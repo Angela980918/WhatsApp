@@ -4,7 +4,7 @@ const contactRoutes = [
         path: '/contact',
         name: 'contact',
         component: ()=> import('@/page/contact/index.vue'),
-        meta: { title: '客戶管理', icon: 'UsergroupAddOutlined'},
+        meta: { title: '客戶管理', icon: 'UsergroupAddOutlined', toplevel: true},
         children: [
             {
                 // 客戶列表

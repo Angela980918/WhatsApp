@@ -4,7 +4,7 @@ const marketingRoutes = [
         path: '/marketing',
         name: 'marketing',
         component: ()=> import('@/page/marketing/index.vue'),
-        meta: { title: '群發計劃', icon: 'SendOutlined'},
+        meta: { title: '群發計劃', icon: 'SendOutlined', toplevel: true},
         children: [
             {
                 // 消息群发
