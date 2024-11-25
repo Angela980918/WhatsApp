@@ -10,14 +10,14 @@ const marketingRoutes = [
                 path: '/broadcast',
                 name: 'broadcast',
                 component: ()=> import('@/page/marketing/broadcast.vue'),
-                meta: { title: '消息群發', icon: 'SendOutlined'},
+                meta: { title: '消息群發', icon: 'ClusterOutlined'},
             },
             {
                 // WhatsApp模板
                 path: '/templates',
                 name: 'templates',
                 component: ()=> import('@/page/marketing/templates.vue'),
-                meta: { title: 'WhatsApp模板', icon: 'SendOutlined'},
+                meta: { title: 'WhatsApp模板', icon: 'OneToOneOutlined'},
             },
         ],
     },

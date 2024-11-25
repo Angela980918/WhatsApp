@@ -32,7 +32,6 @@ function resolveIcon(iconName) {
     const iconComponent = Icons[iconName]; // 从导入的 Icons 中查找对应的图标
     return iconComponent || Icons['QuestionOutlined']; // 如果未找到图标，默认返回一个占位图标
 }
-console.log("props",props.routes)
 </script>
 
 <style scoped>

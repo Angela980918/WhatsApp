@@ -38,7 +38,7 @@ const contactRoutes = [
                 path: '/material-list',
                 name: 'material-list',
                 component: ()=> import('@/page/contact/materialList.vue'),
-                meta: { title: '快捷用語', icon: 'FileAddOutlined'},
+                meta: { title: '素材管理', icon: 'FileAddOutlined'},
             },
         ],
     },

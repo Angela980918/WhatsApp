@@ -26,29 +26,6 @@ const routes = [
             ...marketingRoutes,
         ],
     },
-    // {
-    //     // 首頁
-    //     path: '/home',
-    //     name: 'home',
-    //     component: ()=> import('@/page/home/index.vue'),
-    //     meta: { title: '首頁', icon: 'HomeOutlined', toplevel: true},
-    // },
-    // {
-    //     // 首頁
-    //     path: '/menu',
-    //     name: 'menu',
-    //     component: ()=> import('@/page/menu/index.vue'),
-    //     meta: { title: '首頁', icon: 'HomeOutlined', toplevel: true},
-    // },
-    // {
-    //     // 在綫聊天
-    //     path: '/chat',
-    //     name: 'chat',
-    //     component: ()=> import('@/page/chat/index.vue'),
-    //     meta: { title: '在綫聊天', icon: 'MessageOutlined', toplevel: true},
-    // },
-    // ...contactRoutes,
-    // ...marketingRoutes,
 ]
 
 

@@ -8,8 +8,9 @@
         </a-layout-sider>
         <a-layout>
             <a-layout-header style="background: #fff; padding: 0" />
-            <a-layout-content style="margin: 0 16px">
-                <router-view />
+            <a-layout-content style="margin: 0 16px; padding: 10px 0">
+              <BreadcrumbItem/>
+              <router-view />
             </a-layout-content>
             <a-layout-footer style="text-align: center">
                 WhatsApp Business API 测试开发
@@ -19,6 +20,7 @@
 </template>
 <script lang="ts" setup>
 import {useRoute, useRouter} from "vue-router";
+import BreadcrumbItem from '@/components/Breadcrumb.vue';
 import {computed} from "vue";
 
 const route = useRoute();
@@ -35,6 +37,7 @@ const handleClickMenu = (menmenuInfo) => {
 
 import { ref } from 'vue';
 import MenuItem from "../../components/MenuItem.vue";
+import Breadcrumb from "../../components/Breadcrumb.vue";
 const collapsed = ref<boolean>(false);
 const selectedKeys = ref<string[]>(['/home']);
 </script>
