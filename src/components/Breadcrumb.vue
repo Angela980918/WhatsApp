@@ -39,6 +39,7 @@ const breadcrumbList = computed(() => {
     }
     // 获取父路由信息
     currentRoute = currentRoute.matched[currentRoute.matched.length - 1]?.parent;
+
   }
 
   return breadcrumbArray;
