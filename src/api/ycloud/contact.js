@@ -1,29 +1,25 @@
 import {ycloudInstance} from "@/api/http.js";
 
-/**
- *
- * @param page
- * @param limit
- * @param includeTotal
- * @param tags
- * @param countryCode
- * @param phoneNumber
- * @param email
- * @returns {Promise<axios.AxiosResponse<any>>}
- */
 
-export const getContactList = (page = 1, limit = 10, includeTotal = false, tags, countryCode, phoneNumber, email) => {
-    return ycloudInstance({
-        url: '/contact/contacts', method: 'get', data: {
-            page,
-            limit,
-            includeTotal,
-            'filter.tags': tags,
-            'filter.countryCode': countryCode,
-            'filter.phoneNumber': phoneNumber,
-            'filter.email': email
-        }
-    })
+export const getContactList = (page = 1, limit = 10, includeTotal = false, optionPrams) => {
+    const requireData = {
+        page,
+        limit,
+        includeTotal
+    }
+    const optionData = Object.fromEntries(
+        Object.entries(optionPrams).map(([key, value]) => [`filter.${key}`, value])
+    );
+
+    const data = {
+        ...requireData,
+        ...optionData
+    }
+
+    console.log(data)
+    // return ycloudInstance({
+    //     url: '/contact/contacts', method: 'get', data
+    // })
 }
 
 // const {
