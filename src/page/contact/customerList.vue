@@ -2,10 +2,10 @@
 import {contactApi} from "@/api/ycloud/index.js";
 
 const fetchContacts = async () => {
-  const response = await contactApi.getContactList(1, 10, false,{
+  const response = await contactApi.getContactList(1, 10, false, {
     tag: "tag1"
   })
-  console.log('fetchContacts',response)
+  console.log('fetchContacts', response)
 };
 
 </script>

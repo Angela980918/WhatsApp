@@ -1,14 +1,14 @@
 import {ycloudInstance} from "@/api/http.js";
 
 /**
- * 創建自定義事件
- * @param data
+ * 新建自定義事件
+ * @param name 事件名稱
+ * @param label 事件標簽
+ * @param description 描述
+ * @param objectType 對象類型，默認為CONTACT
  * @returns {Promise<axios.AxiosResponse<any>>}
  */
-export const createEvent = data => {
-    const {
-        name, label, description, objectType = 'CONTACT'
-    } = data;
+export const createEvent = (name, label, objectType = 'CONTACT',description) => {
     return ycloudInstance({
         url: '/event/definitions', method: 'post', data: {
             name, label, description, objectType
@@ -17,41 +17,41 @@ export const createEvent = data => {
 }
 
 /**
- * 檢索某個自定義事件
- * @param eventName 事件名
+ * 檢索事件
+ * @param name 事件名稱
  * @returns {Promise<axios.AxiosResponse<any>>}
  */
-export const retrieveEvent = eventName => {
+export const retrieveEvent = name => {
     return ycloudInstance({
-        url: `/event/definitions/${eventName}`, method: 'get',
+        url: `/event/definitions/${name}`, method: 'get',
     })
 }
 
 /**
- * 更新某個事件
- * @param data
+ *
+ * @param name 事件名稱
+ * @param label 事件標簽
+ * @param description 描述
  * @returns {Promise<axios.AxiosResponse<any>>}
  */
-export const updateEvent = data => {
-    const {
-        eventName, label, description
-    } = data;
+export const updateEvent = (name, label, description) => {
     return ycloudInstance({
-        url: `/event/definitions/${eventName}`, method: 'patch', data: {
+        url: `/event/definitions/${name}`, method: 'patch', data: {
             label, description
         }
     })
 }
 
 /**
- * 自定義事件屬性
- * @param data
+ * 新建事件屬性
+ * @param eventName 事件名
+ * @param name 屬性名
+ * @param label 屬性標簽
+ * @param description 屬性描述
+ * @param type 屬性類型
  * @returns {Promise<axios.AxiosResponse<any>>}
  */
-export const createEventProperty = data => {
-    const {
-        eventName, name, label, description, type
-    } = data;
+export const createEventProperty = (eventName, name, label, description, type) => {
     return ycloudInstance({
         url: `/event/definitions/${eventName}/properties`, method: 'post', data: {
             name, label, description, type
@@ -60,17 +60,29 @@ export const createEventProperty = data => {
 }
 
 /**
- * 更新自定義事件屬性
- * @param data
+ * 更新事件屬性
+ * @param eventName
+ * @param propertyName
+ * @param label
+ * @param description
  * @returns {Promise<axios.AxiosResponse<any>>}
  */
-export const updateEventProperty = data => {
-    const {
-        eventName, propertyName, label, description, type
-    } = data;
+export const updateEventProperty = (eventName, propertyName, label, description) => {
     return ycloudInstance({
         url: `/event/definitions/${eventName}/properties/${propertyName}`, method: 'patch', data: {
-            name, label, description, type
+            label, description
         }
+    })
+}
+
+/**
+ * 刪除事件屬性
+ * @param eventName
+ * @param propertyName
+ * @returns {Promise<axios.AxiosResponse<any>>}
+ */
+export const deleteEventProperty = (eventName, propertyName) => {
+    return ycloudInstance({
+        url: `/event/definitions/${eventName}/properties/${propertyName}`, method: 'delete'
     })
 }
