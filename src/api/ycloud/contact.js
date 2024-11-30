@@ -8,7 +8,7 @@ import {ycloudInstance} from "@/api/http.js";
  * @param optionPrams 其他過濾參數
  * @returns {Promise<axios.AxiosResponse<any>>}
  */
-export const getContactList = (page = 1, limit = 10, includeTotal = false, optionPrams) => {
+export const getContactList = (page = 1, limit = 10, includeTotal = false, optionPrams = {}) => {
     const requireData = {
         page, limit, includeTotal
     }
