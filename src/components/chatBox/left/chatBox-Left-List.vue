@@ -1,0 +1,95 @@
+<template>
+  <!-- 標籤頁頭部 -->
+  <a-space direction="vertical" style="width: 100%;">
+    <a-tabs v-model:activeKey="activeKey">
+      <a-tab-pane key="1">
+        <template #tab>
+          <a-badge count="25">
+            <span style="padding-right: 20px">
+              <EyeOutlined/>
+              已分配
+            </span>
+          </a-badge>
+        </template>
+
+        <!--    客户列表    -->
+        <a-space :class="{ 'chat-box-left-item-active': customer.isActive }" @click="handleItemClick(customer.id)"
+                 direction="vertical" style="width: 100%;" v-for="customer in props.assignedCustomersData"
+                 :key="customer.id">
+          <chat-box-left-item :name="customer.name" :time="customer.time" :message="customer.message"
+                              :badgeCount="customer.badgeCount"
+                              :class="currentCustomerId == customer.id?'chat-box-left-item-active':''"
+
+          ></chat-box-left-item>
+        </a-space>
+
+      </a-tab-pane>
+      <a-tab-pane key="2" force-render>
+        <template #tab>
+          <a-badge count="15">
+            <span style="padding-right: 20px">
+              <EyeInvisibleOutlined/>
+              未分配
+            </span>
+          </a-badge>
+        </template>
+        <!--    客户列表    -->
+        <a-space :class="{ 'chat-box-left-item-active': customer.isActive }" @click="handleItemClick(customer.id)"
+                 direction="vertical" style="width: 100%;" v-for="(customer,index) in props.unassignedCustomersData"
+                 :key="customer.id">
+          <chat-box-left-item :name="customer.name"
+                              :time="customer.time" :message="customer.message"
+                              :badgeCount="customer.badgeCount"
+                              :class="currentCustomerId == customer.id?'chat-box-left-item-active':''"
+          >
+          </chat-box-left-item>
+        </a-space>
+      </a-tab-pane>
+    </a-tabs>
+  </a-space>
+</template>
+
+
+<script lang="ts" setup>
+import {computed, onMounted, ref} from "vue";
+import {EyeInvisibleOutlined, EyeOutlined} from '@ant-design/icons-vue';
+import ChatBoxLeftItem from "@/components/chatBox/left/chatBox-Left-Item.vue";
+import {useCustomerStore} from "@/store/customerStore";
+import {useChatStore} from "@/store/chatStore";
+
+const props = defineProps({
+  assignedCustomersData: {
+    type: Array
+  },
+  unassignedCustomersData: {
+    type: Array
+  }
+})
+
+const customerStore = useCustomerStore();
+const chatStore = useChatStore();
+const currentCustomerId = computed(()=>customerStore.currentUserId)
+
+const activeKey = ref('1');
+
+// 处理点击事件
+const handleItemClick = (id: number) => {
+  console.log(id, 'id')
+  customerStore.setCurrentUser(id)
+  chatStore.setCurrentChatId(id)
+};
+
+onMounted(() => {
+  // 设置已分配和未分配客户
+  // customerStore.setAssignedCustomers(props.assignedCustomersData);
+  // customerStore.setUnassignedCustomers(props.unassignedCustomersData);
+})
+
+</script>
+
+<style scoped>
+.chat-box-left-item-active {
+  background-color: rgba(0, 0, 0, 0.1);
+  border-radius: 12px;
+}
+</style>
