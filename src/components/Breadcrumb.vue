@@ -5,7 +5,7 @@
       <a-breadcrumb-item v-for="(item, index) in breadcrumbList" :key="index">
         <router-link :to="item.path">
           <!-- 如果有图标，显示图标 -->
-          <component v-if="item.icon" :is="item.icon" />
+          <component v-if="item.icon" :is="item.icon"/>
           <!-- 显示文本 -->
           <span>{{ item.title }}</span>
         </router-link>
@@ -15,8 +15,8 @@
 </template>
 
 <script lang="ts" setup>
-import { computed } from 'vue';
-import { useRoute } from 'vue-router';
+import {computed} from 'vue';
+import {useRoute} from 'vue-router';
 
 // 获取当前路由
 const route = useRoute();

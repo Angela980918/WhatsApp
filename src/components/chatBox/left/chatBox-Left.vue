@@ -39,6 +39,7 @@ const siderStyle: CSSProperties = {
   "padding-left": '12px',
   "padding-right": '12px',
   "padding-top": '12px',
+  overflowY: 'auto',
   backgroundColor: 'transparent',
 }
 </script>
