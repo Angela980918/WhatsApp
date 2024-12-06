@@ -29,14 +29,7 @@ export default {
         const editorRef = shallowRef()
 
         // 内容 HTML
-        const valueHtml = ref('<p>hello</p>')
-
-        // 模拟 ajax 异步获取内容
-        onMounted(() => {
-            setTimeout(() => {
-                valueHtml.value = '<p>请输入内容</p>'
-            }, 1500)
-        })
+        const valueHtml = ref('<p>请输入内容</p>')
 
         const toolbarConfig = {
             toolbarKeys: ['bold', 'italic', 'emotion'], // 仅显示加粗、斜体和表情菜单

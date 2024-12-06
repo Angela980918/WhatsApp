@@ -1,8 +1,9 @@
 <template>
-    <div>
+    <div class="Container">
+        <ContactModel />
         <div style="margin-bottom: 16px">
-            <a-button type="primary" :disabled="!hasSelected" :loading="state.loading" @click="start">
-                Reload
+            <a-button type="primary"  :loading="state.loading" @click="start">
+                创建用户
             </a-button>
             <span style="margin-left: 8px">
         <template v-if="hasSelected">
@@ -14,9 +15,10 @@
             :row-selection="{ selectedRowKeys: state.selectedRowKeys, onChange: onSelectChange }"
             :columns="columns"
             :data-source="data"
+            :pagination="{ pageSize: 10, showSizeChanger: true, pageSizeOptions: ['5', '10', '20', '50'] }"
         >
 
-            <template #bodyCell="{ column, record }">
+            <template #bodyCell="{ column, text, record }">
                 <template v-if="column.dataIndex === 'tags'">
                     <span>
                       <a-tag
@@ -41,6 +43,7 @@
 <script lang="ts" setup>
 import {computed, onMounted, reactive, ref} from 'vue';
 import * as ycloudApi from "../../api/ycloud/index.js";
+import ContactModel from "../../components/contact/ContactModel.vue";
 type Key = string | number;
 
 interface DataItem {
@@ -136,14 +139,31 @@ const onSelectChange = (selectedRowKeys: Key[]) => {
 };
 
 
-onMounted(async () => {
-    let response = await ycloudApi.contactApi.getContactList();
-    let result = response.data;
-    result.items.map(item => {
-        // item.tags = ['test1', 'test2'];
-        data.value.push(item);
-    });
-})
+// onMounted(async () => {
+//     let response = await ycloudApi.contactApi.getContactList();
+//     let result = response.data;
+//     result.items.map(item => {
+//         // item.tags = ['test1', 'test2'];
+//         item.key = item.id;
+//         data.value.push(item);
+//     });
+// })
 
 </script>
 
+<style scoped>
+.Container {
+    padding: 20px;
+}
+
+.tempSearch {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+}
+
+.tempList {
+    padding: 0 12px;
+}
+
+</style>

@@ -3,13 +3,19 @@
         {
             'flex-direction': props.direction === 'vertical' ? 'column' : 'row',
             'align-items': props.direction === 'vertical' ? 'flex-start' : 'center',
-            'margin-top': props.direction === 'vertical' ? '10px' : '18px'
+            'margin-top': props.direction === 'vertical' ? '10px' : '18px',
+            'width': props.type === 'editor' || props.type === 'upload-file' ? '80%' : '30%'
         }"
          class="selectCard"
     >
         <span :class="{
-            'selectTitle': props.require
-        }" v-if="props.title !== undefined">{{ props.title }}</span>
+            'selectTitle': props.require,
+            'selectCardTitle' : true
+        }"
+              :style="{
+            'margin-bottom': props.direction === 'vertical' ? '12px' : 0
+              }"
+              v-if="props.title !== undefined">{{ props.title }}</span>
 
         <template v-if="props.type === 'search'">
             <a-input
@@ -62,16 +68,34 @@
                 </a-button>
             </a-upload>
             <span style="color: #808695; font-size: 14px">{{uploadTxt()}}</span>
+        </template>
 
-
+        <template v-else-if="props.type === 'editor'">
+            <div style="border: 1px solid #ccc; width: 100%; max-width: 100%; box-sizing: border-box;">
+                <Toolbar
+                    style="border-bottom: 1px solid #ccc"
+                    :editor="editorRef"
+                    :defaultConfig="toolbarConfig"
+                    :mode="mode"
+                />
+                <Editor
+                    style="height: 300px;overflow-y: hidden;width: 100%;overflow-wrap: break-word;word-wrap: break-word;word-break: break-word;white-space: pre-wrap;box-sizing: border-box"
+                    v-model="valueHtml"
+                    :defaultConfig="editorConfig"
+                    @onChange="handleChange"
+                    @onCreated="handleCreated"
+                />
+            </div>
         </template>
     </div>
 </template>
 
 <script setup>
-import { defineProps, ref, watch } from 'vue';
+import { defineProps, ref, shallowRef, onBeforeUnmount } from 'vue';
 import { SearchOutlined, UploadOutlined } from '@ant-design/icons-vue';
-import Templates from "@/page/marketing/templates.vue";
+
+import '@wangeditor/editor/dist/css/style.css' // 引入 css
+import { Editor, Toolbar } from '@wangeditor/editor-for-vue'
 
 const props = defineProps({
     direction: {
@@ -116,11 +140,34 @@ const props = defineProps({
     }
 });
 const emits = defineEmits(['handleChange'])
-
 const selectItem = ref(props.selectItem);
 const selectOptions = ref(props.options);
 const searchContents = ref(props.searchContents);
 const inputContents = ref(props.inputContents);
+
+// 富文本编辑器配置
+const editorRef = shallowRef();
+const valueHtml = inputContents.value === '' ? ref('<p>請輸入內容</p>') : ref(props.inputContents)
+const toolbarConfig = {
+    toolbarKeys: ['bold', 'italic', 'emotion'], // 仅显示加粗、斜体和表情菜单
+}
+const editorConfig = {
+    placeholder: '请输入内容...',
+}
+// editorConfig.onBlur = (editor) => {
+//     console.log("value::::", valueHtml.value);
+//     emits('handleChange', valueHtml.value)
+// }
+// 组件销毁时，也及时销毁编辑器
+onBeforeUnmount(() => {
+    const editor = editorRef.value
+    if (editor == null) return
+    editor.destroy()
+})
+
+const handleCreated = (editor) => {
+    editorRef.value = editor
+}
 
 const fileList = ref([]);
 const uploadTxt = () => {
@@ -141,10 +188,16 @@ const handleChange = (value) => {
         fileList.value.push(value);
         emits('handleChange', fileList.value)
         return false;
+    }else if(props.type === 'editor'){
+        emits('handleChange', valueHtml.value)
     }else {
         emits('handleChange', selectItem.value)
     }
 };
+
+editorRef.onclick = () => {
+    console.log("test")
+}
 
 </script>
 
@@ -152,15 +205,14 @@ const handleChange = (value) => {
 .selectCard {
     display: flex;
     padding: 0 12px;
-    width: 30%; /* 可以根据需求修改宽度 */
+    max-width: 100%;
 }
 
-.selectCard span {
+.selectCardTitle {
     font-size: 16px;
     padding-right: 10px;
-    margin-bottom: 12px;
-    flex-grow: 0;  /* 让 span 自适应内容 */
-    white-space: nowrap; /* 保证 span 内的文字不会换行 */
+    flex-grow: 0;
+    white-space: nowrap;
 }
 
 .selectTitle::before{

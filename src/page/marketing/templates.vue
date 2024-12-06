@@ -26,7 +26,7 @@
             </div>
             <a-table
                 :columns="columns"
-                :data-source="data"
+                :data-source="filterData"
                 class="tempList"
             >
                 <template #bodyCell="{ column, record }">
@@ -121,55 +121,86 @@ const columns = [
     },
 ];
 
-const data = ref([]);
+const data = ref([
+    {
+        category: "UTILITY",
+        name: "test111",
+        language: "en_US",
+        status: "REJECTED",
+        updateTime: "2024-12-04T02:05:22.277Z"
+    },
+    {
+        category: "UTILITY",
+        name: "test222",
+        language: "zh_CN",
+        status: "REJECTED",
+        updateTime: "2024-12-04T02:05:23.277Z"
+    },
+    {
+        category: "UTILITY",
+        name: "test222",
+        language: "zh_CN",
+        status: "REJECTED",
+        updateTime: "2024-12-04T02:05:23.277Z"
+    },
+    {
+        category: "UTILITY",
+        name: "test333",
+        language: "zh_CN",
+        status: "REJECTED",
+        updateTime: "2024-12-04T02:05:23.277Z"
+    },
+    {
+        category: "UTILITY",
+        name: "test444",
+        language: "zh_CN",
+        status: "REJECTED",
+        updateTime: "2024-12-04T02:05:23.277Z"
+    },
+    {
+        category: "UTILITY",
+        name: "test555",
+        language: "zh_CN",
+        status: "REJECTED",
+        updateTime: "2024-12-04T02:05:23.277Z"
+    }
+]);
 const filterData = ref([]);
 
 // 賬號選擇
 const selectAccount = ref([]);
-const accounts = [
-    {
-        value: "datas1"
-    },
-    {
-        value: "datas2"
-    },
-    {
-        value: "datas3"
-    }
-];
+const accounts = ref([]);
 
 // 搜索欄
-const searchContents = ref();
+const searchContents = ref('');
 
 // 種類
 const selectCategory = ref([]);
 const category = [
-    { value: 'All', kind: 'category' },
-    { value: 'Utility', kind: 'category' },
-    { value: 'Marketing', kind: 'category' },
-    { value: 'Authentication', kind: 'category' }
+    {value: 'Utility', lang: 'UTILITY'},
+    {value: 'Marketing', lang: 'MARKETING'},
+    {value: 'Authentication', lang: 'AUTHENTICATION'}
 ];
 
 // 語言
 const selectLanguage = ref([]);
 const language = [
-    { value: 'All', kind: 'language' },
-    { value: 'Chinese (CHN)', lang: 'zh_CN', kind: 'language'  },
-    { value: 'Chinese (HKG)', lang: 'zh_HK', kind: 'language'  },
-    { value: 'English', lang: 'en', kind: 'language'  },
+    {value: '簡體中文', lang: 'zh_CN'},
+    {value: '繁體中文', lang: 'zh_HK'},
+    {value: '英文', lang: 'en_US'},
 ]
 
 // 狀態
 const selectStatus = ref([]);
 const tempStatus = [
-    { value:  'Active - Quality pending', kind: 'status'},
-    { value:  'Active - High quality', kind: 'status'},
-    { value:  'Active - Medium quality', kind: 'status'},
-    { value:  'Active - Low quality', kind: 'status'},
-    { value:  'In review', kind: 'status'},
-    { value:  'Rejected', kind: 'status'},
-    { value:  'Paused', kind: 'status'},
-    { value:  'Disabled', kind: 'status'},
+    { value:  'Active - Quality pending'},
+    { value:  'Active - High quality'},
+    { value:  'Active - Medium quality'},
+    { value:  'Active - Low quality'},
+    { value:  'In review', lang: "IN REVIEW"},
+    { value:  'Rejected', lang: "REJECTED"},
+    { value:  'Paused', lang: "PAUSED"},
+    { value:  'Disabled', lang: "DISABLED"},
 ]
 
 // 創建方式
@@ -206,10 +237,10 @@ const nameChange = (value) => {
 }
 
 const categoryChange = (value) => {
-
+    selectCategory.value = [];
     for(let i in value) {
         category.map(item => {
-            if(item.value === i) {
+            if(item.value === value[i]) {
                 selectCategory.value.push(item)
             }
         })
@@ -219,23 +250,22 @@ const categoryChange = (value) => {
 }
 
 const langChange = (value) => {
-
+    selectLanguage.value = [];
     for(let i in value) {
         language.map(item => {
-            if(item.value === i) {
+            if(item.value === value[i]) {
                 selectLanguage.value.push(item)
             }
         })
     }
-    console.log("value",value)
     dataFilter();
 }
 
 const statusChange = (value) => {
-
+    selectStatus.value = [];
     for(let i in value) {
         tempStatus.map(item => {
-            if(item.value === i) {
+            if(item.value === value[i]) {
                 selectStatus.value.push(item)
             }
         })
@@ -248,40 +278,71 @@ const dataFilter = () => {
     let newFilter = []
 
     if(searchContents.value !== "") {
-        newFilter = data.value.map(item => item.name.includes(searchContents.value));
+        newFilter = data.value.filter(item => item.name.includes(searchContents.value));
     }else {
         newFilter = data.value;
     }
 
     if(selectCategory.value.length !== 0) {
-        for(let i in value) {
-            newFilter =  newFilter.value.map(item => item.category === i)
+        let selectFilter = [];
+        for(let i in selectCategory.value) {
+            let result = [];
+            result = newFilter.filter(item => item.category === selectCategory.value[i].lang)
+            selectFilter = [...selectFilter, ...result];
         }
+        newFilter = selectFilter;
     }
-
     if(selectLanguage.value.length !== 0) {
-        for(let i in value) {
-            newFilter =  newFilter.value.map(item => item.language === i)
+        let selectFilter = [];
+        console.log("selectLanguage.value[i].lang",selectLanguage.value)
+        for(let i in selectLanguage.value) {
+            let result = [];
+
+            result =  newFilter.filter(item => item.language === selectLanguage.value[i].lang);
+            console.log("result",result)
+            selectFilter = [...selectFilter, ...result];
+
         }
+        newFilter = selectFilter;
     }
 
     if(selectStatus.value.length !== 0) {
-        for(let i in value) {
-            newFilter =  newFilter.value.map(item => item.status === i)
+        let selectFilter = [];
+        for(let i in selectStatus.value) {
+            let result = [];
+            result =  newFilter.filter(item => item.status === selectStatus.value[i].lang)
+            selectFilter = [...selectFilter, ...result];
         }
+        newFilter = selectFilter;
     }
 
     filterData.value = newFilter;
 }
 
 
-// onBeforeMount(async () => {
-//     const response = await templateApi.getTemplateList();
-//     let result = response.data;
-//     result.items.map(item => {
-//         data.value.push(item);
-//     });
-// })
+onBeforeMount(async () => {
+    const wabaResponse = await wabaApi.getWABAList();
+    if(wabaResponse.status === 200) {
+        const result = wabaResponse.data.items;
+        result.map(item => {
+            accounts.value.push({
+                ...item,
+                value: item.name
+            })
+
+        })
+        selectAccount.value.push(accounts.value[0]);
+    }
+
+    const response = await templateApi.getTemplateList();
+    let result = response.data;
+    result.items.map(item => {
+        data.value.push(item);
+    });
+    console.log("itemitemitemitem",data.value)
+    // console.log("itemitemitemitem",item)
+    dataFilter();
+})
 
 </script>
 
