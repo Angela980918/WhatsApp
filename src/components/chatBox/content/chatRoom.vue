@@ -27,7 +27,7 @@
       </a-layout-header>
 
       <!-- 中间内容区域：显示聊天记录，可滚动 -->
-      <a-layout-content class="chatroom22" @scroll="handleScroll" ref="chatRoom22" :style="contentStyle" style="height: 100%; width: 100%;">
+      <a-layout-content class="chatroom22" ref="chatRoom26" :style="contentStyle" style="width: 100%;">
         <div class="chatRoom" ref="chatRoom">
           <a-list :split="false" item-layout="horizontal" :data-source="data">
             <template #renderItem="{ item }">
@@ -67,7 +67,7 @@
 </template>
 
 <script lang="ts" setup>
-import {computed, CSSProperties, h, nextTick, onMounted, ref, watch} from 'vue';
+import {computed, CSSProperties, h, nextTick, onMounted, onUpdated, ref, watch} from 'vue';
 import {useCustomerStore} from "@/store/customerStore";
 import {FileSearchOutlined, TagOutlined} from '@ant-design/icons-vue';
 
@@ -175,6 +175,7 @@ const loadMessages = (customerId) => {
 const sendMessage = () => {
   data.value.push({user: 'Me', text: message.value});
   message.value = '';
+  scrollToBottom()
 };
 
 // 获取消息的样式（左侧或右侧）
@@ -225,47 +226,43 @@ const footerStyle = {
 
 // 滚动到最底部的函数
 const chatRoom = ref(null);
-const chatRoom22 = ref(null);
+const chatRoom26 = ref(null);
 const scrollToBottom = () => {
   nextTick(() => {
-    if (chatRoom.value) {
-      console.log('chatRoom.value.scrollHeight', chatRoom.value.scrollHeight)
-      chatRoom22.value.scrollTop = chatRoom22.value.scrollHeight
-      console.log('chatRoom22.value.scrollTop', chatRoom22.value.scrollTop)
+    const chatRoomElement = chatRoom26.value ? chatRoom26.value.$el : null;
+    if (chatRoomElement) {
+      console.log('scrollHeight:', chatRoomElement.scrollHeight); // 获取 scrollHeight
+      chatRoomElement.scrollTop = chatRoomElement.scrollHeight; // 设置 scrollTop
     }
   });
 };
 
-const handleScroll = (event) => {
-  console.log('chatRoom22.value.scrollHeight', chatRoom22.value.scrollHeight)
-  chatRoom22.value.scrollTop = chatRoom22.value.scrollHeight
-  console.log('chatRoom22.value.scrollTop', chatRoom22.value.scrollTop)
-};
+// const handleScroll = (event) => {
+//   console.log('chatRoom22.value.scrollHeight', chatRoom22.value.scrollHeight)
+//   chatRoom22.value.scrollTop = chatRoom22.value.scrollHeight
+//   console.log('chatRoom22.value.scrollTop', chatRoom22.value.scrollTop)
+// };
 
 // 在数据更新后自动滚动到底部
 onMounted(async () => {
-  // 等待 DOM 渲染完成后再滚动到底部
-  await nextTick();
   scrollToBottom();
 });
 //
-// onUpdated(async () => {
-//   // 等待 DOM 更新完成后再滚动到底部
-//   await nextTick();
-//   scrollToBottom();
-// });
+onUpdated(async () => {
+  scrollToBottom();
+});
 </script>
 
 <style scoped>
 .chatroom22 {
   text-align: center;
-  height: 100%;
-  flex-direction: column;
   flex: 0 0 calc(-459px + 100vh);
-  overflow-y: auto;  /* 自动显示滚动条 */
+  flex-direction: column;
+  overflow-y: auto;
 }
+
 .chatRoom {
-  height: 100%;  /* 确保 chatRoom 容器有高度 */
+  height: 100%;
 }
 
 .list-item-right {
