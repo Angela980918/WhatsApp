@@ -153,6 +153,7 @@ export const useCustomerStore = defineStore('customerStore', {
                 badgeCount: 4
             },
         ],
+        ws: null
     }),
     actions: {
         setCurrentUser(id) {
@@ -170,6 +171,33 @@ export const useCustomerStore = defineStore('customerStore', {
                 isActive: index === 0, // 默认第一个客户 isActive 为 true
             }));
         },
+        //     建立连接
+        async createConnect() {
+            this.ws = await new WebSocket('ws://ws.jackycode.cn:4000', );
+            // 设置 WebSocket 连接打开事件
+            this.ws.onopen = () => {
+                console.log("已建立連接")
+            };
+
+            // 设置 WebSocket 连接消息事件
+            this.ws.onmessage = (event) => {
+                console.log("event",event)
+                console.log('[CLIENT] Received message:', event.data);
+            };
+
+            // 设置 WebSocket 连接关闭事件
+            this.ws.onclose = () => {
+                console.log('[CLIENT] Connection closed');
+            };
+
+            // 设置 WebSocket 错误事件
+            this.ws.onerror = (err) => {
+                console.error('[CLIENT] Error:', err);
+            };
+        },
+        sendMessage(message) {
+            this.ws.send('message', message);
+        }
     },
     getters: {
         getAssignedCustomers: (state) => state.assignedCustomers,

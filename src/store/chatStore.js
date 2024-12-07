@@ -4,6 +4,7 @@ import { defineStore } from 'pinia';
 export const useChatStore = defineStore('chatStore', {
     state: () => ({
         currentChatId: 1,  // 当前聊天的 ID
+        currentPhone: "",
         chatMessages: [],     // 当前聊天记录
     }),
 
@@ -13,6 +14,11 @@ export const useChatStore = defineStore('chatStore', {
             this.currentChatId = id;
             // 每次切换用户时，模拟从 API 加载对应的聊天记录
             this.loadChatMessages(id);
+        },
+        setCurrentPhone(phone) {
+            console.log("phonephone",phone)
+            this.currentPhone = phone;
+            // this.loadChatMessages(id);
         },
 
         // 加载聊天记录的模拟数据
@@ -36,6 +42,11 @@ export const useChatStore = defineStore('chatStore', {
             // 可以根据用户的 id 来模拟不同的聊天记录
         },
 
+        // 添加聊天信息
+        addMessage(message) {
+            console.log("addMessage",message)
+          this.chatMessages.push(message);
+        },
         // 模拟发送消息
         sendMessage(message) {
             if (this.currentChatId !== null) {

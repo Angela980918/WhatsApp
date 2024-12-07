@@ -5,7 +5,7 @@
       <!-- 头部：聊天标题或信息 -->
       <a-layout-header :style="headerStyle">
         <a-flex style="height: 100%" justify="space-between" align="center">
-          <span>{{ currentCustomerInfo.name }}</span>
+          <span>{{ currentCustomerInfo.nickname }}</span>
           <a-space size="middle">
             <a-tooltip placement="top">
               <template #title>
@@ -22,6 +22,13 @@
             </a-tooltip>
 
             <a-button type="primary">結束會話</a-button>
+
+            <a-tooltip placement="top">
+                <template #title>
+                    <span>顯示更多</span>
+                </template>
+                <a-button :icon="h(IdcardOutlined)" @click="emits('setShowRight')"></a-button>
+            </a-tooltip>
           </a-space>
         </a-flex>
       </a-layout-header>
@@ -59,8 +66,11 @@
 
       <!-- 底部输入框 -->
       <a-layout-footer :style="footerStyle">
-        <a-input v-model="message" placeholder="输入消息..." :style="inputStyle" @keydown.enter="sendMessage"/>
-        <a-button type="primary" @click="sendMessage">发送</a-button>
+<!--        <a-input v-model="message" placeholder="输入消息..." :style="inputStyle" @keydown.enter="sendMessage"/>-->
+<!--        <a-button type="primary" @click="sendMess">发送</a-button>-->
+<!--          <WASelect direction="vertical" type="editor" :inputContents="valueHtml"-->
+<!--                    @handleChange="htmlChange"/>-->
+          <ChatMessage @customer="currentCustomerInfo.phoneNumber"/>
       </a-layout-footer>
     </a-layout>
   </div>
@@ -69,10 +79,26 @@
 <script lang="ts" setup>
 import {computed, CSSProperties, h, nextTick, onMounted, onUpdated, ref, watch} from 'vue';
 import {useCustomerStore} from "@/store/customerStore";
-import {FileSearchOutlined, TagOutlined} from '@ant-design/icons-vue';
+import {FileSearchOutlined, TagOutlined, IdcardOutlined} from '@ant-design/icons-vue';
+import ChatMessage from "@/components/chatBox/content/chatMessage.vue";
+import wsconnect from "../../../tools/wsconnect.js";
+import {useChatStore} from "@/store/chatStore";
+
+const emits = defineEmits(['setShowRight'])
 
 // 获取 userStore 和 chatStore
 const customerStore = useCustomerStore();
+wsconnect.createConnect();
+const chatStore = useChatStore();
+
+// customerStore.createConnect();
+
+function sendMess() {
+    // customerStore.sendMessage("test");
+  wsconnect.sendMessage("449711484896804","test00001");
+}
+
+
 const currentCustomerInfo = computed(() => {
   // 如果 currentCustomerInfo 是空对象，则返回 customers 中的第一个客户信息
   return customerStore.currentCustomerInfo && Object.keys(customerStore.currentCustomerInfo).length > 0
@@ -153,6 +179,11 @@ const data: DataItem[] = ref([
   },
 ]);
 
+watch(chatStore.chatMessages, (newValue) => {
+    console.log("newValue",newValue);
+    data.value = [...data.value, ...newValue]
+})
+
 const message = ref('');
 
 // 选择客户并更新当前聊天用户
@@ -222,6 +253,7 @@ const footerStyle = {
   backgroundColor: '#fff',
   borderTop: '1px solid #ddd',
   textAlign: 'center',
+  flex: 1
 };
 
 // 滚动到最底部的函数
@@ -256,6 +288,7 @@ onUpdated(async () => {
 <style scoped>
 .chatroom22 {
   text-align: center;
+  height: 100%;
   flex: 0 0 calc(-459px + 100vh);
   flex-direction: column;
   overflow-y: auto;

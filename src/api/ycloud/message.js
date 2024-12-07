@@ -32,7 +32,7 @@ export const sendMessage = ({
 
     if (type && message !== undefined) {
         const dynamicKey = `${type}`; // 动态变量名，例如 "text_message"
-        data[dynamicKey] = message; // 动态赋值
+        data[dynamicKey] = { body: message }; // 动态赋值
     }
 
     if (context !== undefined) data.context = context;

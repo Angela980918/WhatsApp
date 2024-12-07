@@ -13,10 +13,10 @@
         </template>
 
         <!--    客户列表    -->
-        <a-space :class="{ 'chat-box-left-item-active': customer.isActive }" @click="handleItemClick(customer.id)"
+        <a-space :class="{ 'chat-box-left-item-active': customer.isActive }" @click="handleItemClick(customer.id, customer.phoneNumber)"
                  direction="vertical" style="width: 100%;" v-for="customer in props.assignedCustomersData"
                  :key="customer.id">
-          <chat-box-left-item :name="customer.name" :time="customer.time" :message="customer.message"
+          <chat-box-left-item :name="customer.nickname" :time="customer.lastSeen" :message="customer.message"
                               :badgeCount="customer.badgeCount"
                               :class="currentCustomerId == customer.id?'chat-box-left-item-active':''"
 
@@ -73,10 +73,11 @@ const currentCustomerId = computed(()=>customerStore.currentUserId)
 const activeKey = ref('1');
 
 // 处理点击事件
-const handleItemClick = (id: number) => {
-  console.log(id, 'id')
+const handleItemClick = (id: number, phoneNumber: string) => {
+  console.log(phoneNumber, 'phoneNumber')
   customerStore.setCurrentUser(id)
   chatStore.setCurrentChatId(id)
+  chatStore.setCurrentPhone(phoneNumber)
 };
 
 onMounted(() => {

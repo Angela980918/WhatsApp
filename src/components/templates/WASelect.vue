@@ -4,7 +4,7 @@
             'flex-direction': props.direction === 'vertical' ? 'column' : 'row',
             'align-items': props.direction === 'vertical' ? 'flex-start' : 'center',
             'margin-top': props.direction === 'vertical' ? '10px' : '18px',
-            'width': props.type === 'editor' || props.type === 'upload-file' ? '80%' : '30%'
+            'width': props.type === 'editor' || props.type === 'upload-file' ? '100%' : '30%'
         }"
          class="selectCard"
     >
