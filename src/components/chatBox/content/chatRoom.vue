@@ -81,22 +81,22 @@ import {computed, CSSProperties, h, nextTick, onMounted, onUpdated, ref, watch} 
 import {useCustomerStore} from "@/store/customerStore";
 import {FileSearchOutlined, TagOutlined, IdcardOutlined} from '@ant-design/icons-vue';
 import ChatMessage from "@/components/chatBox/content/chatMessage.vue";
-import wsconnect from "../../../tools/wsconnect.js";
+
 import {useChatStore} from "@/store/chatStore";
 
 const emits = defineEmits(['setShowRight'])
 
 // 获取 userStore 和 chatStore
 const customerStore = useCustomerStore();
-wsconnect.createConnect();
+
 const chatStore = useChatStore();
 
 // customerStore.createConnect();
 
-function sendMess() {
-    // customerStore.sendMessage("test");
-  wsconnect.sendMessage("449711484896804","test00001");
-}
+// function sendMess() {
+//     // customerStore.sendMessage("test");
+//   wsconnect.sendMessage("449711484896804","test00001");
+// }
 
 
 const currentCustomerInfo = computed(() => {

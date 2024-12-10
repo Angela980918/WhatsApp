@@ -18,7 +18,7 @@
                  :key="customer.id">
           <chat-box-left-item :name="customer.nickname" :time="customer.lastSeen" :message="customer.message"
                               :badgeCount="customer.badgeCount"
-                              :class="currentCustomerId == customer.id?'chat-box-left-item-active':''"
+                              :class="currentPhone == customer.phoneNumber?'chat-box-left-item-active':''"
 
           ></chat-box-left-item>
         </a-space>
@@ -68,7 +68,8 @@ const props = defineProps({
 
 const customerStore = useCustomerStore();
 const chatStore = useChatStore();
-const currentCustomerId = computed(()=>customerStore.currentUserId)
+const currentCustomerId = computed(()=> customerStore.currentUserId)
+const currentPhone = computed(() => chatStore.currentPhone);
 
 const activeKey = ref('1');
 

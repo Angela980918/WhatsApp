@@ -1,6 +1,6 @@
 <template>
     <div style="display: flex; height: 100%; flex-direction: column;">
-        <a-textarea  v-model:value="contentTxt" placeholder="輸入內容" :rows="4" />
+        <a-textarea ref="textAreaRef"  v-model:value="contentTxt" placeholder="輸入內容" :rows="4" />
         <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px;">
             <div>
                 <a-tooltip>
@@ -71,10 +71,33 @@ const chatStore = useChatStore();
 const currentCustomerInfo = computed(() => customerStore.currentCustomerInfo);
 const size = ref('large');
 const contentTxt = ref('');
-const showEmoji = ref(false);
+const showEmoji = computed(() => chatStore.showEmoji);
+const nowEmoji = ref(false)
 let emojiIndex = new EmojiIndex(data);
+const textAreaRef = ref(null);
 function selectEmoji(emoji) {
-    contentTxt.value += "1111111" + emoji.native;
+    // contentTxt.value += "1111111" + emoji.native;
+    console.log("emoji",emoji)
+    insertAtCursor(emoji.native);
+
+
+}
+
+function insertAtCursor(text) {
+    const textarea = textAreaRef.value;
+    if (!textarea) return;
+
+    const startPos = textarea.selectionStart;
+    const endPos = textarea.selectionEnd;
+
+    // 插入表情文本
+    contentTxt.value =
+        contentTxt.value.slice(0, startPos) +
+        text +
+        contentTxt.value.slice(endPos);
+    console.log("contentTxt.value",contentTxt.value)
+    // 更新光标位置
+    textarea.focus();
     showSmile();
 }
 
@@ -103,10 +126,12 @@ function sendMessage() {
         type: "text",
         message: contentTxt.value
     })
+    contentTxt.value = "";
 }
 
 function showSmile() {
-    showEmoji.value = !showEmoji.value
+    console.log("8888888")
+    chatStore.setShowEmoji(true);
 }
 
 </script>

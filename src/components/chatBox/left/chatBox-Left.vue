@@ -31,8 +31,8 @@ const unassignedCustomers = computed(() => customerStore.getUnassignedCustomers)
 // 选中的客户
 const handleSelectCustomer = (id) => {
   // 更新当前聊天的用户 ID
-  customerStore.setCurrentUser(id);
-  chatStore.setCurrentChatId(id);  // 设置当前聊天 ID，并加载聊天记录
+  // customerStore.setCurrentUser(id);
+  chatStore.setCurrentPhone(id);  // 设置当前聊天 ID，并加载聊天记录
 };
 
 onMounted(async () => {
@@ -45,6 +45,7 @@ onMounted(async () => {
     });
     console.log("assignedCustomers",assignedCustomers)
     customerStore.setAssignedCustomers(assignedCustomers.value);
+    handleSelectCustomer(assignedCustomers.value[0].phoneNumber);
 })
 
 const siderStyle: CSSProperties = {

@@ -22,6 +22,7 @@
 import {useRoute, useRouter} from "vue-router";
 import BreadcrumbItem from '@/components/Breadcrumb.vue';
 import {computed} from "vue";
+import wsconnect from "../../tools/wsconnect.js";
 
 const route = useRoute();
 const router = useRouter();
@@ -35,11 +36,17 @@ const handleClickMenu = (menmenuInfo) => {
     router.push({ path: menmenuInfo.key });
 };
 
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue';
 import MenuItem from "../../components/MenuItem.vue";
 import Breadcrumb from "../../components/Breadcrumb.vue";
 const collapsed = ref<boolean>(false);
 const selectedKeys = ref<string[]>(['/home']);
+import {useChatStore} from "@/store/chatStore";
+const chatStore = useChatStore();
+
+onMounted(() => {
+    wsconnect.createConnect();
+})
 </script>
 <style scoped>
 #components-layout-demo-side .logo {

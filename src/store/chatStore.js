@@ -6,6 +6,8 @@ export const useChatStore = defineStore('chatStore', {
         currentChatId: 1,  // 当前聊天的 ID
         currentPhone: "",
         chatMessages: [],     // 当前聊天记录
+        showEmoji: true,
+        nowEmoji: true
     }),
 
     actions: {
@@ -19,6 +21,13 @@ export const useChatStore = defineStore('chatStore', {
             console.log("phonephone",phone)
             this.currentPhone = phone;
             // this.loadChatMessages(id);
+        },
+        setShowEmoji(value) {
+            this.showEmoji = !this.showEmoji;
+        },
+        cancelEmoji() {
+            this.nowEmoji = false;
+            this.showEmoji = false;
         },
 
         // 加载聊天记录的模拟数据
