@@ -139,15 +139,15 @@ const onSelectChange = (selectedRowKeys: Key[]) => {
 };
 
 
-// onMounted(async () => {
-//     let response = await ycloudApi.contactApi.getContactList();
-//     let result = response.data;
-//     result.items.map(item => {
-//         // item.tags = ['test1', 'test2'];
-//         item.key = item.id;
-//         data.value.push(item);
-//     });
-// })
+onMounted(async () => {
+    let response = await ycloudApi.contactApi.getContactList();
+    let result = response.data;
+    result.items.map(item => {
+        // item.tags = ['test1', 'test2'];
+        item.key = item.id;
+        data.value.push(item);
+    });
+})
 
 </script>
 

@@ -38,7 +38,7 @@
         <div class="chatRoom" ref="chatRoom">
           <a-list :split="false" item-layout="horizontal" :data-source="data">
             <template #renderItem="{ item }">
-              <a-list-item v-if="item.position == 'left'" class="list-item-left">
+              <a-list-item v-if="item.position == 'inbound'" class="list-item-left">
                 <a-space size="middle" align="end">
                   <a-avatar size="large" src="https://randomuser.me/api/portraits/women/7.jpg"/>
                   <a-list-item-meta class="list-item-content" :description="item.time">
@@ -51,9 +51,53 @@
 
               <a-list-item v-else class="list-item-right">
                 <a-space size="middle" align="end">
-                  <a-list-item-meta class="list-item-content" :description="item.time">
-                    <template #title>
+                  <a-list-item-meta class="list-item-content" >
+                    <template #title v-if="item.type === 'text'">
                       <span>{{ item.title }}</span>
+                    </template>
+
+                    <template #title v-if="item.type === 'image'">
+                        <div>
+                            <img :src="item.link" style="width: 100%;cursor: pointer;">
+                            <span>{{ item.title }}</span>
+                        </div>
+                    </template>
+
+                    <template #title v-if="item.type === 'video'">
+                        <div>
+                            <video ref="videoPlayer" width="100%" controls class="mt-2">
+                                <source :src="item.link" type="video/mp4">
+                            </video>
+                            <span>{{ item.title }}</span>
+                        </div>
+                    </template>
+
+                    <template #title v-if="item.type === 'document'">
+                        <div>
+                          <a :href="item.link"
+                            download
+                            target="_blank" style="display: flex; justify-content: center; font-size: 50px;width: 100%;padding: 5px; border-width: 1px; border-style: solid; border-radius: 10px; border-color: #0e0e0e0e;">
+
+                                  <FilePdfOutlined style="color: red; cursor: pointer;" />
+
+                          </a>
+                        <span>{{ item.title }}</span>
+                        </div>
+                    </template>
+
+                    <template #description>
+                        <span>{{ item.time }}</span>
+                        <span class="status-icon">
+                          <template v-if="item.status === 'delivered'">
+                            <CheckOutlined style="padding-left: 12px;color: black;font-size: 12px" />
+                          </template>
+                          <template v-else-if="item.status === 'read'">
+                            <CheckOutlined style="padding-left: 12px;color: green;font-size: 12px" />
+                          </template>
+                          <template v-else-if="item.status === 'failed'">
+                            <ExclamationCircleOutlined style="padding-left: 12px;color: red;font-size: 12px" />
+                          </template>
+                        </span>
                     </template>
                   </a-list-item-meta>
                   <a-avatar size="large" src="https://randomuser.me/api/portraits/women/7.jpg"/>
@@ -79,7 +123,7 @@
 <script lang="ts" setup>
 import {computed, CSSProperties, h, nextTick, onMounted, onUpdated, ref, watch} from 'vue';
 import {useCustomerStore} from "@/store/customerStore";
-import {FileSearchOutlined, TagOutlined, IdcardOutlined} from '@ant-design/icons-vue';
+import {FileSearchOutlined, TagOutlined, IdcardOutlined, ExclamationCircleOutlined, CheckOutlined, FilePdfOutlined} from '@ant-design/icons-vue';
 import ChatMessage from "@/components/chatBox/content/chatMessage.vue";
 
 import {useChatStore} from "@/store/chatStore";
@@ -97,6 +141,10 @@ const chatStore = useChatStore();
 //     // customerStore.sendMessage("test");
 //   wsconnect.sendMessage("449711484896804","test00001");
 // }
+
+function download(link) {
+
+}
 
 
 const currentCustomerInfo = computed(() => {
@@ -126,6 +174,7 @@ const customers = ref([
   {id: 2, name: 'Alice'},
   {id: 3, name: 'Bob'}
 ]);
+
 const currentChatUser = ref(null);
 
 interface DataItem {
@@ -134,54 +183,90 @@ interface DataItem {
   time: string;
 }
 
-const data: DataItem[] = ref([
-  {
-    position: 'left',
-    title: 'Ant Design Title 1',
-    time: '2024-12/02 20:12:30'
-  },
-  {
-    position: 'left',
-    title: 'Ant Design Title 2',
-    time: '2024-12/02 20:12:30'
+// const data: DataItem[] = ref([
+//   {
+//     position: 'inbound',
+//     title: 'Ant Design Title 1',
+//     time: '2024-12/02 20:12:30',
+//     type: 'text',
+//   },
+//   {
+//     position: 'inbound',
+//     title: 'Ant Design Title 2',
+//     time: '2024-12/02 20:12:30',
+//       type: 'text',
+//   },
+//   {
+//     position: 'outbound',
+//     title: 'Ant Design Title 3 Ant Design Title 3 Ant Design Title 3 Ant Design Title 3',
+//     time: '2024-12/02 20:12:30',
+//     status: "sent",
+//       type: 'text',
+//   },
+//   {
+//     position: 'outbound',
+//     title: 'Ant Design Title 4',
+//     time: '2024-12/02 20:12:30',
+//       status: "failed",
+//       type: 'text',
+//   },
+//   {
+//     position: 'inbound',
+//     title: 'Ant Design Title 2',
+//     time: '2024-12/02 20:12:30',
+//       type: 'text',
+//   },
+//   {
+//     position: 'outbound',
+//     title: 'Ant Design Title 2',
+//     time: '2024-12/02 20:12:30',
+//       status: "delivered",
+//       type: 'text',
+//   },
+//   {
+//     position: 'outbound',
+//     title: 'Ant Design Title 4',
+//     time: '2024-12/02 20:12:30',
+//       status: "read",
+//       type: 'text',
+//   },
+//     {
+//     position: 'outbound',
+//     title: 'Ant Design Title 4',
+//     time: '2024-12/02 20:12:30',
+//         status: "delivered",
+//         type: 'text',
+//   },
+//     {
+//         position: 'outbound',
+//         link: "https://cos.jackycode.cn/29700.jpg",
+//         title: 'imagetest 4',
+//         time: '2024-12/02 20:12:30',
+//         status: "delivered",
+//         type: 'image',
+//     },
+//     {
+//         position: 'outbound',
+//         link: "https://reloan-old.s3.ap-east-1.amazonaws.com/sign.mp4",
+//         title: 'videotest 4',
+//         time: '2024-12/02 20:12:30',
+//         status: "delivered",
+//         type: 'video',
+//     },
+//     {
+//         position: 'outbound',
+//         link: "https://cos.jackycode.cn/29700.jpg",
+//         title: 'documenttest 4',
+//         time: '2024-12/02 20:12:30',
+//         status: "delivered",
+//         type: 'document',
+//     },
+// ]);
 
-  },
-  {
-    position: 'right',
-    title: 'Ant Design Title 3 Ant Design Title 3 Ant Design Title 3 Ant Design Title 3',
-    time: '2024-12/02 20:12:30'
-  },
-  {
-    position: 'right',
-    title: 'Ant Design Title 4',
-    time: '2024-12/02 20:12:30'
-  },
-  {
-    position: 'left',
-    title: 'Ant Design Title 2',
-    time: '2024-12/02 20:12:30'
-
-  },
-  {
-    position: 'left',
-    title: 'Ant Design Title 2',
-    time: '2024-12/02 20:12:30'
-
-  },
-  {
-    position: 'right',
-    title: 'Ant Design Title 4',
-    time: '2024-12/02 20:12:30'
-  }, {
-    position: 'right',
-    title: 'Ant Design Title 4',
-    time: '2024-12/02 20:12:30'
-  },
-]);
+const data: DataItem[] = ref([]);
 
 watch(chatStore.chatMessages, (newValue) => {
-    console.log("newValue",newValue);
-    data.value = [...data.value, ...newValue]
+    data.value = [...newValue]
 })
 
 const message = ref('');

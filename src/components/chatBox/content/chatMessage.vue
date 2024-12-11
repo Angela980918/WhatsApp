@@ -69,9 +69,10 @@ import {useChatStore} from "@/store/chatStore";
 const customerStore = useCustomerStore();
 const chatStore = useChatStore();
 const currentCustomerInfo = computed(() => customerStore.currentCustomerInfo);
+const currentPhone = computed(() => chatStore.currentPhone);
 const size = ref('large');
 const contentTxt = ref('');
-const showEmoji = computed(() => chatStore.showEmoji);
+const showEmoji = ref(false);
 const nowEmoji = ref(false)
 let emojiIndex = new EmojiIndex(data);
 const textAreaRef = ref(null);
@@ -108,21 +109,21 @@ function sendMessage() {
         title: contentTxt.value,
         time: new Date()
     }
-    chatStore.addMessage(message)
+    // chatStore.addMessage(message)
 
-    const data = {
-        from: "+8613672967202",
-        to: "type",
-        type: "text"
-    }
+    // const data = {
+    //     from: "+8613672967202",
+    //     to: "type",
+    //     type: "text"
+    // }
 
     // if(data.type === 'text') {
     //     data.text = { body: JSON.stringify(contentTxt.value) }
     // }
-
+    console.log("发送消息",contentTxt.value)
     ycloudApi.messageApi.sendMessage({
         from: "+8613672967202",
-        to: currentCustomerInfo.value.phoneNumber,
+        to: currentPhone.value,
         type: "text",
         message: contentTxt.value
     })
@@ -131,7 +132,7 @@ function sendMessage() {
 
 function showSmile() {
     console.log("8888888")
-    chatStore.setShowEmoji(true);
+    showEmoji.value = !showEmoji.value
 }
 
 </script>

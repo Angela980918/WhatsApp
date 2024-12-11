@@ -67,6 +67,14 @@ export const useChatStore = defineStore('chatStore', {
                 });
             }
         },
+        // 更新自己的消息狀態
+        updateMessage(id, status) {
+            this.chatMessages.map(item => {
+                if(item.position === 'outbound' && item.id === id) {
+                    item.status = status;
+                }
+            })
+        },
 
         // 清空聊天记录
         clearChat() {

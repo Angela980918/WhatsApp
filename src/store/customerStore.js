@@ -197,7 +197,7 @@ export const useCustomerStore = defineStore('customerStore', {
         },
         sendMessage(message) {
             this.ws.send('message', message);
-        }
+        },
     },
     getters: {
         getAssignedCustomers: (state) => state.assignedCustomers,

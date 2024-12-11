@@ -45,7 +45,7 @@ onMounted(async () => {
     });
     console.log("assignedCustomers",assignedCustomers)
     customerStore.setAssignedCustomers(assignedCustomers.value);
-    handleSelectCustomer(assignedCustomers.value[0].phoneNumber);
+    handleSelectCustomer(assignedCustomers.value[3].phoneNumber);
 })
 
 const siderStyle: CSSProperties = {

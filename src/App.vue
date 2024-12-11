@@ -1,3 +1,4 @@
+
 <template>
   <div>
       <router-view />
@@ -6,7 +7,13 @@
 
 <script setup>
 import {useRoute, useRouter} from "vue-router";
+
+import {onMounted} from "vue";
+
 const router = useRouter();
+
+
+
 </script>
 
 <style scoped >
