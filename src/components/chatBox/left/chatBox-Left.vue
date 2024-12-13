@@ -5,7 +5,7 @@
 
     <!--  分配列表  -->
     <chat-box-left-list :assignedCustomersData="assignedCustomers"
-                        :unassignedCustomersData="unassignedCustomers"></chat-box-left-list>
+                        :unassignedCustomersData="unassignedCustomers" @loadLocalMessage="loadLocalMessage"></chat-box-left-list>
 
   </a-layout-sider>
 </template>
@@ -35,6 +35,20 @@ const handleSelectCustomer = (id) => {
   chatStore.setCurrentPhone(id);  // 设置当前聊天 ID，并加载聊天记录
 };
 
+async function loadLocalMessage(guestPhone, userPhone) {
+    console.log("guestPhone, userPhone",guestPhone, userPhone)
+  const key = guestPhone + '_' + userPhone;
+    console.log("keykeykeykey",key)
+  const chatMessageStr = await localStorage.getItem(key);
+    console.log("chatMessageStr",chatMessageStr)
+  const MessageList = JSON.parse(chatMessageStr);
+  if(MessageList !== null) {
+    chatStore.setMessageList(MessageList);
+  }
+
+
+}
+
 onMounted(async () => {
     let response = await ycloudApi.contactApi.getContactList();
     let result = response.data;
@@ -43,9 +57,11 @@ onMounted(async () => {
         item.key = item.id;
         assignedCustomers.value.push(item);
     });
-    console.log("assignedCustomers",assignedCustomers)
+
     customerStore.setAssignedCustomers(assignedCustomers.value);
     handleSelectCustomer(assignedCustomers.value[3].phoneNumber);
+    customerStore.setCurrentUserInfo(assignedCustomers.value[3]);
+    loadLocalMessage(assignedCustomers.value[3].phoneNumber, "+8613672967202")
 })
 
 const siderStyle: CSSProperties = {

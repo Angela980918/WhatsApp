@@ -86,8 +86,9 @@
                     </template>
 
                     <template #description>
-                        <span>{{ item.time }}</span>
-                        <span class="status-icon">
+<!--                        <div style="display: flex;flex-direction: row;">-->
+                          <span>{{ item.time }}</span>
+                        <span class="status-icon" >
                           <template v-if="item.status === 'delivered'">
                             <CheckOutlined style="padding-left: 12px;color: black;font-size: 12px" />
                           </template>
@@ -95,9 +96,10 @@
                             <CheckOutlined style="padding-left: 12px;color: green;font-size: 12px" />
                           </template>
                           <template v-else-if="item.status === 'failed'">
-                            <ExclamationCircleOutlined style="padding-left: 12px;color: red;font-size: 12px" />
+                            <ExclamationCircleOutlined style="color: red" />
                           </template>
                         </span>
+<!--                        </div>-->
                     </template>
                   </a-list-item-meta>
                   <a-avatar size="large" src="https://randomuser.me/api/portraits/women/7.jpg"/>
@@ -121,7 +123,7 @@
 </template>
 
 <script lang="ts" setup>
-import {computed, CSSProperties, h, nextTick, onMounted, onUpdated, ref, watch} from 'vue';
+import {computed, CSSProperties, h, nextTick, onBeforeMount, onMounted, onUpdated, ref, watch} from 'vue';
 import {useCustomerStore} from "@/store/customerStore";
 import {FileSearchOutlined, TagOutlined, IdcardOutlined, ExclamationCircleOutlined, CheckOutlined, FilePdfOutlined} from '@ant-design/icons-vue';
 import ChatMessage from "@/components/chatBox/content/chatMessage.vue";
@@ -132,6 +134,7 @@ const emits = defineEmits(['setShowRight'])
 
 // 获取 userStore 和 chatStore
 const customerStore = useCustomerStore();
+const assignedCustomers = computed(() => customerStore.assignedCustomers)
 
 const chatStore = useChatStore();
 
@@ -147,12 +150,7 @@ function download(link) {
 }
 
 
-const currentCustomerInfo = computed(() => {
-  // 如果 currentCustomerInfo 是空对象，则返回 customers 中的第一个客户信息
-  return customerStore.currentCustomerInfo && Object.keys(customerStore.currentCustomerInfo).length > 0
-      ? customerStore.currentCustomerInfo
-      : customerStore.assignedCustomers[0] || {};
-})
+const currentCustomerInfo = computed(() => customerStore.currentCustomerInfo)
 
 watch(() => customerStore.currentUserId, (newUserId) => {
   console.log('newUserId', newUserId)
@@ -263,11 +261,15 @@ interface DataItem {
 //     },
 // ]);
 
-const data: DataItem[] = ref([]);
+const data = computed(() => chatStore.chatMessages);
+const currentPhone = computed(() => chatStore.currentPhone);
 
-watch(chatStore.chatMessages, (newValue) => {
-    data.value = [...newValue]
-})
+
+// const key = computed(() => {
+//   return chatStore.currentPhone + '_' + '+8613672967202'
+// });
+// console.log("key", key);
+
 
 const message = ref('');
 
@@ -354,20 +356,28 @@ const scrollToBottom = () => {
   });
 };
 
+
 // const handleScroll = (event) => {
 //   console.log('chatRoom22.value.scrollHeight', chatRoom22.value.scrollHeight)
 //   chatRoom22.value.scrollTop = chatRoom22.value.scrollHeight
 //   console.log('chatRoom22.value.scrollTop', chatRoom22.value.scrollTop)
 // };
 
+
+
 // 在数据更新后自动滚动到底部
 onMounted(async () => {
   scrollToBottom();
+  // chatStore.setMessageList(MessageList);
 });
 //
 onUpdated(async () => {
   scrollToBottom();
 });
+onBeforeMount(async () => {
+    const key = chatStore.currentPhone + "_" + "+8613672967202";
+    localStorage.setItem(key, JSON.stringify([...data.value]))
+})
 </script>
 
 <style scoped>

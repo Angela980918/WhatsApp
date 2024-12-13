@@ -198,7 +198,11 @@ export const useCustomerStore = defineStore('customerStore', {
         sendMessage(message) {
             this.ws.send('message', message);
         },
+        setCurrentUserInfo(user) {
+            this.currentCustomerInfo = user;
+        },
     },
+    
     getters: {
         getAssignedCustomers: (state) => state.assignedCustomers,
         getUnassignedCustomers: (state) => state.unassignedCustomers,

@@ -51,7 +51,7 @@
 
 
 <script lang="ts" setup>
-import {computed, onMounted, ref} from "vue";
+import {computed, onMounted, ref, defineEmits} from "vue";
 import {EyeInvisibleOutlined, EyeOutlined} from '@ant-design/icons-vue';
 import ChatBoxLeftItem from "@/components/chatBox/left/chatBox-Left-Item.vue";
 import {useCustomerStore} from "@/store/customerStore";
@@ -65,7 +65,7 @@ const props = defineProps({
     type: Array
   }
 })
-
+const emits = defineEmits(['loadLocalMessage'])
 const customerStore = useCustomerStore();
 const chatStore = useChatStore();
 const currentCustomerId = computed(()=> customerStore.currentUserId)
@@ -75,10 +75,14 @@ const activeKey = ref('1');
 
 // 处理点击事件
 const handleItemClick = (id: number, phoneNumber: string) => {
-  console.log(phoneNumber, 'phoneNumber')
+  const data = chatStore.chatMessages;
+  const key = chatStore.currentPhone + "_" + "+8613672967202";
+  localStorage.setItem(key, JSON.stringify(data));
+  chatStore.clearChat();
   customerStore.setCurrentUser(id)
   chatStore.setCurrentChatId(id)
   chatStore.setCurrentPhone(phoneNumber)
+  emits('loadLocalMessage', phoneNumber, "+8613672967202")
 };
 
 onMounted(() => {

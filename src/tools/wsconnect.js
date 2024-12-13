@@ -24,7 +24,7 @@ const eventTypes = {
     template: ""
 }
 
-const messageType = {
+export const messageType = {
     failed: "failed",
     read: "read",
     sent: "sent",
@@ -112,15 +112,18 @@ const wsconnect = {
             // 如果是服務未連接的錯誤，重連
             clearTimeout(resetTimer);
             resetTimer = null;
+            // console.log("重连");
+            
+            wsconnect.resConnect(config.id);
             // console.log("111111111")
-            resetTimer = setTimeout(() => {
-                if(!wsConfigs[config.id].isContect) {
-                    wsconnect.resConnect(config.id);
-                }else {
-                    clearTimeout(resetTimer);
-                    resetTimer = null;
-                }
-            }, 5000)
+            // resetTimer = setTimeout(() => {
+            //     if(!wsConfigs[config.id].isContect) {
+                    
+            //     }else {
+            //         clearTimeout(resetTimer);
+            //         resetTimer = null;
+            //     }
+            // }, 5000)
         });
 
         // 接收用戶消息
@@ -239,21 +242,21 @@ const wsconnect = {
 
             switch (type) {
                 case messageType.sent:
-                    let message = {
-                        position: "outbound",
-                        id: whatsappMessage.id,
-                        status: messageType.sent,
-                        type: whatsappMessage.type
-                    }
+                    // let message = {
+                    //     position: "outbound",
+                    //     id: whatsappMessage.id,
+                    //     status: messageType.sent,
+                    //     type: whatsappMessage.type
+                    // }
 
-                    if(whatsappMessage.type === 'text') {
-                        message.title = whatsappMessage.text.body;
-                    }else {
-                        message.link = whatsappMessage[whatsappMessage.type].link
-                        message.title = whatsappMessage[whatsappMessage.type].caption
-                    }
-                    message.time = whatsappMessage.sendTime;
-                    chatStore.addMessage(message);
+                    // if(whatsappMessage.type === 'text') {
+                    //     message.title = whatsappMessage.text.body;
+                    // }else {
+                    //     message.link = whatsappMessage[whatsappMessage.type].link
+                    //     message.title = whatsappMessage[whatsappMessage.type].caption
+                    // }
+                    // message.time = whatsappMessage.sendTime;
+                    // chatStore.addMessage(message);
                     // chatStore.updateMessage(whatsappMessage.id, messageType.sent);
                     break;
                 case messageType.accept:

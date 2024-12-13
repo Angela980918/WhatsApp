@@ -50,10 +50,11 @@ export const useChatStore = defineStore('chatStore', {
             }
             // 可以根据用户的 id 来模拟不同的聊天记录
         },
-
+        setMessageList(messageList) {
+            this.chatMessages = [...messageList];
+        },
         // 添加聊天信息
         addMessage(message) {
-            console.log("addMessage",message)
           this.chatMessages.push(message);
         },
         // 模拟发送消息
@@ -78,6 +79,7 @@ export const useChatStore = defineStore('chatStore', {
 
         // 清空聊天记录
         clearChat() {
+            console.log("清空")
             this.chatMessages = [];
         },
     },

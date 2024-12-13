@@ -65,6 +65,7 @@ import * as ycloudApi from "../../../api/ycloud/index.js";
 import {computed, defineProps, ref} from "vue";
 import {useCustomerStore} from "@/store/customerStore.js";
 import {useChatStore} from "@/store/chatStore";
+import { messageType } from '@/tools/wsconnect.js';
 
 const customerStore = useCustomerStore();
 const chatStore = useChatStore();
@@ -102,13 +103,13 @@ function insertAtCursor(text) {
     showSmile();
 }
 
-function sendMessage() {
+async function sendMessage() {
 
-    let message = {
-        position: "right",
-        title: contentTxt.value,
-        time: new Date()
-    }
+    // let message = {
+    //     position: "right",
+    //     title: contentTxt.value,
+    //     time: new Date()
+    // }
     // chatStore.addMessage(message)
 
     // const data = {
@@ -120,14 +121,52 @@ function sendMessage() {
     // if(data.type === 'text') {
     //     data.text = { body: JSON.stringify(contentTxt.value) }
     // }
-    console.log("发送消息",contentTxt.value)
-    ycloudApi.messageApi.sendMessage({
+
+    const resultObj = await ycloudApi.messageApi.sendMessage({
         from: "+8613672967202",
         to: currentPhone.value,
         type: "text",
         message: contentTxt.value
     })
+    const result = resultObj.data;
+    console.log("发送消息",result)
+//     const result = {
+//     id: "675b069c3616c7451878ffab",
+//     wamid: "wamid.HBgLODUyOTYxMzIwODAVAgARGBIzNTU0MDM4NTQ4Mzc0RjNEMDIA",
+//     status: "accepted",
+//     from: "+8613672967202",
+//     to: "+85296132080",
+//     wabaId: "449711484896804",
+//     type: "text",
+//     text: {
+//         body: "test"
+//     },
+//     createTime: "2024-12-12T15:51:56.916Z",
+//     updateTime: "2024-12-12T15:51:57.366Z",
+//     totalPrice: 0.0,
+//     pricingCategory: "service",
+//     currency: "USD",
+//     regionCode: "HK",
+//     bizType: "whatsapp"
+// }
+
+    let message = {
+        position: "outbound",
+        id: result.id,
+        status: result.status,
+        type: result.type,
+        time: result.createTime
+    }
+
+    if(result.type === 'text') {
+        message.title = result.text.body;
+    }else {
+        message.link = result[result.type].link
+        message.title = result[result.type].caption
+    }
+
     contentTxt.value = "";
+    chatStore.addMessage(message);
 }
 
 function showSmile() {
