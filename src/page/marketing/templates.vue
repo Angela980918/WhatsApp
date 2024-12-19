@@ -51,17 +51,19 @@
               <template #overlay>
                 <a-menu>
                   <a-menu-item>
-                    <a target="_blank" rel="noopener noreferrer" @click="onPreview(record.key)">
+                    <a target="_blank" rel="noopener noreferrer"
+                       @click="onPreview(record.key)">
                       預覽
                     </a>
                   </a-menu-item>
                   <a-menu-item>
-                    <a target="_blank" rel="noopener noreferrer" href="http://www.taobao.com/">
+                    <a target="_blank" rel="noopener noreferrer"
+                       @click="onEdit(record.key)">
                       編輯
                     </a>
                   </a-menu-item>
                   <a-menu-item>
-                    <a target="_blank" rel="noopener noreferrer" href="http://www.tmall.com/">
+                    <a target="_blank" rel="noopener noreferrer" @click="onDelete(record.key)">
                       刪除
                     </a>
                   </a-menu-item>
@@ -80,6 +82,7 @@ import {onBeforeMount, reactive, ref} from 'vue';
 import {templateApi, wabaApi} from "@/api/ycloud/index.js";
 import WASelect from "@/components/templates/WASelect.vue";
 import {useRouter} from "vue-router";
+import {useCreateTempStore} from '@/store/useCreateTempStore'
 
 const router = useRouter();
 
@@ -119,16 +122,6 @@ const columns = [
     title: '最近更新',
     dataIndex: 'updateTime',
   },
-  // {
-  //     key: 6,
-  //     title: '已發送/已閱讀',
-  //     dataIndex: 'lastSeen',
-  // },
-  // {
-  //     key: 7,
-  //     title: '創建方式',
-  //     dataIndex: 'lastSeen',
-  // },
   {
     title: 'Action',
     key: 'operation',
@@ -136,59 +129,14 @@ const columns = [
   },
 ];
 
-const data = ref([
-  // {
-  //   key: 1,
-  //   category: "UTILITY",
-  //   name: "test111",
-  //   language: "en_US",
-  //   status: "REJECTED",
-  //   updateTime: "2024-12-04T02:05:22.277Z"
-  // },
-  // {
-  //   key: 2,
-  //   category: "UTILITY",
-  //   name: "test222",
-  //   language: "zh_CN",
-  //   status: "REJECTED",
-  //   updateTime: "2024-12-04T02:05:23.277Z"
-  // },
-  // {
-  //   key: 3,
-  //   category: "UTILITY",
-  //   name: "test222",
-  //   language: "zh_CN",
-  //   status: "REJECTED",
-  //   updateTime: "2024-12-04T02:05:23.277Z"
-  // },
-  // {
-  //   key: 4,
-  //   category: "UTILITY",
-  //   name: "test333",
-  //   language: "zh_CN",
-  //   status: "REJECTED",
-  //   updateTime: "2024-12-04T02:05:23.277Z"
-  // },
-  // {
-  //   key: 5,
-  //   category: "UTILITY",
-  //   name: "test444",
-  //   language: "zh_CN",
-  //   status: "REJECTED",
-  //   updateTime: "2024-12-04T02:05:23.277Z"
-  // },
-  // {
-  //   key: 6,
-  //   category: "UTILITY",
-  //   name: "test555",
-  //   language: "zh_CN",
-  //   status: "REJECTED",
-  //   updateTime: "2024-12-04T02:05:23.277Z"
-  // }
-]);
+// 原始数据
+const data = ref([]);
 
-
+// 表格显示数据
 const filterData = ref([]);
+
+// 模板数据
+const createTempStore = useCreateTempStore()
 
 // 賬號選擇
 const selectAccount = ref([]);
@@ -385,9 +333,26 @@ onBeforeMount(async () => {
   dataFilter();
 })
 
+// 编辑模板 | 路由跳转
 const onPreview = (index) => {
-  console.log('index')
-  console.log('onPreview', data.value[index])
+  // console.log('onPreview', data.value[index])
+  createTempStore.setTemplateData(data.value[index])
+  router.push({
+    name: 'createTemp',
+  })
+}
+
+// 编辑模板 | 路由跳转
+const onEdit = (index) => {
+  createTempStore.setTemplateData(data.value[index])
+  router.push({
+    name: 'createTemp',
+  })
+}
+
+// 删除模板
+const onDelete = (index) => {
+  console.log('onDelete', data.value[index])
 }
 
 </script>
