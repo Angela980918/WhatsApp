@@ -6,7 +6,8 @@ const customerStore = useCustomerStore();
 let missedPongs = 0; // 记录服务器未响应的心跳次数
 const MAX_MISSED_PONGS = 3; // 最大未响应心跳次数
 let wsList = {};
-
+let isReconnecting = {};  // 用来标记每个连接是否正在重连，防止重复重连
+let resetTimer = null;
 const eventTypes = {
     connect: "connect",
     heart: "heart",
@@ -69,13 +70,20 @@ const wsconnect = {
     resConnect: async (id) => {
         let config = wsConfigs[id];
         let connectWS;
-        let resetTimer = null;
 
         if(!config.isContect) {
             connectWS = await io(config.url,{
                 query: { id: config.id },
             });
         }
+
+        if (isReconnecting[id]) {
+            console.log("已经在重连中，跳过连接请求");
+            return;
+        }
+
+        isReconnecting[id] = true;  // 标记当前连接正在重连
+
         connectWS.on(eventTypes.connect, (value) => {
             wsConfigs[config.id].isContect = true;
             wsList[config.id] = { id: config.id, socket: connectWS, isContect: true, missedPongs: 0 };
@@ -112,13 +120,16 @@ const wsconnect = {
             // 如果是服務未連接的錯誤，重連
             clearTimeout(resetTimer);
             resetTimer = null;
-            // console.log("重连");
-            
-            wsconnect.resConnect(config.id);
+            console.log("重连");
+
+            resetTimer = setTimeout(() => {
+                isReconnecting[id] = false;  // 重连完成，标记为未在重连
+                wsconnect.resConnect(config.id);  // 延迟后重试连接
+            }, 5000);  // 设置延时 5 秒后重试
             // console.log("111111111")
             // resetTimer = setTimeout(() => {
             //     if(!wsConfigs[config.id].isContect) {
-                    
+
             //     }else {
             //         clearTimeout(resetTimer);
             //         resetTimer = null;

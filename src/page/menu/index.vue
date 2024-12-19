@@ -22,7 +22,7 @@
 import {useRoute, useRouter} from "vue-router";
 import BreadcrumbItem from '@/components/Breadcrumb.vue';
 import {computed} from "vue";
-import wsconnect from "../../tools/wsconnect.js";
+import wsconnect from "@/tools/wsconnect.js";
 
 const route = useRoute();
 const router = useRouter();
@@ -45,7 +45,7 @@ import {useChatStore} from "@/store/chatStore";
 const chatStore = useChatStore();
 
 onMounted(() => {
-    wsconnect.createConnect();
+    // wsconnect.createConnect();
 })
 </script>
 <style scoped>
