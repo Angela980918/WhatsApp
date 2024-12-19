@@ -394,7 +394,7 @@ onBeforeMount(async () => {
 .chatroom22 {
     text-align: center;
     height: 100%;
-    flex: 0 0 calc(-459px + 100vh);
+    flex: 0 0 calc(-383px + 100vh);
     flex-direction: column;
     overflow-y: auto;
 }
