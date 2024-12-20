@@ -38,6 +38,7 @@
           @change="handleChange"
           style="flex-grow: 1; width: 100%"
           :options="selectOptions"
+          :disabled="props.disabled"
       ></a-select>
     </template>
 
@@ -59,7 +60,8 @@
           v-model:value="inputContents"
           show-count
           @change="handleChange"
-          :maxlength=props.maxTxt />
+          :disabled="props.disabled"
+          :maxlength="props.maxTxt"/>
     </template>
 
     <template v-else-if="props.type === 'upload-file'">
@@ -98,7 +100,7 @@
 </template>
 
 <script setup>
-import {defineProps, ref, shallowRef, onBeforeUnmount} from 'vue';
+import {defineProps, onBeforeUnmount, ref, shallowRef} from 'vue';
 import {SearchOutlined, UploadOutlined} from '@ant-design/icons-vue';
 
 import '@wangeditor/editor/dist/css/style.css' // 引入 css
@@ -106,8 +108,8 @@ import {Editor, Toolbar} from '@wangeditor/editor-for-vue'
 
 const props = defineProps({
   name: {
-      type: String,
-      default: "name"
+    type: String,
+    default: "name"
   },
   direction: {
     type: String,
@@ -131,7 +133,7 @@ const props = defineProps({
   },
   selectItem: {
     type: Object,
-    default: []
+    default: {}
   },
   searchContents: {
     type: String,
@@ -148,6 +150,11 @@ const props = defineProps({
   uploadType: {
     type: String,
     default: 'image/*'
+  },
+  disabled: {
+    // 禁用狀態
+    type: Boolean,
+    default: false
   }
 });
 const emits = defineEmits(['handleChange'])

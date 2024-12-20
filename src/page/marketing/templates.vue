@@ -1,22 +1,19 @@
 <template>
   <div class="tempContainer">
-    <div class="Common">
-      <WASelect name=t_accounts" direction="horizontal" title="賬號" type="select-common" :select-item="selectAccount"
-                :options="accounts" @handleChange="accountChange"/>
-    </div>
-
-
     <div class="Common tempSearch">
-      <WASelect name=t_search" direction="vertical" title="Search" type="search" :search-contents="searchContents"
+      <WASelect direction="vertical" title="賬號" type="select-common" :select-item="selectAccount"
+                :options="accounts" @handleChange="accountChange"/>
+
+      <WASelect direction="vertical" title="Search" type="search" :search-contents="searchContents"
                 @handleChange="nameChange"/>
 
-      <WASelect name=t_category" direction="vertical" title="Category" type="select-multiple" :select-item="selectCategory"
+      <WASelect direction="vertical" title="Category" type="select-multiple" :select-item="selectCategory"
                 :options="category" @handleChange="categoryChange"/>
 
-      <WASelect name=t_language" direction="vertical" title="Language" type="select-multiple" :select-item="selectLanguage"
+      <WASelect direction="vertical" title="Language" type="select-multiple" :select-item="selectLanguage"
                 :options="language" @handleChange="langChange"/>
 
-      <WASelect name=t_tempStatus" direction="vertical" title="Status" type="select-multiple" :select-item="selectStatus"
+      <WASelect direction="vertical" title="Status" type="select-multiple" :select-item="selectStatus"
                 :options="tempStatus" @handleChange="statusChange"/>
 
     </div>
@@ -78,11 +75,10 @@
 </template>
 
 <script lang="ts" setup>
-import {onBeforeMount, reactive, ref} from 'vue';
-import {templateApi, wabaApi} from "@/api/ycloud/index.js";
+import {computed, onBeforeMount, reactive, ref} from 'vue';
 import WASelect from "@/components/templates/WASelect.vue";
 import {useRouter} from "vue-router";
-import {useCreateTempStore} from '@/store/useCreateTempStore'
+import {useTempStore} from '@/store/useTempStore'
 
 const router = useRouter();
 
@@ -130,13 +126,15 @@ const columns = [
 ];
 
 // 原始数据
-const data = ref([]);
+const data = computed(() => {
+  return TempStore.tempData
+})
 
 // 表格显示数据
 const filterData = ref([]);
 
 // 模板数据
-const createTempStore = useCreateTempStore()
+const TempStore = useTempStore()
 
 // 賬號選擇
 const selectAccount = ref([]);
@@ -195,7 +193,7 @@ const onSelectChange = (selectedRowKeys: Key[]) => {
   console.log('selectedRowKeys changed: ', selectedRowKeys);
   state.selectedRowKeys = selectedRowKeys;
   state.isButtonDisabled = selectedRowKeys.length !== 0;
-  console.log('state.isButtonDisabled',typeof state.isButtonDisabled)
+  console.log('state.isButtonDisabled', typeof state.isButtonDisabled)
 };
 
 const formatDate = (date) => {
@@ -310,34 +308,15 @@ const dataFilter = () => {
 
 
 onBeforeMount(async () => {
-  const wabaResponse = await wabaApi.getWABAList();
-  if (wabaResponse.status === 200) {
-    const result = wabaResponse.data.items;
-    result.map(item => {
-      accounts.value.push({
-        ...item,
-        value: item.name
-      })
-
-    })
-    selectAccount.value.push(accounts.value[0]);
-  }
-
-  const response = await templateApi.getTemplateList();
-  let result = response.data;
-  result.items.map((item, index) => {
-    item.key = index;
-    data.value.push(item);
-  });
+  await TempStore.loadTemplates()
   console.log("itemitemitemitem", data.value)
-  // console.log("itemitemitemitem",item)
   dataFilter();
 })
 
 // 编辑模板 | 路由跳转
 const onPreview = (index) => {
   // console.log('onPreview', data.value[index])
-  createTempStore.setTemplateData(data.value[index])
+  TempStore.setTemplateData(data.value[index])
   router.push({
     name: 'createTemp',
   })
@@ -345,7 +324,7 @@ const onPreview = (index) => {
 
 // 编辑模板 | 路由跳转
 const onEdit = (index) => {
-  createTempStore.setTemplateData(data.value[index])
+  TempStore.setTemplateData(data.value[index])
   router.push({
     name: 'createTemp',
   })
