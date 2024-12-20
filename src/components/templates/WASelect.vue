@@ -19,6 +19,7 @@
 
     <template v-if="props.type === 'search'">
       <a-input
+          :name="props.name"
           v-model:value="searchContents"
           allow-clear
           style="flex-grow: 1; width: 100%;"
@@ -32,6 +33,7 @@
 
     <template v-else-if="props.type === 'select-common'">
       <a-select
+          :name="props.name"
           v-model:value="selectItem"
           @change="handleChange"
           style="flex-grow: 1; width: 100%"
@@ -41,6 +43,7 @@
 
     <template v-else-if="props.type === 'select-multiple'">
       <a-select
+          :name="props.name"
           v-model:value="selectItem"
           @change="handleChange"
           mode="multiple"
@@ -52,6 +55,7 @@
 
     <template v-else-if="props.type === 'input-text'">
       <a-input
+          :name="props.name"
           v-model:value="inputContents"
           show-count
           @change="handleChange"
@@ -60,6 +64,7 @@
 
     <template v-else-if="props.type === 'upload-file'">
       <a-upload
+          :name="props.name"
           v-model:file-list="selectItem"
           :before-upload="handleChange"
           :accept="uploadType"
@@ -100,6 +105,10 @@ import '@wangeditor/editor/dist/css/style.css' // 引入 css
 import {Editor, Toolbar} from '@wangeditor/editor-for-vue'
 
 const props = defineProps({
+  name: {
+      type: String,
+      default: "name"
+  },
   direction: {
     type: String,
     default: "horizontal"

@@ -1,22 +1,22 @@
 <template>
   <div class="tempContainer">
     <div class="Common">
-      <WASelect direction="horizontal" title="賬號" type="select-common" :select-item="selectAccount"
+      <WASelect name=t_accounts" direction="horizontal" title="賬號" type="select-common" :select-item="selectAccount"
                 :options="accounts" @handleChange="accountChange"/>
     </div>
 
 
     <div class="Common tempSearch">
-      <WASelect direction="vertical" title="Search" type="search" :search-contents="searchContents"
+      <WASelect name=t_search" direction="vertical" title="Search" type="search" :search-contents="searchContents"
                 @handleChange="nameChange"/>
 
-      <WASelect direction="vertical" title="Category" type="select-multiple" :select-item="selectCategory"
+      <WASelect name=t_category" direction="vertical" title="Category" type="select-multiple" :select-item="selectCategory"
                 :options="category" @handleChange="categoryChange"/>
 
-      <WASelect direction="vertical" title="Language" type="select-multiple" :select-item="selectLanguage"
+      <WASelect name=t_language" direction="vertical" title="Language" type="select-multiple" :select-item="selectLanguage"
                 :options="language" @handleChange="langChange"/>
 
-      <WASelect direction="vertical" title="Status" type="select-multiple" :select-item="selectStatus"
+      <WASelect name=t_tempStatus" direction="vertical" title="Status" type="select-multiple" :select-item="selectStatus"
                 :options="tempStatus" @handleChange="statusChange"/>
 
     </div>
