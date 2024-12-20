@@ -125,7 +125,7 @@
                 <!--        <a-button type="primary" @click="sendMess">发送</a-button>-->
                 <!--          <WASelect direction="vertical" type="editor" :inputContents="valueHtml"-->
                 <!--                    @handleChange="htmlChange"/>-->
-                <ChatMessage @customer="currentCustomerInfo.phoneNumber"/>
+                <ChatMessage/>
             </a-layout-footer>
         </a-layout>
     </div>

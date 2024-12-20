@@ -1,52 +1,52 @@
 <template>
   <div class="createContaianer">
     <div class="tempHeader">
-      <WASelect require="true" direction="vertical" title="模板名稱" type="input-text" maxTxt="512"
+      <WASelect :require="true" direction="vertical" title="模板名稱" type="input-text" :maxTxt="512"
                 :inputContents="inputContents" @handleChange="nameChange"/>
-      <WASelect require="true" direction="vertical" title="分類" type="select-common"
+      <WASelect :require="true" direction="vertical" title="分類" type="select-common"
                 :select-item="selectCategory" :options="category" @handleChange="categoryChange"/>
     </div>
 
     <div class="tempContainer">
       <div class="contentLeft">
-        <WASelect require="true" direction="vertical" title="語言" type="select-common"
+        <WASelect :require="true" direction="vertical" title="語言" type="select-common"
                   :select-item="selectLanguage" :options="language" @handleChange="languageChange"/>
 
         <div class="Header">
-          <WASelect require="true" direction="vertical" title="Header" type="select-common"
+          <WASelect :require="true" direction="vertical" title="Header" type="select-common"
                     :select-item="selectHeader" :options="headers" @handleChange="headerChange"/>
 
           <div v-if="selectHeader.value === 'Text'">
-            <WASelect direction="vertical" require="true" title="内容" type="input-text" maxTxt="60"
+            <WASelect direction="vertical" :require="true" title="内容" type="input-text" :maxTxt="60"
                       :inputContents="headerTxt" @handleChange="headerTxtChange"/>
           </div>
 
           <div v-else-if="selectHeader.value === 'Media'">
             <div>
-              <WASelect require="true" direction="vertical" title="內容形式" type="select-common"
+              <WASelect :require="true" direction="vertical" title="內容形式" type="select-common"
                         :select-item="mediaValue" :options="mediaOptions" @handleChange="contentChange"/>
             </div>
 
             <div v-if="mediaValue.value === 'Image'">
-              <WASelect require="true" direction="horizontal" title="上傳素材" type="upload-file"
+              <WASelect :require="true" direction="horizontal" title="上傳素材" type="upload-file"
                         @handleChange="beforeUpdate" uploadType="image/*"/>
             </div>
 
             <div v-else-if="mediaValue.value === 'Video'">
-              <WASelect require="true" direction="horizontal" title="上傳視頻" type="upload-file"
+              <WASelect :require="true" direction="horizontal" title="上傳視頻" type="upload-file"
                         @handleChange="beforeUpdate" uploadType="video/*"/>
             </div>
 
             <div v-else-if="mediaValue.value === 'PDF'">
-              <WASelect require="true" direction="horizontal" title="上傳文檔" type="upload-file"
+              <WASelect :require="true" direction="horizontal" title="上傳文檔" type="upload-file"
                         @handleChange="beforeUpdate" uploadType=".pdf"/>
             </div>
           </div>
 
-          <WASelect require="true" direction="vertical" title="Body" type="editor" :inputContents="valueHtml"
+          <WASelect :require="true" direction="vertical" title="Body" type="editor" :inputContents="valueHtml"
                     @handleChange="htmlChange"/>
 
-          <WASelect direction="vertical" title="底部" type="input-text" maxTxt="60"
+          <WASelect direction="vertical" title="底部" type="input-text" :maxTxt="60"
                     :inputContents="footerContent" @handleChange="footerChange"/>
 
 
@@ -88,28 +88,29 @@ import {defineProps} from 'vue';
 
 const router = useRouter();
 
-const selectCategory = ref("");
+const selectCategory = ref({});
 const category = [
   {value: 'Utility', lang: 'UTILITY'},
   {value: 'Marketing', lang: 'MARKETING'},
   {value: 'Authentication', lang: 'AUTHENTICATION'}
 ];
 
-const selectLanguage = ref("");
+const selectLanguage = ref({});
 const language = [
   {value: '簡體中文', lang: 'zh_CN'},
   {value: '繁體中文', lang: 'zh_HK'},
   {value: '英文', lang: 'en_US'},
 ]
 
-const selectHeader = ref('None');
+const selectHeader = ref({
+});
 const headers = [
   {value: 'None', lang: 'None'},
   {value: 'Text', lang: 'Text'},
   {value: 'Media', lang: 'Media'}
 ]
 
-const mediaValue = ref('');
+const mediaValue = ref({});
 const mediaOptions = [
   {label: 'IMAGE', value: 'Image'},
   {label: 'VIDEO', value: 'Video'},

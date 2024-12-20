@@ -12,7 +12,7 @@
         <span>備註</span>
         <a-tooltip>
           <template #title>表情</template>
-          <PlusCircleOutlined class="inputText" style="font-size: 16px; margin: 4px;color: #535bf2" @click="showSmile"/>
+          <PlusCircleOutlined class="inputText" style="font-size: 16px; margin: 4px;color: #535bf2"/>
         </a-tooltip>
       </div>
       <span class="tip">您可以為該客戶添加任何備註</span>

@@ -195,6 +195,7 @@ const onSelectChange = (selectedRowKeys: Key[]) => {
   console.log('selectedRowKeys changed: ', selectedRowKeys);
   state.selectedRowKeys = selectedRowKeys;
   state.isButtonDisabled = selectedRowKeys.length !== 0;
+  console.log('state.isButtonDisabled',typeof state.isButtonDisabled)
 };
 
 const formatDate = (date) => {
