@@ -66,10 +66,12 @@
 
     <template v-else-if="props.type === 'upload-file'">
       <a-upload
+          :max-count="1"
           :name="props.name"
           v-model:file-list="selectItem"
           :before-upload="handleChange"
           :accept="uploadType"
+          action="https://whatsapp.jackycode.cn/cos/upload"
       >
         <a-button>
           <upload-outlined></upload-outlined>
@@ -100,11 +102,12 @@
 </template>
 
 <script setup>
-import {defineProps, onBeforeUnmount, ref, shallowRef} from 'vue';
+import {defineProps, onBeforeUnmount, ref, shallowRef, watch} from 'vue';
 import {SearchOutlined, UploadOutlined} from '@ant-design/icons-vue';
 
 import '@wangeditor/editor/dist/css/style.css' // 引入 css
 import {Editor, Toolbar} from '@wangeditor/editor-for-vue'
+import {isObject} from "ant-design-vue/es/_util/util.js";
 
 const props = defineProps({
   name: {
@@ -132,8 +135,8 @@ const props = defineProps({
     default: "search"
   },
   selectItem: {
-    type: Object,
-    default: {}
+    type: Object || Array,
+    default: () => ({})
   },
   searchContents: {
     type: String,
@@ -159,9 +162,14 @@ const props = defineProps({
 });
 const emits = defineEmits(['handleChange'])
 const selectItem = ref(props.selectItem);
+if (isObject(selectItem.value)) {
+  selectItem.value = []
+}
 const selectOptions = ref(props.options);
 const searchContents = ref(props.searchContents);
 const inputContents = ref(props.inputContents);
+
+
 
 // 富文本编辑器配置
 const editorRef = shallowRef();
@@ -188,6 +196,7 @@ const handleCreated = (editor) => {
 }
 
 const fileList = ref([]);
+
 const uploadTxt = () => {
   if (props.uploadType === 'image/*') {
     return "(請選擇圖片)";
@@ -198,13 +207,14 @@ const uploadTxt = () => {
   }
 }
 const handleChange = (value) => {
+  console.log('handleChange', props.type, value);
   if (props.type === 'search') {
     emits('handleChange', searchContents.value)
   } else if (props.type === 'input-text') {
     emits('handleChange', inputContents.value)
   } else if (props.type === 'upload-file') {
     fileList.value.push(value);
-    emits('handleChange', fileList.value)
+    // emits('handleChange', fileList.value)
     return false;
   } else if (props.type === 'editor') {
     emits('handleChange', valueHtml.value)
