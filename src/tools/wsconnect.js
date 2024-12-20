@@ -34,7 +34,7 @@ export const messageType = {
 }
 
 let wsConfigs = {
-    '449711484896804': { id: '449711484896804', url: 'ws://43.138.183.200:4000', isContect: false }
+    '449711484896804': { id: '449711484896804', url: 'ws://whatsapi.jackycode.cn:4000', isContect: false }
 };
 
 const wsconnect = {
@@ -126,15 +126,6 @@ const wsconnect = {
                 isReconnecting[id] = false;  // 重连完成，标记为未在重连
                 wsconnect.resConnect(config.id);  // 延迟后重试连接
             }, 5000);  // 设置延时 5 秒后重试
-            // console.log("111111111")
-            // resetTimer = setTimeout(() => {
-            //     if(!wsConfigs[config.id].isContect) {
-
-            //     }else {
-            //         clearTimeout(resetTimer);
-            //         resetTimer = null;
-            //     }
-            // }, 5000)
         });
 
         // 接收用戶消息
@@ -145,29 +136,25 @@ const wsconnect = {
             let whatsappMessage = "";
             whatsappMessage = jsonData.whatsappInboundMessage;
 
-            // if(jsonData.type === "whatsapp.message.updated") {
-            //     whatsappMessage = jsonData.whatsappMessage
-            // }else if(jsonData.type === "whatsapp.inbound_message.received") {
-            //
-            // }
             const assignedCustomers = customerStore.getAssignedCustomers;
             const unAssignedCustomers = customerStore.getUnassignedCustomers;
-
+            console.log("whatsappMessage",whatsappMessage)
             // 如果拿出的消息是当前沟通用户，添加到当前记录
             if(chatStore.currentPhone === whatsappMessage.from) {
-                let message = {
-                    position: "inbound",
-                    id: whatsappMessage.id
-                    // title: whatsappMessage.text.body,
-                    // time: whatsappMessage.sendTime
-                }
-                if(whatsappMessage.type === 'text') {
-                    message.title = whatsappMessage.text.body;
-                }else {
-                    message.link = whatsappMessage[whatsappMessage.type].link
-                    message.title = whatsappMessage[whatsappMessage.type].caption
-                }
-                message.time = whatsappMessage.sendTime;
+                let message = this.handleMessage(whatsappMessage, 'inbound')
+                // let message = {
+                //     position: "inbound",
+                //     id: whatsappMessage.id,
+                //     type: whatsappMessage.type,
+                //     status: whatsappMessage.status
+                // }
+                // if(whatsappMessage.type === 'text') {
+                //     message.title = whatsappMessage.text.body;
+                // }else {
+                //     message.link = whatsappMessage[whatsappMessage.type].link
+                //     message.title = whatsappMessage[whatsappMessage.type].caption
+                // }
+                // message.time = whatsappMessage.sendTime;
 
                 // 為當前用戶添加未讀
                 assignedCustomers.map(item => {
@@ -195,7 +182,7 @@ const wsconnect = {
 
                 // 查詢是否是來自已訂閱的用戶信息
                 assignedCustomers.map(item => {
-                    if(item.phone === whatsappMessage.from) {
+                    if(item.phoneNumber === whatsappMessage.from) {
                         inserOrNot = 1;
                         item.time = whatsappMessage.sendTime;
                         item.message = whatsappMessage.message;
@@ -234,44 +221,40 @@ const wsconnect = {
 
                 // 更新未訂閱
                 customerStore.setUnassignedCustomers(unAssignedCustomers);
-                chatStore.addMessage(message);
+                // chatStore.addMessage(message);
 
             }
         })
 
         // 本人發送消息
         connectWS.on(eventTypes.message, (value) => {
-
             let newValue = JSON.parse(value);
-            // console.log("newValue",value)
             const jsonData = newValue.data;
-            // console.log("jsonData",jsonData)
             let whatsappMessage = "";
             whatsappMessage = jsonData.whatsappMessage;
-            // console.log("whatsappMessage",whatsappMessage)
+
+            let message = this.handleMessage(whatsappMessage, "outbound")
+
             const type = whatsappMessage.status;
+
+            // let message = {
+            //     position: "outbound",
+            //     id: whatsappMessage.id,
+            //     type: whatsappMessage.type,
+            //     status: whatsappMessage.status
+            // }
+            //
+            // if(whatsappMessage.type === 'text') {
+            //     message.title = whatsappMessage.text.body;
+            // }else {
+            //     message.link = whatsappMessage[whatsappMessage.type].link
+            //     message.title = whatsappMessage[whatsappMessage.type].caption
+            // }
+            // message.time = whatsappMessage.sendTime;
 
             switch (type) {
                 case messageType.sent:
-                    // let message = {
-                    //     position: "outbound",
-                    //     id: whatsappMessage.id,
-                    //     status: messageType.sent,
-                    //     type: whatsappMessage.type
-                    // }
-
-                    // if(whatsappMessage.type === 'text') {
-                    //     message.title = whatsappMessage.text.body;
-                    // }else {
-                    //     message.link = whatsappMessage[whatsappMessage.type].link
-                    //     message.title = whatsappMessage[whatsappMessage.type].caption
-                    // }
-                    // message.time = whatsappMessage.sendTime;
-                    // chatStore.addMessage(message);
-                    // chatStore.updateMessage(whatsappMessage.id, messageType.sent);
-                    break;
-                case messageType.accept:
-                    chatStore.updateMessage(whatsappMessage.id, messageType.accept);
+                    chatStore.updateMessage(whatsappMessage.id, messageType.sent, message);
                     break;
                 case messageType.arrow:
                     chatStore.updateMessage(whatsappMessage.id, messageType.arrow);
@@ -297,6 +280,26 @@ const wsconnect = {
             console.log("value",value)
         });
 
+    },
+
+    handleMessage: (whatsAppMessage, position) => {
+        whatsAppMessage.sendTime = undefined;
+        let message = {
+            position: position,
+            id: whatsAppMessage.id,
+            type: whatsAppMessage.type,
+            status: whatsAppMessage.status,
+            time: whatsAppMessage.sendTime
+        }
+
+        if(whatsAppMessage.type === 'text') {
+            message.title = whatsAppMessage.text.body;
+        }else if(whatsAppMessage.type === 'image' || whatsAppMessage.type === 'video' || whatsAppMessage.type === 'document'){
+            message.link = whatsAppMessage[whatsAppMessage.type].link
+            message.title = whatsAppMessage[whatsAppMessage.type].caption
+        }
+
+        return message;
     }
 };
 

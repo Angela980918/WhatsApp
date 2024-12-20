@@ -69,12 +69,18 @@ export const useChatStore = defineStore('chatStore', {
             }
         },
         // 更新自己的消息狀態
-        updateMessage(id, status) {
+        updateMessage(id, status, message = {}) {
+            let add = true;
             this.chatMessages.map(item => {
                 if(item.position === 'outbound' && item.id === id) {
+                    add = false;
                     item.status = status;
                 }
             })
+            if(add && status === 'sent') {
+                console.log("message", message)
+                this.chatMessages.push(message)
+            }
         },
 
         // 清空聊天记录

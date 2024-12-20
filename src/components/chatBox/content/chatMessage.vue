@@ -1,5 +1,6 @@
 <template>
     <div style="display: flex; height: 100%; flex-direction: column;">
+        <TemplateList ref="colTemp"  />
         <a-textarea ref="textAreaRef"  v-model:value="contentTxt" placeholder="輸入內容" :rows="4" />
         <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px;">
             <div>
@@ -29,7 +30,7 @@
                 </a-tooltip>
                 <a-tooltip>
                     <template #title>訊息模板</template>
-                    <FileTextOutlined style="font-size: 20px; margin: 4px;" />
+                    <FileTextOutlined style="font-size: 20px; margin: 4px;" @click="handleSubmit" />
                 </a-tooltip>
             </div>
             <div>
@@ -40,7 +41,9 @@
                 </a-button>
             </div>
         </div>
-        <Picker v-if="showEmoji" class="emojiPicker" :data="emojiIndex" set="twitter" @select="selectEmoji" />
+
+            <Picker v-if="showEmoji" class="emojiPicker" :data="emojiIndex" set="twitter" @select="selectEmoji" />
+
     </div>
 <!--        <Picker :data="emojiIndex" set="twitter" @select="showEmoji" />-->
 </template>
@@ -66,6 +69,7 @@ import {computed, defineProps, ref} from "vue";
 import {useCustomerStore} from "@/store/customerStore.js";
 import {useChatStore} from "@/store/chatStore";
 import { messageType } from '@/tools/wsconnect.js';
+import TemplateList from "@/components/chatBox/content/message/TemplateList.vue";
 
 const customerStore = useCustomerStore();
 const chatStore = useChatStore();
@@ -74,15 +78,15 @@ const currentPhone = computed(() => chatStore.currentPhone);
 const size = ref('large');
 const contentTxt = ref('');
 const showEmoji = ref(false);
-const nowEmoji = ref(false)
+const colTemp = ref(null)
 let emojiIndex = new EmojiIndex(data);
 const textAreaRef = ref(null);
 function selectEmoji(emoji) {
-    // contentTxt.value += "1111111" + emoji.native;
-    console.log("emoji",emoji)
     insertAtCursor(emoji.native);
+}
 
-
+function handleSubmit() {
+    colTemp.value.controlTemp();
 }
 
 function insertAtCursor(text) {
@@ -105,23 +109,6 @@ function insertAtCursor(text) {
 
 async function sendMessage() {
 
-    // let message = {
-    //     position: "right",
-    //     title: contentTxt.value,
-    //     time: new Date()
-    // }
-    // chatStore.addMessage(message)
-
-    // const data = {
-    //     from: "+8613672967202",
-    //     to: "type",
-    //     type: "text"
-    // }
-
-    // if(data.type === 'text') {
-    //     data.text = { body: JSON.stringify(contentTxt.value) }
-    // }
-
     const resultObj = await ycloudApi.messageApi.sendMessage({
         from: "+8613672967202",
         to: currentPhone.value,
@@ -130,25 +117,6 @@ async function sendMessage() {
     })
     const result = resultObj.data;
     console.log("发送消息",result)
-//     const result = {
-//     id: "675b069c3616c7451878ffab",
-//     wamid: "wamid.HBgLODUyOTYxMzIwODAVAgARGBIzNTU0MDM4NTQ4Mzc0RjNEMDIA",
-//     status: "accepted",
-//     from: "+8613672967202",
-//     to: "+85296132080",
-//     wabaId: "449711484896804",
-//     type: "text",
-//     text: {
-//         body: "test"
-//     },
-//     createTime: "2024-12-12T15:51:56.916Z",
-//     updateTime: "2024-12-12T15:51:57.366Z",
-//     totalPrice: 0.0,
-//     pricingCategory: "service",
-//     currency: "USD",
-//     regionCode: "HK",
-//     bizType: "whatsapp"
-// }
 
     let message = {
         position: "outbound",
