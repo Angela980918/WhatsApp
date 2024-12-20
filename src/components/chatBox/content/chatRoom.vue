@@ -3,9 +3,9 @@
         <!-- 聊天框 -->
         <a-layout style="height: 100%; flex-direction: column;">
             <ImageView
-                    :imgUrl="imgUrl"
-                    :visiable="visiable"
-                    @handleChange="handleVisiable"
+                :imgUrl="imgUrl"
+                :visiable="visiable"
+                @handleChange="handleVisiable"
             />
             <!-- 头部：聊天标题或信息 -->
             <a-layout-header :style="headerStyle">
@@ -49,7 +49,9 @@
                          :class="item.position === 'inbound' ? ['message-content'] : ['message-content right']">
                         <!--                  <div style="max-width: 400px" :class="item.position === 'inbound' ? ['item'] : ['item', 'right']">-->
                         <!--                      <a-space size="middle" align="end">-->
-                        <a-avatar size="large" src="https://randomuser.me/api/portraits/women/7.jpg"/>
+                        <div style="display: flex;flex-direction: column-reverse;">
+                            <a-avatar style="margin-bottom: 10px;" size="large" src="https://randomuser.me/api/portraits/women/7.jpg"/>
+                        </div>
 
                         <div class="list-item-content">
                             <div v-if="item.type === 'text'">
@@ -79,7 +81,7 @@
                                     <a :href="item.link"
                                        download
                                        target="_blank"
-                                       style="display: flex; justify-content: center; font-size: 50px;width: 100%;padding: 5px; border-width: 1px; border-style: solid; border-radius: 10px; border-color: #0e0e0e0e;">
+                                       style="display: flex; justify-content: center; font-size: 50px;width: 100%;padding: 15px; border-width: 1px; border-style: solid; border-radius: 10px; border-color: #0e0e0e0e;">
 
                                         <FilePdfOutlined style="color: red; cursor: pointer;"/>
 
@@ -88,24 +90,24 @@
                                 </div>
                             </div>
 
-<!--                            <template #description>-->
-<!--                                &lt;!&ndash;                        <div style="display: flex;flex-direction: row;">&ndash;&gt;-->
-<!--                                <span>{{ item.time }}</span>-->
-<!--                                <span class="status-icon">-->
-<!--                                                  <div v-if="item.status === 'delivered'">-->
-<!--                                                    <CheckOutlined-->
-<!--                                                            style="padding-left: 12px;color: black;font-size: 12px"/>-->
-<!--                                                  </div>-->
-<!--                                                  <div v-else-if="item.status === 'read'">-->
-<!--                                                    <CheckOutlined-->
-<!--                                                            style="padding-left: 12px;color: green;font-size: 12px"/>-->
-<!--                                                  </div>-->
-<!--                                                  <div v-else-if="item.status === 'failed'">-->
-<!--                                                    <ExclamationCircleOutlined style="color: red"/>-->
-<!--                                                  </div>-->
-<!--                                                </span>-->
-<!--                                &lt;!&ndash;                        </div>&ndash;&gt;-->
-<!--                            </template>-->
+                            <!--                            <template #description>-->
+                            <!--                                &lt;!&ndash;                        <div style="display: flex;flex-direction: row;">&ndash;&gt;-->
+                            <!--                                <span>{{ item.time }}</span>-->
+                            <!--                                <span class="status-icon">-->
+                            <!--                                                  <div v-if="item.status === 'delivered'">-->
+                            <!--                                                    <CheckOutlined-->
+                            <!--                                                            style="padding-left: 12px;color: black;font-size: 12px"/>-->
+                            <!--                                                  </div>-->
+                            <!--                                                  <div v-else-if="item.status === 'read'">-->
+                            <!--                                                    <CheckOutlined-->
+                            <!--                                                            style="padding-left: 12px;color: green;font-size: 12px"/>-->
+                            <!--                                                  </div>-->
+                            <!--                                                  <div v-else-if="item.status === 'failed'">-->
+                            <!--                                                    <ExclamationCircleOutlined style="color: red"/>-->
+                            <!--                                                  </div>-->
+                            <!--                                                </span>-->
+                            <!--                                &lt;!&ndash;                        </div>&ndash;&gt;-->
+                            <!--                            </template>-->
                         </div>
                         <!--                      </a-space>-->
                         <!--                  </div>-->
@@ -269,6 +271,30 @@ const data: DataItem[] = ref([
         status: "delivered",
         type: 'document',
     },
+    {
+        position: 'inbound',
+        link: "https://cos.jackycode.cn/29700.jpg",
+        title: 'imagetest 4',
+        time: '2024-12/02 20:12:30',
+        status: "delivered",
+        type: 'image',
+    },
+    {
+        position: 'inbound',
+        link: "https://reloan-old.s3.ap-east-1.amazonaws.com/sign.mp4",
+        title: 'videotest 4',
+        time: '2024-12/02 20:12:30',
+        status: "delivered",
+        type: 'video',
+    },
+    {
+        position: 'inbound',
+        link: "https://cos.jackycode.cn/29700.jpg",
+        title: 'documenttest 4',
+        time: '2024-12/02 20:12:30',
+        status: "delivered",
+        type: 'document',
+    },
 ]);
 
 // const data = computed(() => chatStore.chatMessages);
@@ -422,7 +448,7 @@ onBeforeMount(async () => {
     border-radius: 0 8px 8px 8px;
     font-size: 16px;
     line-height: 22px;
-    max-width: 400px;
+    /* max-width: 400px; */
     display: flex;
 
 }
@@ -435,6 +461,11 @@ onBeforeMount(async () => {
     background: #ffffff;
     min-width: 200px;
     text-align: start;
+    margin-left: 10px;
+    span {
+        font-size: 22px;
+        margin-top: 10px;
+    }
 }
 
 </style>

@@ -48,7 +48,7 @@ import ChatBoxRightTips from "@/components/chatBox/right/chatBox-right-tips.vue"
 import {useCustomerStore} from "@/store/customerStore.js";
 import {PlusCircleOutlined} from "@ant-design/icons-vue";
 import {storeToRefs} from "pinia";
-import {computed, onMounted} from "vue";
+import {computed, onMounted, ref} from "vue";
 
 const activeKey = ref('1');
 const customerStore = useCustomerStore();
