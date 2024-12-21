@@ -9,3 +9,12 @@ export const getAllCustomer = () => {
         url: '/chat/getAllCustomerLatestChats?wabaId=449711484896804', method: 'GET'
     })
 }
+
+/**
+ * 查詢消息列表
+ */
+// export const getAllCustomer = () => {
+//     return whatsappInstance({
+//         url: '/chat/getAllCustomerLatestChats?wabaId=449711484896804', method: 'GET'
+//     })
+// }

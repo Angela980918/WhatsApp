@@ -13,10 +13,10 @@
         </template>
 
         <!--    客户列表    -->
-        <a-space :class="{ 'chat-box-left-item-active': customer.isActive }" @click="handleItemClick(customer.id, customer.phoneNumber)"
+        <a-space  @click="handleItemClick(customer.id, customer.phoneNumber)"
                  direction="vertical" style="width: 100%;" v-for="customer in props.assignedCustomersData"
                  :key="customer.id">
-          <chat-box-left-item :name="customer.nickname" :time="customer.lastSeen" :message="customer.message"
+          <chat-box-left-item :color="customer.color" :name="customer.name" :time="customer.time" :message="customer.message"
                               :badgeCount="customer.badgeCount"
                               :class="currentPhone == customer.phoneNumber?'chat-box-left-item-active':''"
 
@@ -37,7 +37,8 @@
         <a-space :class="{ 'chat-box-left-item-active': customer.isActive }" @click="handleItemClick(customer.id)"
                  direction="vertical" style="width: 100%;" v-for="(customer,index) in props.unassignedCustomersData"
                  :key="customer.id">
-          <chat-box-left-item :name="customer.name"
+          <chat-box-left-item :color="customer.color"
+                              :name="customer.name"
                               :time="customer.time" :message="customer.message"
                               :badgeCount="customer.badgeCount"
                               :class="currentCustomerId == customer.id?'chat-box-left-item-active':''"

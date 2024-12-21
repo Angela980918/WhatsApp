@@ -11,6 +11,7 @@ const onSearch = (searchValue: string) => {
 <template>
   <a-space direction="vertical" style="width: 100%;">
     <a-input-search
+        name="customerPhone"
         v-model:value="value"
         placeholder="客戶名字或手機號碼"
         @search="onSearch"
