@@ -207,14 +207,14 @@ const uploadTxt = () => {
   }
 }
 const handleChange = (value) => {
-  console.log('handleChange', props.type, value);
   if (props.type === 'search') {
     emits('handleChange', searchContents.value)
   } else if (props.type === 'input-text') {
     emits('handleChange', inputContents.value)
   } else if (props.type === 'upload-file') {
-    fileList.value.push(value);
-    // emits('handleChange', fileList.value)
+    console.log('handleChange', value)
+    fileList.value = [value]
+    emits('handleChange', fileList.value)
     return false;
   } else if (props.type === 'editor') {
     emits('handleChange', valueHtml.value)

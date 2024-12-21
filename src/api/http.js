@@ -13,8 +13,9 @@ const ycloudInstance = axios.create({
 });
 
 const whatsappInstance = axios.create({
-    baseURL: "https://whatsapi.jackycode.cn", // 根据环境变量设置基础URL
-    timeout: 5000, // 设置超时时间
+    // baseURL: "https://whatsapi.jackycode.cn", // 根据环境变量设置基础URL
+    baseURL: "http://localhost:3000", // 根据环境变量设置基础URL
+    timeout: 100000, // 设置超时时间
     headers: {
         'Content-Type': 'application/json',
         'accept': 'application/json'

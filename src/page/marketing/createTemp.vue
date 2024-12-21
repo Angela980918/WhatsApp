@@ -1,29 +1,33 @@
 <template>
   <div class="createContaianer">
     <div class="tempHeader">
-      <WASelect name="t_tempName" :require="true" direction="vertical" title="模板名稱" type="input-text" :maxTxt="512"
+      <WASelect :disabled="isDisable" name="t_tempName" :require="true" direction="vertical" title="模板名稱"
+                type="input-text" :maxTxt="512"
                 :inputContents="inputContents" @handleChange="nameChange"/>
-      <WASelect name="t_selectCategory" :require="true" direction="vertical" title="分類" type="select-common"
+      <WASelect :disabled="isDisable" name="t_selectCategory" :require="true" direction="vertical" title="分類"
+                type="select-common"
                 :select-item="selectCategory" :options="category" @handleChange="categoryChange"/>
     </div>
 
     <div class="tempContainer">
       <div class="contentLeft">
-        <WASelect name="t_selectLanguage"  :require="true" direction="vertical" title="語言" type="select-common"
+        <WASelect :disabled="isDisable" name="t_selectLanguage" :require="true" direction="vertical" title="語言"
+                  type="select-common"
                   :select-item="selectLanguage" :options="language" @handleChange="languageChange"/>
 
         <div class="Header">
-          <WASelect name="t_selectHeader"  :require="true" direction="vertical" title="頭部" type="select-common"
+          <WASelect name="t_selectHeader" :require="true" direction="vertical" title="頂部" type="select-common"
                     :select-item="selectHeader" :options="headers" @handleChange="headerChange"/>
 
           <div v-if="selectHeader.value === 'TEXT'">
-            <WASelect name="t_headerTxt" direction="vertical" :require="true" title="標題" type="input-text" :maxTxt="60"
+            <WASelect name="t_headerTxt" direction="vertical" :require="true" title="標題" type="input-text"
+                      :maxTxt="60"
                       :inputContents="headerTxt" @handleChange="headerTxtChange"/>
           </div>
 
           <div v-else-if="selectHeader.value === 'MEDIA'">
             <div>
-              <WASelect name="t_mediaValue" :require="true" direction="vertical" title="内容形式" type="select-common"
+              <WASelect name="t_mediaValue" :require="true" direction="vertical" title="附件類型" type="select-common"
                         :select-item="mediaValue" :options="mediaOptions" @handleChange="contentChange"/>
             </div>
 
@@ -33,7 +37,7 @@
             </div>
 
             <div v-else-if="mediaValue.value === 'VIDEO'">
-              <WASelect name="t_video"  :require="true" direction="horizontal" title="上傳視頻" type="upload-file"
+              <WASelect name="t_video" :require="true" direction="horizontal" title="上傳視頻" type="upload-file"
                         @handleChange="beforeUpdate" uploadType="video/*"/>
             </div>
 
@@ -43,7 +47,8 @@
             </div>
           </div>
 
-          <WASelect name="t_editor" :require="true" direction="vertical" title="内容" type="editor" :inputContents="valueHtml"
+          <WASelect name="t_editor" :require="true" direction="vertical" title="内容" type="editor"
+                    :inputContents="valueHtml"
                     @handleChange="htmlChange"/>
 
           <WASelect name="t_footerContent" direction="vertical" title="底部" type="input-text" :maxTxt="60"
@@ -65,12 +70,38 @@
               <div class="arrow"/>
               <div class="content">
                 <h6 class="contentHeader" v-if="selectHeader.value === 'TEXT'">{{ headerTxt }}</h6>
-                <a-image
-                    v-if="selectHeader.value === 'MEDIA' && mediaValue.value === 'IMAGE'"
-                    :height="180"
-                    width="100%"
-                    fallback="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMIAAADDCAYAAADQvc6UAAABRWlDQ1BJQ0MgUHJvZmlsZQAAKJFjYGASSSwoyGFhYGDIzSspCnJ3UoiIjFJgf8LAwSDCIMogwMCcmFxc4BgQ4ANUwgCjUcG3awyMIPqyLsis7PPOq3QdDFcvjV3jOD1boQVTPQrgSkktTgbSf4A4LbmgqISBgTEFyFYuLykAsTuAbJEioKOA7DkgdjqEvQHEToKwj4DVhAQ5A9k3gGyB5IxEoBmML4BsnSQk8XQkNtReEOBxcfXxUQg1Mjc0dyHgXNJBSWpFCYh2zi+oLMpMzyhRcASGUqqCZ16yno6CkYGRAQMDKMwhqj/fAIcloxgHQqxAjIHBEugw5sUIsSQpBobtQPdLciLEVJYzMPBHMDBsayhILEqEO4DxG0txmrERhM29nYGBddr//5/DGRjYNRkY/l7////39v///y4Dmn+LgeHANwDrkl1AuO+pmgAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAwqADAAQAAAABAAAAwwAAAAD9b/HnAAAHlklEQVR4Ae3dP3PTWBSGcbGzM6GCKqlIBRV0dHRJFarQ0eUT8LH4BnRU0NHR0UEFVdIlFRV7TzRksomPY8uykTk/zewQfKw/9znv4yvJynLv4uLiV2dBoDiBf4qP3/ARuCRABEFAoBEgghggQAQZQKAnYEaQBAQaASKIAQJEkAEEegJmBElAoBEgghggQAQZQKAnYEaQBAQaASKIAQJEkAEEegJmBElAoBEgghggQAQZQKAnYEaQBAQaASKIAQJEkAEEegJmBElAoBEgghggQAQZQKAnYEaQBAQaASKIAQJEkAEEegJmBElAoBEgghggQAQZQKAnYEaQBAQaASKIAQJEkAEEegJmBElAoBEgghggQAQZQKAnYEaQBAQaASKIAQJEkAEEegJmBElAoBEgghggQAQZQKAnYEaQBAQaASKIAQJEkAEEegJmBElAoBEgghggQAQZQKAnYEaQBAQaASKIAQJEkAEEegJmBElAoBEgghggQAQZQKAnYEaQBAQaASKIAQJEkAEEegJmBElAoBEgghggQAQZQKAnYEaQBAQaASKIAQJEkAEEegJmBElAoBEgghggQAQZQKAnYEaQBAQaASKIAQJEkAEEegJmBElAoBEgghggQAQZQKAnYEaQBAQaASKIAQJEkAEEegJmBElAoBEgghgg0Aj8i0JO4OzsrPv69Wv+hi2qPHr0qNvf39+iI97soRIh4f3z58/u7du3SXX7Xt7Z2enevHmzfQe+oSN2apSAPj09TSrb+XKI/f379+08+A0cNRE2ANkupk+ACNPvkSPcAAEibACyXUyfABGm3yNHuAECRNgAZLuYPgEirKlHu7u7XdyytGwHAd8jjNyng4OD7vnz51dbPT8/7z58+NB9+/bt6jU/TI+AGWHEnrx48eJ/EsSmHzx40L18+fLyzxF3ZVMjEyDCiEDjMYZZS5wiPXnyZFbJaxMhQIQRGzHvWR7XCyOCXsOmiDAi1HmPMMQjDpbpEiDCiL358eNHurW/5SnWdIBbXiDCiA38/Pnzrce2YyZ4//59F3ePLNMl4PbpiL2J0L979+7yDtHDhw8vtzzvdGnEXdvUigSIsCLAWavHp/+qM0BcXMd/q25n1vF57TYBp0a3mUzilePj4+7k5KSLb6gt6ydAhPUzXnoPR0dHl79WGTNCfBnn1uvSCJdegQhLI1vvCk+fPu2ePXt2tZOYEV6/fn31dz+shwAR1sP1cqvLntbEN9MxA9xcYjsxS1jWR4AIa2Ibzx0tc44fYX/16lV6NDFLXH+YL32jwiACRBiEbf5KcXoTIsQSpzXx4N28Ja4BQoK7rgXiydbHjx/P25TaQAJEGAguWy0+2Q8PD6/Ki4R8EVl+bzBOnZY95fq9rj9zAkTI2SxdidBHqG9+skdw43borCXO/ZcJdraPWdv22uIEiLA4q7nvvCug8WTqzQveOH26fodo7g6uFe/a17W3+nFBAkRYENRdb1vkkz1CH9cPsVy/jrhr27PqMYvENYNlHAIesRiBYwRy0V+8iXP8+/fvX11Mr7L7ECueb/r48eMqm7FuI2BGWDEG8cm+7G3NEOfmdcTQw4h9/55lhm7DekRYKQPZF2ArbXTAyu4kDYB2YxUzwg0gi/41ztHnfQG26HbGel/crVrm7tNY+/1btkOEAZ2M05r4FB7r9GbAIdxaZYrHdOsgJ/wCEQY0J74TmOKnbxxT9n3FgGGWWsVdowHtjt9Nnvf7yQM2aZU/TIAIAxrw6dOnAWtZZcoEnBpNuTuObWMEiLAx1HY0ZQJEmHJ3HNvGCBBhY6jtaMoEiJB0Z29vL6ls58vxPcO8/zfrdo5qvKO+d3Fx8Wu8zf1dW4p/cPzLly/dtv9Ts/EbcvGAHhHyfBIhZ6NSiIBTo0LNNtScABFyNiqFCBChULMNNSdAhJyNSiECRCjUbEPNCRAhZ6NSiAARCjXbUHMCRMjZqBQiQIRCzTbUnAARcjYqhQgQoVCzDTUnQIScjUohAkQo1GxDzQkQIWejUogAEQo121BzAkTI2agUIkCEQs021JwAEXI2KoUIEKFQsw01J0CEnI1KIQJEKNRsQ80JECFno1KIABEKNdtQcwJEyNmoFCJAhELNNtScABFyNiqFCBChULMNNSdAhJyNSiECRCjUbEPNCRAhZ6NSiAARCjXbUHMCRMjZqBQiQIRCzTbUnAARcjYqhQgQoVCzDTUnQIScjUohAkQo1GxDzQkQIWejUogAEQo121BzAkTI2agUIkCEQs021JwAEXI2KoUIEKFQsw01J0CEnI1KIQJEKNRsQ80JECFno1KIABEKNdtQcwJEyNmoFCJAhELNNtScABFyNiqFCBChULMNNSdAhJyNSiECRCjUbEPNCRAhZ6NSiAARCjXbUHMCRMjZqBQiQIRCzTbUnAARcjYqhQgQoVCzDTUnQIScjUohAkQo1GxDzQkQIWejUogAEQo121BzAkTI2agUIkCEQs021JwAEXI2KoUIEKFQsw01J0CEnI1KIQJEKNRsQ80JECFno1KIABEKNdtQcwJEyNmoFCJAhELNNtScABFyNiqFCBChULMNNSdAhJyNSiEC/wGgKKC4YMA4TAAAAABJRU5ErkJggg=="
-                />
+                <div class="mediaCenter" v-if="selectHeader.value === 'MEDIA'">
+                  <div v-if="mediaValue.value === 'IMAGE'">
+                    <a-flex v-if="fileUrl !== ''" justify="center" align="center" style="width: 100%; height: 130px">
+                      <a-image height="100%" width="100%" :src="fileUrl"></a-image>
+                    </a-flex>
+                    <a-flex style="width: 100%; height: 130px; background: rgb(215, 213, 223)" v-else justify="center"
+                            align="center">
+                      <FileImageOutlined style="font-size: 50px; color: #ffffff;"/>
+                    </a-flex>
+                  </div>
+                  <div v-else-if="mediaValue.value === 'VIDEO'">
+                    <a-flex v-if="fileUrl !== ''" justify="center" align="center" style="width: 100%; height: 130px">
+                      <iframe :src="fileUrl" style="width: 100%; height: 100%">
+                      </iframe>
+                    </a-flex>
+                    <a-flex style="width: 100%; height: 130px; background: rgb(215, 213, 223)" v-else justify="center"
+                            align="center">
+                      <VideoCameraOutlined style="font-size: 50px; color: #ffffff;"/>
+                    </a-flex>
+                  </div>
+                  <div v-else-if="mediaValue.value === 'DOCUMENT'">
+                    <a-flex v-if="fileUrl !== ''" justify="center" align="center" style="width: 100%; height: 130px">
+                      <iframe :src="fileUrl" v-if="fileUrl !== ''" style="width: 100%; height: 130px">
+                      </iframe>
+                    </a-flex>
+                    <a-flex style="width: 100%; height: 130px; background: rgb(215, 213, 223)" v-else justify="center"
+                            align="center">
+                      <FilePdfOutlined style="font-size: 50px; color: #ffffff;"/>
+                    </a-flex>
+                  </div>
+                </div>
+
                 <p class="contentBody" v-html="valueHtml"></p>
                 <p class="contentFooter">{{ footerContent }}</p>
               </div>
@@ -84,11 +115,13 @@
 </template>
 
 <script setup>
-import {onMounted, ref, watch} from "vue";
+import {onBeforeMount, onMounted, onUnmounted, ref} from "vue";
 import WASelect from "@/components/templates/WASelect.vue";
-import {templateApi} from "@/api/ycloud/index.js";
-import {useRoute, useRouter} from "vue-router";
-import {defineProps} from 'vue';
+import {useRouter} from "vue-router";
+import {message} from 'ant-design-vue';
+import {cosApi} from "@/api/whatsapp/index.js";
+import {FileImageOutlined, FilePdfOutlined, VideoCameraOutlined} from '@ant-design/icons-vue';
+import {useTempStore} from "@/store/useTempStore.js";
 
 const previewVisible = ref(false);
 const previewImage = ref('');
@@ -98,24 +131,28 @@ const handleCancel = () => {
   previewTitle.value = '';
 };
 
+const TempStore = useTempStore();
+
 const router = useRouter();
+
+// 禁用狀態
+const isDisable = ref(false)
 
 const selectCategory = ref({});
 const category = [
-  {value: 'Utility', lang: 'UTILITY'},
-  {value: 'Marketing', lang: 'MARKETING'},
-  {value: 'Authentication', lang: 'AUTHENTICATION'}
+  {label: '通用', value: 'UTILITY'},
+  {label: '營銷', value: 'MARKETING'},
+  {label: '驗證', value: 'AUTHENTICATION'}
 ];
 
 const selectLanguage = ref({});
 const language = [
-  {value: '簡體中文', lang: 'zh_CN'},
-  {value: '繁體中文', lang: 'zh_HK'},
-  {value: '英文', lang: 'en_US'},
+  {label: '簡體中文', value: 'zh_CN'},
+  {label: '繁體中文', value: 'zh_HK'},
+  {label: '英文', value: 'en_US'},
 ]
 
-const selectHeader = ref({
-});
+const selectHeader = ref({});
 const headers = [
   {label: '無', value: 'NONE'},
   {label: '文本', value: 'TEXT'},
@@ -132,23 +169,36 @@ const testUrl = ref("https://i.loli.net/2021/04/07/QgHvB7hlJyCnN8s.jpg")
 let inputContents = ref('');
 let headerTxt = ref('');
 let footerContent = ref('');
-const fileList = ref([
-  {
-    uid: '-4',
-    name: 'image.png',
-    status: 'done',
-    url: 'https://zos.alipayobjects.com/rmsportal/jkjgkEfvpUPVyRjUImniVslZfWPnJuuZ.png',
-  },
-]);
+const fileList = ref([]);
+
+const fileUrl = ref('');
+
 
 let valueHtml = ref('');
 const htmlChange = (value) => {
   valueHtml.value = value
 }
-const beforeUpdate = file => {
-  console.log('beforeUpdate',file)
-  fileList.value.push(file)
-  return false
+
+
+const key = 'updatable';
+const uploadContent = ref('文件上传中');
+const beforeUpdate = async file => {
+  // 消息处理
+  message.loading({content: () => uploadContent.value, key});  // 显示加载中的消息
+  try {
+    const response = await cosApi.uploadFile(file[0]);  // 上传文件
+    if (response.data.code === 200) {
+      fileUrl.value = response.data.result;  // 上传成功，保存图片链接
+      uploadContent.value = '文件上传成功';  // 更新上传状态
+      message.success({content: '文件上传成功', key, duration: 2});
+    } else {
+      uploadContent.value = '文件上传失败';  // 上传失败
+      message.error({content: '文件上传失败', key, duration: 2});
+    }
+  } catch (error) {
+    uploadContent.value = '文件上传失败';  // 异常处理
+    message.error({content: '文件上传失败', key, duration: 2});
+  }
 };
 
 const nameChange = (newValue) => {
@@ -180,6 +230,8 @@ const headerChange = (value) => {
 }
 
 const contentChange = (value) => {
+  // 清空上一次值
+  fileUrl.value = ''
   mediaOptions.map(item => {
     if (item.value === value) {
       console.log("item", item)
@@ -193,37 +245,49 @@ const headerTxtChange = (value) => {
 }
 
 
-
 const footerChange = (value) => {
   footerContent.value = value;
 }
 
 const checkData = () => {
-  if (selectLanguage.value === "") {
+
+  if (inputContents.value.toString().trim() === "") {
+    return "請填寫模板名稱"
+  }
+
+  if (Object.keys(selectCategory.value).length === 0) {
+    return "請選擇模板分類"
+  }
+
+  if (Object.keys(selectLanguage.value).length === 0) {
     return "請選擇模板語言"
   }
 
-  if (selectHeader.value === "None") {
-    return "請填寫模板頂部信息"
+  if (Object.keys(selectHeader.value).length === 0) {
+    return "請選擇模板頭部類型"
   }
 
-  if (mediaValue.value === "") {
-    return "請選擇模板頂部信息類型"
+  if (Object.keys(selectHeader.value).length !== 0) {
+    if (selectHeader.value.value === 'TEXT' && headerTxt.value.toString().trim() === "") {
+      return "文本類型下標題不能為空"
+    } else if (selectHeader.value.value === 'MEDIA') {
+      if (Object.keys(mediaValue.value).length === 0) {
+        return "請選擇内容形式"
+      } else if (fileList.value.length === 0 || fileUrl.value === '') {
+        return "請上传文件"
+      }
+    }
   }
 
-  if (selectHeader.value.value === 'Text' && inputContents.value === "") {
-    return "請填寫頂部信息"
+  if (valueHtml.value === `<p><br></p>`) {
+    return "請填寫模板內容"
   }
 
-  if (selectHeader.value.value === 'Media' && fileList.value.length === 0) {
-    return "請選擇文件"
+  if (footerContent.value.toString().trim() === "") {
+    return "請填寫模板底部"
   }
 
-  if (valueHtml.value === "") {
-    return "請填寫Body的內容"
-  }
-
-  return "";
+  return ''
 }
 
 const createComponent = () => {
@@ -259,11 +323,11 @@ const createComponent = () => {
 }
 
 const confirm = async () => {
-  // const message = checkData();
+  const errorMessage = checkData();
 
-  // if(message !== "") {
-  //     console.log("錯誤信息", message)
-  // }
+  if (errorMessage !== "") {
+    return message.error(errorMessage)
+  }
 
   let data = {
     name: inputContents.value,
@@ -272,16 +336,42 @@ const confirm = async () => {
     components: createComponent()
   }
   console.log("datadatadata", data)
-  const response = await templateApi.createTemplate(data)
-  if (response.status === 200) {
-    router.back();
-  }
+  // const response = await templateApi.createTemplate(data)
+  // if (response.status === 200) {
+  //   router.back();
+  // }
 }
 
 const cancel = () => {
   router.back();
 }
 
+onMounted(() => {
+  const createTempData = TempStore.createTempData
+  console.log('createTempData', createTempData)
+  if (createTempData.length !== 0) {
+    isDisable.value = true
+    inputContents.value = createTempData.name
+    selectCategory.value = category.find(item => item.value === createTempData.category).value
+    selectLanguage.value = language.find(item => item.value === createTempData.language).value
+
+    // 處理模板内容部分
+    let components = createTempData.components
+    // 頭部
+    let headerComponent = components.filter(item => item.type === "HEADER")
+    // if (headerComponent) {
+    //   console.log('headers', headers.find(item => item.value === headerComponent[0].format))
+    //   selectHeader.value = headers.find(item => item.value === headerComponent[0].format).value
+    //   if (headerComponent[0].format === 'TEXT') {
+    //   }
+    // }
+  }
+
+  onUnmounted(() => {
+    TempStore.resetCreateTempData()
+  })
+
+})
 </script>
 
 <style scoped>
