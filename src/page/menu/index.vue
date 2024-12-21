@@ -20,8 +20,9 @@
 import {useRoute, useRouter} from "vue-router";
 import BreadcrumbItem from '@/components/Breadcrumb.vue';
 import {computed, onMounted, ref} from "vue";
-import MenuItem from "../../components/MenuItem.vue";
+import MenuItem from "@/components/MenuItem.vue";
 import {useChatStore} from "@/store/chatStore";
+import wsconnect from "@/tools/wsconnect.js"
 
 const route = useRoute();
 const router = useRouter();
@@ -41,7 +42,7 @@ const selectedKeys = ref<string[]>(['/home']);
 const chatStore = useChatStore();
 
 onMounted(() => {
-  // wsconnect.createConnect();
+  wsconnect.createConnect();
 })
 </script>
 <style scoped>

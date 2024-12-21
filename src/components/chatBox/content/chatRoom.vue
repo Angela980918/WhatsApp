@@ -10,7 +10,7 @@
             <!-- 头部：聊天标题或信息 -->
             <a-layout-header :style="headerStyle">
                 <a-flex style="height: 100%" justify="space-between" align="center">
-                    <span>{{ currentCustomerInfo.nickname }}</span>
+                    <span>{{ currentCustomerInfo.name }}</span>
                     <a-space size="middle">
                         <a-tooltip placement="top">
                             <template #title>
@@ -85,12 +85,50 @@
                                             <span>{{ item.title }}</span>
                                         </div>
                                     </div>
+
+                                    <div v-else-if="item.type === 'template'" style="width: 100%">
+
+                                        <div class="content">
+                                            <div class="contentHeader" v-if="item.header != undefined">
+                                                <div v-if="item.header.format === 'TEXT'">
+                                                    <h6>{{item.header.content}}</h6>
+                                                </div>
+
+                                                <div v-else-if="item.header.format === 'IMAGE'">
+                                                    <img :src="item.header.content"
+                                                 style="object-fit: cover;min-height: 220px;max-height: 300px;max-width: 100%;cursor: pointer;"
+                                                 @click="handleVisiable(item.header.content)">
+                                                </div>
+
+                                                <div v-else-if="item.header.format === 'VIDEO'">
+                                                    <video ref="videoPlayer" width="100%" controls class="mt-2">
+                                                <source :src="item.header.content" type="video/mp4">
+                                            </video>
+                                                </div>
+
+                                                <div v-else-if="item.header.format === 'DOCUMENT'">
+                                                    <a :href="item.header.content"
+                                               download
+                                               target="_blank"
+                                               style="display: flex; justify-content: center; font-size: 50px;width: 100%;padding: 15px; border-width: 1px; border-style: solid; border-radius: 10px; border-color: #0e0e0e0e;">
+
+                                                <FilePdfOutlined style="color: red; cursor: pointer;"/>
+
+                                            </a>
+                                                </div>
+                                            </div>
+                                            <span class="contentBody">{{item.body.content}}</span>
+                                            <span class="contentFooter" v-if="item.footer != undefined">
+                                                {{ item.footer.content }}
+                                            </span>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
 
                             <div :class="item.position === 'inbound' ? ['message-footer'] : ['message-footer', 'message-footer-right']">
-                                <span>{{ item.time }}</span>
-                                <span class="status-icon">
+                                <span>{{ timeJS.formatTime(item.time) }}</span>
+                                <span class="status-icon" v-if="item.position === 'outbound'">
                                     <div v-if="item.status === 'delivered'">
                                         <CheckOutlined
                                             style="padding-left: 12px;padding-right: 12px;color: black;font-size: 14px"/>
@@ -145,6 +183,7 @@ import {
     LoadingOutlined
 } from '@ant-design/icons-vue';
 import ChatMessage from "@/components/chatBox/content/chatMessage.vue";
+import {timeJS} from '@/tools'
 
 import {useChatStore} from "@/store/chatStore";
 import ImageView from "./message/ImageView.vue";
@@ -195,109 +234,6 @@ interface DataItem {
     link: string
 }
 
-// const data: DataItem[] = ref([
-//     {
-//         position: 'inbound',
-//         title: 'Ant Design Title 1',
-//         time: '2024-12/02 20:12:30',
-//         type: 'text',
-//     },
-//     {
-//         position: 'inbound',
-//         title: 'Ant Design Title 2',
-//         time: '2024-12/02 20:12:30',
-//         type: 'text',
-//     },
-//     {
-//         position: 'outbound',
-//         title: 'Ant Design Title 3 Ant Design Title 3 Ant Design Title 3 Ant Design Title 3',
-//         time: '2024-12/02 20:12:30',
-//         status: "sent",
-//         type: 'text',
-//     },
-//     {
-//         position: 'outbound',
-//         title: 'Ant Design Title 4',
-//         time: '2024-12/02 20:12:30',
-//         status: "failed",
-//         type: 'text',
-//     },
-//     {
-//         position: 'inbound',
-//         title: 'Ant Design Title 2',
-//         time: '2024-12/02 20:12:30',
-//         type: 'text',
-//     },
-//     {
-//         position: 'outbound',
-//         title: 'Ant Design Title 2',
-//         time: '2024-12/02 20:12:30',
-//         status: "delivered",
-//         type: 'text',
-//     },
-//     {
-//         position: 'outbound',
-//         title: 'Ant Design Title 4',
-//         time: '2024-12/02 20:12:30',
-//         status: "read",
-//         type: 'text',
-//     },
-//     {
-//         position: 'outbound',
-//         title: 'Ant Design Title 4',
-//         time: '2024-12/02 20:12:30',
-//         status: "delivered",
-//         type: 'text',
-//     },
-//     {
-//         position: 'outbound',
-//         link: "https://cos.jackycode.cn/29700.jpg",
-//         title: 'imagetest 4',
-//         time: '2024-12/02 20:12:30',
-//         status: "delivered",
-//         type: 'image',
-//     },
-//     {
-//         position: 'outbound',
-//         link: "https://reloan-old.s3.ap-east-1.amazonaws.com/sign.mp4",
-//         title: 'videotest 4',
-//         time: '2024-12/02 20:12:30',
-//         status: "delivered",
-//         type: 'video',
-//     },
-//     {
-//         position: 'outbound',
-//         link: "https://cos.jackycode.cn/29700.jpg",
-//         title: 'documenttest 4',
-//         time: '2024-12/02 20:12:30',
-//         status: "delivered",
-//         type: 'document',
-//     },
-//     {
-//         position: 'inbound',
-//         link: "https://cos.jackycode.cn/29700.jpg",
-//         title: 'imagetest 4',
-//         time: '2024-12/02 20:12:30',
-//         status: "delivered",
-//         type: 'image',
-//     },
-//     {
-//         position: 'inbound',
-//         link: "https://reloan-old.s3.ap-east-1.amazonaws.com/sign.mp4",
-//         title: 'videotest 4',
-//         time: '2024-12/02 20:12:30',
-//         status: "delivered",
-//         type: 'video',
-//     },
-//     {
-//         position: 'inbound',
-//         link: "https://cos.jackycode.cn/29700.jpg",
-//         title: 'documenttest 4',
-//         time: '2024-12/02 20:12:30',
-//         status: "delivered",
-//         type: 'document',
-//     },
-// ]);
 
 const data = computed(() => {
     console.log("chatStore.chatMessages",chatStore.chatMessages)
@@ -496,5 +432,50 @@ onUpdated(async () => {
     margin-right: 58px;
     justify-content: end;
 }
+
+.content {
+          position: relative;
+          max-width: 350px;
+          /*max-height: 300px;*/
+          overflow: hidden;
+          background-color: rgb(255, 255, 255);
+          border-radius: 8px;
+          padding: 8px;
+          display: flex;
+          flex-direction: column;
+
+          .contentHeader {
+            margin: 0px 0px 4px;
+            font-size: 16px;
+            font-weight: 600;
+            line-height: 24px;
+            font-family: Roboto, Helvetica, Arial, sans-serif;
+            letter-spacing: 0.00938em;
+            word-break: break-word;
+            white-space: break-spaces;
+          }
+
+          .contentBody {
+            margin: 0;
+            font-size: 16px;
+            font-weight: 400;
+            font-family: Roboto, Helvetica, Arial, sans-serif;
+            letter-spacing: 0.01071em;
+            line-height: 24px;
+            word-break: break-word;
+            white-space: break-spaces;
+          }
+
+          .contentFooter {
+            margin: 4px 0 0 0;
+            font-size: 14px;
+            font-weight: 400;
+            line-height: 22px;
+            font-family: Roboto, Helvetica, Arial, sans-serif;
+            letter-spacing: 0.00938em;
+            color: rgb(162, 157, 174);
+            overflow-wrap: break-word;
+          }
+        }
 
 </style>

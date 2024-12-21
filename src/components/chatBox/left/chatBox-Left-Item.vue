@@ -2,7 +2,7 @@
   <a-row style="width: 100%;">
     <a-col style="align-self: center;padding: 10px 0" :span="5">
       <a-flex align="center" justify="center">
-        <a-avatar size="large" :style="{ backgroundColor: avatarColor }">{{ avatarText }}</a-avatar>
+        <a-avatar size="large" :style="{ backgroundColor: props.color }">{{ avatarText }}</a-avatar>
       </a-flex>
     </a-col>
     <a-col :span="18" style="align-self: center;">
@@ -46,20 +46,23 @@ const props = defineProps({
     type: Number,
     default: 0,
   },
+  color: {
+    type: String,
+    default: '#000'
+  }
 })
 
 // 随机颜色
-const generateRandomColor = () => {
-  const letters = '0123456789ABCDEF';
-  let color = '#';
-  for (let i = 0; i < 6; i++) {
-    color += letters[Math.floor(Math.random() * 16)];
-  }
-  return color;
-};
+// const generateRandomColor = () => {
+//   const letters = '0123456789ABCDEF';
+//   let color = '#';
+//   for (let i = 0; i < 6; i++) {
+//     color += letters[Math.floor(Math.random() * 16)];
+//   }
+//   return color;
+// };
 
-const avatarColor = generateRandomColor();
-
+// const avatarColor = generateRandomColor();
 // 时间处理格式
 const formattedTime = computed(() => {
   return timeJS.formatTime(props.time);

@@ -24,8 +24,7 @@ export const sendMessage = ({
     filterBlocked,
     enqueue = false,
 
-    name,
-    language
+    template
 }) => {
     const data = {
         from,
@@ -37,12 +36,7 @@ export const sendMessage = ({
         const dynamicKey = `${type}`
         // data.name = name,
         // data.language = language
-        data[dynamicKey] = {
-            name,
-            language: {
-                code: language
-            }
-        }
+        data[dynamicKey] = template
     }
 
     else if (type && message !== undefined) {

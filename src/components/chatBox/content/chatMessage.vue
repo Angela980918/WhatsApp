@@ -1,7 +1,8 @@
+
 <template>
     <div style="display: flex; height: 100%; flex-direction: column;">
-        <TemplateList ref="colTemp"  />
-        <a-textarea ref="textAreaRef"  v-model:value="contentTxt" placeholder="輸入內容" :rows="4" />
+        <TemplateList :currentPhone="currentPhone" ref="colTemp"  />
+        <a-textarea name="messageContent" ref="textAreaRef"  v-model:value="contentTxt" placeholder="輸入內容" :rows="4" />
         <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px;">
             <div>
                 <a-tooltip>
@@ -64,7 +65,7 @@ import {
 import data from "emoji-mart-vue-fast/data/all.json";
 import "emoji-mart-vue-fast/css/emoji-mart.css";
 import { Picker, EmojiIndex } from "emoji-mart-vue-fast/src";
-import * as ycloudApi from "../../../api/ycloud/index.js";
+import * as ycloudApi from "@/api/ycloud/index.js";
 import {computed, defineProps, ref} from "vue";
 import {useCustomerStore} from "@/store/customerStore.js";
 import {useChatStore} from "@/store/chatStore";

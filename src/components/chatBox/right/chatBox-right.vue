@@ -3,7 +3,7 @@
     <div class="headerCard">
       <a-avatar style="margin-right: 12px" size="large" src="https://randomuser.me/api/portraits/women/7.jpg"/>
       <div class="sampleInfo">
-        <span>關於 {{ currentCustomerInfo.nickname }}</span>
+        <span>關於 {{ currentCustomerInfo.name }}</span>
         <span>創建時間：2024/12/06</span>
       </div>
     </div>

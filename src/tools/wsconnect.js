@@ -132,34 +132,29 @@ const wsconnect = {
         connectWS.on(eventTypes.inbound_message, (value) => {
 
             let newValue = JSON.parse(value);
+            console.log("newValuenewValuenewValue",newValue);
+
             const jsonData = newValue.data;
             let whatsappMessage = "";
             whatsappMessage = jsonData.whatsappInboundMessage;
 
             const assignedCustomers = customerStore.getAssignedCustomers;
             const unAssignedCustomers = customerStore.getUnassignedCustomers;
-            console.log("whatsappMessage",whatsappMessage)
+
             // 如果拿出的消息是当前沟通用户，添加到当前记录
             if(chatStore.currentPhone === whatsappMessage.from) {
-                let message = this.handleMessage(whatsappMessage, 'inbound')
-                // let message = {
-                //     position: "inbound",
-                //     id: whatsappMessage.id,
-                //     type: whatsappMessage.type,
-                //     status: whatsappMessage.status
-                // }
-                // if(whatsappMessage.type === 'text') {
-                //     message.title = whatsappMessage.text.body;
-                // }else {
-                //     message.link = whatsappMessage[whatsappMessage.type].link
-                //     message.title = whatsappMessage[whatsappMessage.type].caption
-                // }
-                // message.time = whatsappMessage.sendTime;
-
+                let message = wsconnect.handleMessage(whatsappMessage, 'inbound')
+                console.log("messagemessagemessage",message)
                 // 為當前用戶添加未讀
                 assignedCustomers.map(item => {
-                    if(item.phone === whatsappMessage.from) {
+                    if(item.phoneNumber === whatsappMessage.from) {
                         item.badgeCount++;
+
+                        if(message.type === 'text') {
+                            item.message = message.title;
+                        }else {
+                            item.message = `${message.type} Message`
+                        }
                     }
                 })
 
@@ -172,7 +167,10 @@ const wsconnect = {
                 let inserOrNot = 0;
 
                 let message = "";
+                console.log("whatsappMessage.type",whatsappMessage.type,whatsappMessage.type==='text');
+
                 if(whatsappMessage.type === 'text') {
+                    console.log("whatsappMessage.type",whatsappMessage.text.body);
                     message = whatsappMessage.text.body;
                 }else {
                     // message.title = whatsappMessage[whatsappMessage.type].caption;
@@ -185,7 +183,10 @@ const wsconnect = {
                     if(item.phoneNumber === whatsappMessage.from) {
                         inserOrNot = 1;
                         item.time = whatsappMessage.sendTime;
-                        item.message = whatsappMessage.message;
+                        // item.message = message;
+
+                        item.message = message;
+
                         item.badgeCount++;
                     }
                 })
@@ -197,7 +198,9 @@ const wsconnect = {
                         if(item.phone === whatsappMessage.from) {
                             inserOrNot = 1;
                             item.time = whatsappMessage.sendTime;
-                            item.message = whatsappMessage.message;
+                            // item.message = message;
+
+                            item.message = message;
                             item.badgeCount++;
                         }
                     })
@@ -210,6 +213,9 @@ const wsconnect = {
                 // 插入新用戶
                 if(inserOrNot !== 1) {
                     const userName = whatsappMessage.customerProfile.name;
+
+
+
                     unAssignedCustomers.push({
                         phone: whatsappMessage.from,
                         name: userName,
@@ -228,12 +234,14 @@ const wsconnect = {
 
         // 本人發送消息
         connectWS.on(eventTypes.message, (value) => {
+
             let newValue = JSON.parse(value);
             const jsonData = newValue.data;
+            console.log("newValuenewValuenewValue", newValue);
             let whatsappMessage = "";
             whatsappMessage = jsonData.whatsappMessage;
 
-            let message = this.handleMessage(whatsappMessage, "outbound")
+            let message = wsconnect.handleMessage(whatsappMessage, "outbound")
 
             const type = whatsappMessage.status;
 
