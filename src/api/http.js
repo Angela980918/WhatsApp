@@ -12,6 +12,15 @@ const ycloudInstance = axios.create({
     },
 });
 
+const whatsappInstance = axios.create({
+    baseURL: "https://whatsapi.jackycode.cn", // 根据环境变量设置基础URL
+    timeout: 5000, // 设置超时时间
+    headers: {
+        'Content-Type': 'application/json',
+        'accept': 'application/json'
+    },
+});
+
 // 创建自定义 API 实例
 const customInstance = axios.create({
     baseURL: '127.0.01', // 根据环境变量设置基础URL
@@ -54,5 +63,6 @@ const errorInterceptor = error => {
 
 ycloudInstance.interceptors.request.use(responseInterceptor, errorInterceptor)
 customInstance.interceptors.request.use(responseInterceptor, errorInterceptor)
+whatsappInstance.interceptors.request.use(responseInterceptor, errorInterceptor)
 
-export { ycloudInstance, customInstance };
+export { ycloudInstance, customInstance, whatsappInstance };

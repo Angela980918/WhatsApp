@@ -22,7 +22,10 @@ export const sendMessage = ({
     externalId,
     filterUnsubscribed,
     filterBlocked,
-    enqueue = false
+    enqueue = false,
+
+    name,
+    language
 }) => {
     const data = {
         from,
@@ -30,7 +33,19 @@ export const sendMessage = ({
         type
     }
 
-    if (type && message !== undefined) {
+    if(type === "template") {
+        const dynamicKey = `${type}`
+        // data.name = name,
+        // data.language = language
+        data[dynamicKey] = {
+            name,
+            language: {
+                code: language
+            }
+        }
+    }
+
+    else if (type && message !== undefined) {
         const dynamicKey = `${type}`; // 动态变量名，例如 "text_message"
         data[dynamicKey] = { body: message }; // 动态赋值
     }
