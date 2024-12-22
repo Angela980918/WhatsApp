@@ -19,11 +19,18 @@ const marketingRoutes = [
                 component: () => import('@/page/marketing/templates.vue'),
                 meta: {title: 'WhatsApp模板', icon: 'OneToOneOutlined'},
             },
+            // {
+            //     // 创建模板
+            //     path: '/create-temp',
+            //     name: 'createTemp',
+            //     component: () => import('@/page/marketing/createTemp.vue'),
+            //     meta: {title: '創建模板', icon: 'OneToOneOutlined'},
+            // },
             {
                 // 创建模板
-                path: '/create-temp',
-                name: 'createTemp',
-                component: () => import('@/page/marketing/createTemp.vue'),
+                path: '/create-temp2',
+                name: 'createTemp2',
+                component: () => import('@/page/marketing/createTemp2.vue'),
                 meta: {title: '創建模板', icon: 'OneToOneOutlined'},
             },
         ],

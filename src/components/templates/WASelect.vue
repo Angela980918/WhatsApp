@@ -68,7 +68,7 @@
       <a-upload
           :max-count="1"
           :name="props.name"
-          v-model:file-list="selectItem"
+          v-model:file-list="fileItem"
           :before-upload="handleChange"
           :accept="uploadType"
           action="https://whatsapp.jackycode.cn/cos/upload"
@@ -101,8 +101,8 @@
   </div>
 </template>
 
-<script setup>
-import {defineProps, onBeforeUnmount, ref, shallowRef, watch} from 'vue';
+<script lang="ts" setup>
+import {defineProps, onBeforeUnmount, PropType, ref, shallowRef, watch} from 'vue';
 import {SearchOutlined, UploadOutlined} from '@ant-design/icons-vue';
 
 import '@wangeditor/editor/dist/css/style.css' // 引入 css
@@ -135,8 +135,12 @@ const props = defineProps({
     default: "search"
   },
   selectItem: {
-    type: Object || Array,
-    default: () => ({})
+    type: [String, Array] as PropType<string | any[]>,
+    default: ''
+  },
+  fileItem: {
+    type: Array,
+    default: []
   },
   searchContents: {
     type: String,
@@ -158,12 +162,14 @@ const props = defineProps({
     // 禁用狀態
     type: Boolean,
     default: false
-  }
+  },
 });
 const emits = defineEmits(['handleChange'])
 const selectItem = ref(props.selectItem);
-if (isObject(selectItem.value)) {
-  selectItem.value = []
+const fileItem = ref(props.fileItem);
+if (typeof fileItem.value === 'string') {
+  console.log('fileItem.value', fileItem.value)
+  fileItem.value = [fileItem.value]
 }
 const selectOptions = ref(props.options);
 const searchContents = ref(props.searchContents);
@@ -180,10 +186,6 @@ const toolbarConfig = {
 const editorConfig = {
   placeholder: '请输入内容...',
 }
-// editorConfig.onBlur = (editor) => {
-//     console.log("value::::", valueHtml.value);
-//     emits('handleChange', valueHtml.value)
-// }
 // 组件销毁时，也及时销毁编辑器
 onBeforeUnmount(() => {
   const editor = editorRef.value

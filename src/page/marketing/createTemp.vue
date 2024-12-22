@@ -19,29 +19,29 @@
           <WASelect name="t_selectHeader" :require="true" direction="vertical" title="頂部" type="select-common"
                     :select-item="selectHeader" :options="headers" @handleChange="headerChange"/>
 
-          <div v-if="selectHeader.value === 'TEXT'">
+          <div v-if="selectHeader === 'TEXT'">
             <WASelect name="t_headerTxt" direction="vertical" :require="true" title="標題" type="input-text"
                       :maxTxt="60"
                       :inputContents="headerTxt" @handleChange="headerTxtChange"/>
           </div>
 
-          <div v-else-if="selectHeader.value === 'MEDIA'">
+          <div v-else-if="selectHeader === 'MEDIA'">
             <div>
               <WASelect name="t_mediaValue" :require="true" direction="vertical" title="附件類型" type="select-common"
-                        :select-item="mediaValue" :options="mediaOptions" @handleChange="contentChange"/>
+                        :file-item="mediaValue" :options="mediaOptions" @handleChange="contentChange"/>
             </div>
 
-            <div v-if="mediaValue.value === 'IMAGE'">
+            <div v-if="mediaValue === 'IMAGE'">
               <WASelect name="t_upload" :require="true" direction="horizontal" title="上傳素材" type="upload-file"
                         @handleChange="beforeUpdate" uploadType="image/*"/>
             </div>
 
-            <div v-else-if="mediaValue.value === 'VIDEO'">
+            <div v-else-if="mediaValue === 'VIDEO'">
               <WASelect name="t_video" :require="true" direction="horizontal" title="上傳視頻" type="upload-file"
                         @handleChange="beforeUpdate" uploadType="video/*"/>
             </div>
 
-            <div v-else-if="mediaValue.value === 'DOCUMENT'">
+            <div v-else-if="mediaValue === 'DOCUMENT'">
               <WASelect name="t_pdf" :require="true" direction="horizontal" title="上傳文檔" type="upload-file"
                         @handleChange="beforeUpdate" uploadType=".pdf"/>
             </div>
@@ -69,9 +69,9 @@
             <div class="phoneCenter">
               <div class="arrow"/>
               <div class="content">
-                <h6 class="contentHeader" v-if="selectHeader.value === 'TEXT'">{{ headerTxt }}</h6>
-                <div class="mediaCenter" v-if="selectHeader.value === 'MEDIA'">
-                  <div v-if="mediaValue.value === 'IMAGE'">
+                <h6 class="contentHeader" v-if="selectHeader === 'TEXT'">{{ headerTxt }}</h6>
+                <div class="mediaCenter" v-if="selectHeader === 'MEDIA'">
+                  <div v-if="mediaValue === 'IMAGE'">
                     <a-flex v-if="fileUrl !== ''" justify="center" align="center" style="width: 100%; height: 130px">
                       <a-image height="100%" width="100%" :src="fileUrl"></a-image>
                     </a-flex>
@@ -80,7 +80,7 @@
                       <FileImageOutlined style="font-size: 50px; color: #ffffff;"/>
                     </a-flex>
                   </div>
-                  <div v-else-if="mediaValue.value === 'VIDEO'">
+                  <div v-else-if="mediaValue === 'VIDEO'">
                     <a-flex v-if="fileUrl !== ''" justify="center" align="center" style="width: 100%; height: 130px">
                       <iframe :src="fileUrl" style="width: 100%; height: 100%">
                       </iframe>
@@ -90,7 +90,7 @@
                       <VideoCameraOutlined style="font-size: 50px; color: #ffffff;"/>
                     </a-flex>
                   </div>
-                  <div v-else-if="mediaValue.value === 'DOCUMENT'">
+                  <div v-else-if="mediaValue === 'DOCUMENT'">
                     <a-flex v-if="fileUrl !== ''" justify="center" align="center" style="width: 100%; height: 130px">
                       <iframe :src="fileUrl" v-if="fileUrl !== ''" style="width: 100%; height: 130px">
                       </iframe>
@@ -138,28 +138,28 @@ const router = useRouter();
 // 禁用狀態
 const isDisable = ref(false)
 
-const selectCategory = ref({});
+const selectCategory = ref();
 const category = [
   {label: '通用', value: 'UTILITY'},
   {label: '營銷', value: 'MARKETING'},
   {label: '驗證', value: 'AUTHENTICATION'}
 ];
 
-const selectLanguage = ref({});
+const selectLanguage = ref();
 const language = [
   {label: '簡體中文', value: 'zh_CN'},
   {label: '繁體中文', value: 'zh_HK'},
   {label: '英文', value: 'en_US'},
 ]
 
-const selectHeader = ref({});
+  const selectHeader = ref();
 const headers = [
   {label: '無', value: 'NONE'},
   {label: '文本', value: 'TEXT'},
   {label: '媒體', value: 'MEDIA'}
 ]
 
-const mediaValue = ref({});
+const mediaValue = ref();
 const mediaOptions = [
   {label: '圖片', value: 'IMAGE'},
   {label: '視頻', value: 'VIDEO'},
@@ -224,7 +224,7 @@ const languageChange = (value) => {
 const headerChange = (value) => {
   headers.map(item => {
     if (item.value === value) {
-      selectHeader.value = item
+      selectHeader.value = value
     }
   })
 }
@@ -235,7 +235,7 @@ const contentChange = (value) => {
   mediaOptions.map(item => {
     if (item.value === value) {
       console.log("item", item)
-      mediaValue.value = item
+      mediaValue.value = item.value
     }
   })
 }
@@ -263,11 +263,11 @@ const checkData = () => {
     return "請選擇模板語言"
   }
 
-  if (Object.keys(selectHeader.value).length === 0) {
+  if (selectHeader.value === '') {
     return "請選擇模板頭部類型"
   }
 
-  if (Object.keys(selectHeader.value).length !== 0) {
+  if (selectHeader.value) {
     if (selectHeader.value.value === 'TEXT' && headerTxt.value.toString().trim() === "") {
       return "文本類型下標題不能為空"
     } else if (selectHeader.value.value === 'MEDIA') {
@@ -301,7 +301,7 @@ const createComponent = () => {
   let footer = {
     type: "FOOTER",
   }
-  if (selectHeader.value.value === 'TEXT') {
+  if (selectHeader.value === 'TEXT') {
     header.format = "TEXT";
     header.text = headerTxt.value;
   } else if (selectHeader.value) {
@@ -346,7 +346,7 @@ const cancel = () => {
   router.back();
 }
 
-onMounted(() => {
+onBeforeMount(() => {
   const createTempData = TempStore.createTempData
   console.log('createTempData', createTempData)
   if (createTempData.length !== 0) {
@@ -359,12 +359,12 @@ onMounted(() => {
     let components = createTempData.components
     // 頭部
     let headerComponent = components.filter(item => item.type === "HEADER")
-    // if (headerComponent) {
-    //   console.log('headers', headers.find(item => item.value === headerComponent[0].format))
-    //   selectHeader.value = headers.find(item => item.value === headerComponent[0].format).value
-    //   if (headerComponent[0].format === 'TEXT') {
-    //   }
-    // }
+    if (headerComponent) {
+      console.log('headers', headers.find(item => item.value === headerComponent[0].format))
+      selectHeader.value = headers.find(item => item.value === headerComponent[0].format).value
+      if (headerComponent[0].format === 'TEXT') {
+      }
+    }
   }
 
   onUnmounted(() => {

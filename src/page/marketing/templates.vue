@@ -35,9 +35,18 @@
           :columns="columns"
           :data-source="filterData"
           class="tempList"
+          :pagination="{ pageSize: 5, showSizeChanger: false }"
       >
         <template #bodyCell="{ column, record }">
-
+          <template v-if="column.key === 4">
+            <a-tag
+                :color="record.status === 'APPROVED' ? 'success' : record.status === 'REJECTED' ? 'error' : 'default'">
+              <template #icon>
+                <component :is="getTagIcon(record.status)"/>
+              </template>
+              {{ record.status }}
+            </a-tag>
+          </template>
           <template v-if="column.key === 5">
             <span>{{ formatDate(record.updateTime) }}</span>
           </template>
@@ -79,8 +88,33 @@ import {computed, onBeforeMount, reactive, ref} from 'vue';
 import WASelect from "@/components/templates/WASelect.vue";
 import {useRouter} from "vue-router";
 import {useTempStore} from '@/store/useTempStore'
+import {
+  CheckCircleOutlined,
+  SyncOutlined,
+  CloseCircleOutlined,
+  ExclamationCircleOutlined,
+  ClockCircleOutlined,
+  MinusCircleOutlined,
+} from '@ant-design/icons-vue';
 
 const router = useRouter();
+
+// icon、顔色變化
+const getTagColor = (status) =>{
+  if (status === 'APPROVED') return 'success';
+  if (status === 'REJECTED') return 'error';
+  return 'default';
+}
+const getTagIcon = (status) => {
+  const icons = {
+    APPROVED: CheckCircleOutlined,
+    REJECTED: CloseCircleOutlined,
+    PENDING: ExclamationCircleOutlined,
+    IN_PROGRESS: SyncOutlined,
+    WAITING: ClockCircleOutlined,
+  };
+  return icons[status] || MinusCircleOutlined;
+};
 
 type Key = string | number;
 
