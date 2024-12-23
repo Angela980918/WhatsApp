@@ -138,20 +138,20 @@ export const useCustomerStore = defineStore('customerStore', {
         ],
         // 未分配客户的模拟数据
         unassignedCustomers: [
-            {
-                id: 20,
-                name: 'Bob Brown',
-                time: '2024-12-03T10:00:00Z',
-                message: 'Have you reviewed the new project proposal?',
-                badgeCount: 1
-            },
-            {
-                id: 21,
-                name: 'Charlie Davis',
-                time: '2024-12-03T13:20:00Z',
-                message: 'Let me know your thoughts on the new design.',
-                badgeCount: 4
-            },
+            // {
+            //     id: 20,
+            //     name: 'Bob Brown',
+            //     time: '2024-12-03T10:00:00Z',
+            //     message: 'Have you reviewed the new project proposal?',
+            //     badgeCount: 1
+            // },
+            // {
+            //     id: 21,
+            //     name: 'Charlie Davis',
+            //     time: '2024-12-03T13:20:00Z',
+            //     message: 'Let me know your thoughts on the new design.',
+            //     badgeCount: 4
+            // },
         ],
         ws: null
     }),
@@ -164,7 +164,7 @@ export const useCustomerStore = defineStore('customerStore', {
                 ...customer,
                 isActive: index === 0, // 默认第一个客户 isActive 为 true
             }));
-            console.log("this.assignedCustomers", this.assignedCustomers);
+            // console.log("this.assignedCustomers", this.assignedCustomers);
 
         },
         setUnassignedCustomers(customers) {

@@ -83,6 +83,11 @@ onMounted(async () => {
                 phoneNumber: item.customerId,
                 color: color
             }
+
+            if(item.customerProfile != undefined) {
+                newMessage.name = item.customerProfile.name;
+            }
+
             if(item.messageList[0].type === 'text') {
                 newMessage.message = item.messageList[0].content.body;
             }else {
@@ -91,11 +96,11 @@ onMounted(async () => {
 
             customer.push(newMessage);
         });
-
+        console.log("customercustomer",customer)
         customerStore.setAssignedCustomers(customer);
-        handleSelectCustomer(customer[3].phoneNumber, customer[3]._id);
-        customerStore.setCurrentUserInfo(customer[3]);
-        loadLocalMessage(customer[3].phoneNumber, "+8613672967202")
+        handleSelectCustomer(customer[0].phoneNumber, customer[0]._id);
+        customerStore.setCurrentUserInfo(customer[0]);
+        loadLocalMessage(customer[0].phoneNumber, "+8613672967202")
     }
 
 })

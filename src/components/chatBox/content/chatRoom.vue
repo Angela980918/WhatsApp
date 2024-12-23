@@ -56,9 +56,9 @@
 
                                     <div v-else-if="item.type === 'image'">
                                         <div style="position: relative;max-width: 350px;max-height: 350px;overflow: hidden">
-                                            <img :src="item.link"
-                                                 style="object-fit: cover;min-height: 220px;max-width: 100%;cursor: pointer;"
-                                                 @click="handleVisiable(item.link)">
+                                            <a-image
+                                                :src="item.link"
+                                            />
                                         </div>
                                         <span>{{ item.title }}</span>
                                     </div>
@@ -95,9 +95,12 @@
                                                 </div>
 
                                                 <div v-else-if="item.header.format === 'IMAGE'">
-                                                    <img :src="item.header.content"
-                                                 style="object-fit: cover;min-height: 220px;max-height: 300px;max-width: 100%;cursor: pointer;"
-                                                 @click="handleVisiable(item.header.content)">
+<!--                                                    <img :src="item.header.content"-->
+<!--                                                 style="object-fit: cover;min-height: 220px;max-height: 300px;max-width: 100%;cursor: pointer;"-->
+<!--                                                 @click="handleVisiable(item.header.content)">-->
+                                                    <a-image
+                                                        :src="item.header.content"
+                                                    />
                                                 </div>
 
                                                 <div v-else-if="item.header.format === 'VIDEO'">
@@ -134,8 +137,8 @@
                                             style="padding-left: 12px;padding-right: 12px;color: black;font-size: 14px"/>
                                     </div>
                                     <div v-else-if="item.status === 'read'">
-                                        <CheckOutlined
-                                            style="padding-left: 12px;padding-right: 12px;color: green;font-size: 14px"/>
+                                        <CheckCircleTwoTone
+                                            style="padding-left: 12px;padding-right: 12px;color: green;font-size: 14px" two-tone-color="#52c41a"/>
                                     </div>
                                     <div v-else-if="item.status === 'failed'">
                                         <ExclamationCircleOutlined
@@ -180,7 +183,8 @@ import {
     ExclamationCircleOutlined,
     CheckOutlined,
     FilePdfOutlined,
-    LoadingOutlined
+    LoadingOutlined,
+    CheckCircleTwoTone
 } from '@ant-design/icons-vue';
 import ChatMessage from "@/components/chatBox/content/chatMessage.vue";
 import {timeJS} from '@/tools'
@@ -357,6 +361,11 @@ onMounted(async () => {
 onUpdated(async () => {
     scrollToBottom();
 });
+
+watch(() => data,async () => {
+    await nextTick(); // 确保 DOM 已经更新
+    scrollToBottom();
+}, {deep: true})
 
 </script>
 

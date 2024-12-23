@@ -4,7 +4,7 @@
     <a-tabs v-model:activeKey="activeKey">
       <a-tab-pane key="1">
         <template #tab>
-          <a-badge count="25">
+          <a-badge :count="assCount">
             <span style="padding-right: 20px">
               <EyeOutlined/>
               已分配
@@ -26,7 +26,7 @@
       </a-tab-pane>
       <a-tab-pane key="2" force-render>
         <template #tab>
-          <a-badge count="15">
+          <a-badge count="">
             <span style="padding-right: 20px">
               <EyeInvisibleOutlined/>
               未分配
@@ -52,7 +52,7 @@
 
 
 <script lang="ts" setup>
-import {computed, onMounted, ref, defineEmits} from "vue";
+import {computed, onMounted, ref, defineEmits, watch} from "vue";
 import {EyeInvisibleOutlined, EyeOutlined} from '@ant-design/icons-vue';
 import ChatBoxLeftItem from "@/components/chatBox/left/chatBox-Left-Item.vue";
 import {useCustomerStore} from "@/store/customerStore";
@@ -72,6 +72,9 @@ const chatStore = useChatStore();
 const currentCustomerId = computed(()=> customerStore.currentUserId)
 const currentPhone = computed(() => chatStore.currentPhone);
 
+const assCount = ref(0);
+const unAssCount = ref(0);
+
 const activeKey = ref('1');
 
 // 处理点击事件
@@ -90,6 +93,15 @@ onMounted(() => {
   // 设置已分配和未分配客户
   // customerStore.setAssignedCustomers(props.assignedCustomersData);
   // customerStore.setUnassignedCustomers(props.unassignedCustomersData);
+})
+
+watch(() => customerStore.assignedCustomers, (newValue) => {
+    console.log("newValuenewValue",newValue)
+    let count = 0;
+    newValue.map(item => {
+        count += item.badgeCount ?? 0
+    })
+    assCount.value = count;
 })
 
 </script>

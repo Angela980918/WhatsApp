@@ -6,8 +6,6 @@
     <template #bodyCell="{ column, record }">
       <template v-if="column.key === 'action'">
         <span>
-          <a-button :disabled="true">预览</a-button>
-          <a-divider type="vertical" />
           <a-button @click="sendTemplate(record)" type="primary">发送</a-button>
         </span>
       </template>
@@ -23,12 +21,14 @@ import * as ycloudApi from "@/api/ycloud/index.js";
 import {useChatStore} from "@/store/chatStore";
 import {useTempStore} from "@/store/useTempStore";
 const chatStore = useChatStore();
+const wabaId = computed(() => chatStore.wabaId);
 const template = useTempStore();
 const currentPhone = computed(() => chatStore.currentPhone);
 const templateList = computed(() => {
     let list = []
     template.rawTempData.map((item) => {
-        if(item.status === "APPROVED") {
+        console.log("item",item)
+        if(item.status === "APPROVED" && item.wabaId === wabaId.value) {
             let cloumn = {
                 key: item.key,
                 name: item.name,
@@ -60,9 +60,9 @@ const columns = [
         dataIndex: 'language',
     },
     {
-    title: 'Action',
-    key: 'action',
-  },
+        title: 'Action',
+        key: 'action',
+    },
 ];
 
 let open = ref(false);
