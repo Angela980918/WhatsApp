@@ -26,7 +26,7 @@
       </a-tab-pane>
       <a-tab-pane key="2" force-render>
         <template #tab>
-          <a-badge count="">
+          <a-badge :count="unAssCount">
             <span style="padding-right: 20px">
               <EyeInvisibleOutlined/>
               未分配
@@ -102,6 +102,15 @@ watch(() => customerStore.assignedCustomers, (newValue) => {
         count += item.badgeCount ?? 0
     })
     assCount.value = count;
+})
+
+watch(() => customerStore.unassignedCustomers, (newValue) => {
+    console.log("newValuenewValue",newValue)
+    let count = 0;
+    newValue.map(item => {
+        count += item.badgeCount ?? 0
+    })
+    unAssCount.value = count;
 })
 
 </script>
