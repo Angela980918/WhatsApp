@@ -8,11 +8,12 @@
           ref="formRef"
           :rules="rules"
           :model="formState"
+          :disabled="isPending"
       >
         <a-col span="16">
           <a-form-item label="模板名稱" name="tempName">
             <select-input v-model:value="formState.tempName" @handleChange="nameChange" type="input-text"
-                          :max-txt="512" :disabled="isDisable"></select-input>
+                          :max-txt="512" :disabled="isDisable || isPending"></select-input>
           </a-form-item>
         </a-col>
 
@@ -21,7 +22,7 @@
           <a-form-item label="分類" name="selectCategory">
             <select-input @handleChange="categoryChange" type="select-common"
                           v-model:value="formState.selectCategory"
-                          :disabled="isDisable"
+                          :disabled="isDisable || isPending"
                           :select-options="allCategory" :select-value="formState.selectCategory"></select-input>
           </a-form-item>
         </a-col>
@@ -30,7 +31,7 @@
           <a-form-item label="語言" name="selectLanguage">
             <select-input @handleChange="languageChange" type="select-common"
                           v-model:value="formState.selectLanguage"
-                          :disabled="isDisable"
+                          :disabled="isDisable || isPending"
                           :select-options="allLanguage" :select-value="formState.selectLanguage"></select-input>
           </a-form-item>
         </a-col>
@@ -39,6 +40,7 @@
           <a-form-item label="頂部" name="selectHeader">
             <select-input @handleChange="headerChange" type="select-common"
                           v-model:value="formState.selectHeader"
+                          :disabled="isPending"
                           :select-options="allHeader" :select-value="formState.selectHeader"></select-input>
           </a-form-item>
         </a-col>
@@ -48,6 +50,7 @@
           <a-col span="24" v-if="formState.selectHeader === 'TEXT'">
             <a-form-item label="文本標題" name="selectTitle">
               <select-input v-model:value="formState.titleContents" @handleChange="titleChange"
+                            :disabled="isPending"
                             type="input-text" :max-txt="60"></select-input>
             </a-form-item>
           </a-col>
@@ -56,6 +59,7 @@
             <a-form-item label="附件類型" name="selectMedia">
               <select-input v-model:value="formState.selectMedia" @handleChange="mediaChange"
                             type="select-common" :select-options="allMedia"
+                            :disabled="isPending"
                             :select-value="formState.selectMedia"></select-input>
             </a-form-item>
           </a-col>
@@ -64,6 +68,7 @@
         <a-col span="24" v-if="formState.selectMedia">
           <a-form-item label="上傳" name="selectFile">
             <select-input @handleChange="fileChange" :upload-type="formState.selectMedia" type="upload-file"
+                          :disabled="isPending"
                           v-model:value="formState.selectFile"></select-input>
           </a-form-item>
         </a-col>
@@ -71,6 +76,7 @@
         <a-col span="24">
           <a-form-item label="内容" name="editor">
             <select-input @handleChange="htmlChange" :inputContents="formState.editor"
+                          :disabled="isPending"
                           type="editor"></select-input>
           </a-form-item>
         </a-col>
@@ -78,6 +84,7 @@
         <a-col span="14">
           <a-form-item label="底部" name="footer">
             <select-input v-model:value="formState.footer" :select-value="formState.footer" @handleChange="footerChange"
+                          :disabled="isPending"
                           name="footer" type="input-text"
                           :max-txt="60"></select-input>
           </a-form-item>
@@ -86,7 +93,9 @@
         <a-col span="14">
           <a-form-item>
             <a-flex justify="center">
-              <a-button type="primary" @click.prevent="onSubmit">提交</a-button>
+              <a-tooltip :title="isPending?'审核中禁止重复修改':''" color="red">
+                <a-button type="primary" @click.prevent="onSubmit">提交</a-button>
+              </a-tooltip>
               <a-button style="margin-left: 10px" @click="resetFields">清空</a-button>
             </a-flex>
           </a-form-item>
@@ -152,7 +161,6 @@
 import {onBeforeMount, onUnmounted, reactive, ref, toRaw, UnwrapRef} from 'vue';
 import {FileImageOutlined, FilePdfOutlined, VideoCameraOutlined,} from '@ant-design/icons-vue';
 import {message, SelectProps} from 'ant-design-vue';
-import {cosApi} from "@/api/whatsapp/index.js";
 import SelectInput from "@/components/templates/SelectInput.vue";
 import type {Rule} from 'ant-design-vue/es/form';
 import {templateApi} from "@/api/ycloud/index.js";
@@ -201,28 +209,6 @@ const fileChange = (value) => {
 // 上傳的文件
 const key = 'uploadFile';
 const uploadContent = ref('文件上传中');
-
-// 文件上传
-const customUpload = async (options) => {
-  const {file, onSuccess, onError} = options;
-  message.loading({content: () => uploadContent.value, key});  // 显示加载中的消息
-  try {
-    const response = await cosApi.uploadFile(file);  // 上传文件
-    if (response.data.code === 200) {
-      formState.selectFile = response.data.result;  // 上传成功，保存图片链接
-      onSuccess(file);
-      uploadContent.value = '文件上传成功';  // 更新上传状态
-      message.success({content: '文件上传成功', key, duration: 2});
-    } else {
-      onError(new Error('上传失败'));
-      uploadContent.value = '文件上传失败';  // 上传失败
-      message.error({content: '文件上传失败', key, duration: 2});
-    }
-  } catch (error) {
-    uploadContent.value = '文件上传失败';  // 异常处理
-    message.error({content: '文件上传失败', key, duration: 2});
-  }
-}
 
 // 富文本
 const htmlChange = (value) => {
@@ -400,7 +386,8 @@ const focus = () => {
 };
 
 // 模板編輯原数据
-const isUpdated = ref(false) // 判斷是否為更新
+const isUpdated = ref(false) // 可更新状态
+const isPending = ref(false) // 审核状态
 const isDisable = ref(false)
 const TempStore = useTempStore()
 onBeforeMount(() => {
@@ -434,6 +421,12 @@ onBeforeMount(() => {
           break;
       }
     })
+
+    // 判斷是否為审核中
+    if (createTempData.status === 'PENDING') {
+      isPending.value = true
+      console.log('isPending.value', isPending.value)
+    }
   }
 })
 
