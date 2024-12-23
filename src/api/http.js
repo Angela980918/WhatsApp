@@ -4,7 +4,7 @@ import { message } from 'ant-design-vue';
 // 创建 Ycloud API 实例
 const ycloudInstance = axios.create({
     baseURL: "https://api.ycloud.com/v2", // 根据环境变量设置基础URL
-    timeout: 5000, // 设置超时时间
+    timeout: 100000, // 设置超时时间
     headers: {
         'Content-Type': 'application/json',
         'accept': 'application/json',

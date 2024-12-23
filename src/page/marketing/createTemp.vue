@@ -124,7 +124,6 @@ import {FileImageOutlined, FilePdfOutlined, VideoCameraOutlined} from '@ant-desi
 import {useTempStore} from "@/store/useTempStore.js";
 
 const previewVisible = ref(false);
-const previewImage = ref('');
 const previewTitle = ref('');
 const handleCancel = () => {
   previewVisible.value = false;
@@ -366,11 +365,10 @@ onBeforeMount(() => {
       }
     }
   }
+})
 
-  onUnmounted(() => {
-    TempStore.resetCreateTempData()
-  })
-
+onUnmounted(() => {
+  TempStore.resetCreateTempData()
 })
 </script>
 

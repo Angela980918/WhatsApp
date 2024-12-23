@@ -1,6 +1,7 @@
 <template>
   <template v-if="props.type === 'input-text'">
-    <a-input :maxlength="props.maxTxt" showCount v-model:value="inputContents" @change="handleChange"></a-input>
+    <a-input :disabled="props.disabled" :maxlength="props.maxTxt" showCount v-model:value="inputContents"
+             @change="handleChange"></a-input>
   </template>
 
   <template v-else-if="props.type === 'select-common'">
@@ -50,12 +51,13 @@
 </template>
 
 <script setup>
-import {ref, defineEmits, defineProps, onBeforeUnmount, shallowRef} from "vue";
+import {defineEmits, defineProps, onBeforeMount, onBeforeUnmount, ref, shallowRef, watch} from "vue";
 import '@wangeditor/editor/dist/css/style.css' // 引入 css
 import {Editor, Toolbar} from '@wangeditor/editor-for-vue'
 import {UploadOutlined} from "@ant-design/icons-vue";
 import {message} from 'ant-design-vue';
 import {cosApi} from "@/api/whatsapp/index.js";
+import {useTempStore} from "@/store/useTempStore.js";
 
 
 const props = defineProps({
@@ -119,16 +121,16 @@ const props = defineProps({
 const inputContents = ref(props.selectValue);
 const emits = defineEmits(['handleChange'])
 const handleChange = (value) => {
-  console.log('handleChange', props.type, value);
+  // console.log('handleChange', props.type, value);
   const changeHandlers = {
     'input-text': () => emits('handleChange', inputContents.value),
     'select-common': () => emits('handleChange', value),
     'upload-file': () => {
-      console.log('handleChange - upload-file', value);
+      // console.log('handleChange - upload-file', value);
       emits('handleChange', fileUrl.value);
     },
     'editor': () => {
-      console.log('handleChange - editor',valueHtml.value)
+      // console.log('handleChange - editor', valueHtml.value)
       emits('handleChange', valueHtml.value)
     }
   };
@@ -144,7 +146,7 @@ const uploadContent = ref('文件上传中');
 // 文件上传
 const customUpload = async (options) => {
   const {file, onSuccess, onError} = options;
-  console.log('customUpload', file);
+  // console.log('customUpload', file);
   message.loading({content: () => uploadContent.value, key});  // 显示加载中的消息
   try {
     const response = await cosApi.uploadFile(file);  // 上传文件
@@ -186,6 +188,10 @@ const uploadTxt = (uploadType) => {
 // 富文本编辑器配置
 const editorRef = shallowRef();
 const valueHtml = inputContents.value === '' ? ref('<p>請輸入內容</p>') : ref(props.inputContents)
+watch(() => props.inputContents, (newVal) => {
+  console.log(newVal)
+  valueHtml.value = newVal || '<p>請輸入內容</p>';
+});
 const toolbarConfig = {
   toolbarKeys: ['bold', 'italic', 'emotion'], // 仅显示加粗、斜体和表情菜单
 }
@@ -202,6 +208,17 @@ onBeforeUnmount(() => {
   editor.destroy()
 })
 
+const TempStore = useTempStore()
+onBeforeMount(() => {
+  if (TempStore.createTempData && TempStore.createTempData.components) {
+    const bodyComponent = TempStore.createTempData.components.find(
+        (component) => component.type === 'BODY'
+    );
+    if (bodyComponent) {
+      valueHtml.value = bodyComponent.text;
+    }
+  }
+})
 
 </script>
 

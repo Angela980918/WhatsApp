@@ -12,7 +12,7 @@
         <a-col span="16">
           <a-form-item label="模板名稱" name="tempName">
             <select-input v-model:value="formState.tempName" @handleChange="nameChange" type="input-text"
-                          :max-txt="512"></select-input>
+                          :max-txt="512" :disabled="isDisable"></select-input>
           </a-form-item>
         </a-col>
 
@@ -21,6 +21,7 @@
           <a-form-item label="分類" name="selectCategory">
             <select-input @handleChange="categoryChange" type="select-common"
                           v-model:value="formState.selectCategory"
+                          :disabled="isDisable"
                           :select-options="allCategory" :select-value="formState.selectCategory"></select-input>
           </a-form-item>
         </a-col>
@@ -29,6 +30,7 @@
           <a-form-item label="語言" name="selectLanguage">
             <select-input @handleChange="languageChange" type="select-common"
                           v-model:value="formState.selectLanguage"
+                          :disabled="isDisable"
                           :select-options="allLanguage" :select-value="formState.selectLanguage"></select-input>
           </a-form-item>
         </a-col>
@@ -147,18 +149,15 @@
 
 </template>
 <script lang="ts" setup>
-import {ref, reactive, toRaw} from 'vue';
-import {
-  FileImageOutlined,
-  FilePdfOutlined,
-  VideoCameraOutlined,
-} from '@ant-design/icons-vue';
-import {SelectProps, message} from 'ant-design-vue';
+import {onBeforeMount, onUnmounted, reactive, ref, toRaw, UnwrapRef} from 'vue';
+import {FileImageOutlined, FilePdfOutlined, VideoCameraOutlined,} from '@ant-design/icons-vue';
+import {message, SelectProps} from 'ant-design-vue';
 import {cosApi} from "@/api/whatsapp/index.js";
 import SelectInput from "@/components/templates/SelectInput.vue";
 import type {Rule} from 'ant-design-vue/es/form';
-import type {UnwrapRef} from 'vue';
 import {templateApi} from "@/api/ycloud/index.js";
+import {useTempStore} from "@/store/useTempStore.js";
+import {categoryMap, headerMap, languageMap, mediaMap} from "@/map/template"
 
 const labelCol = {style: {width: '100px'}};
 
@@ -168,31 +167,19 @@ const nameChange = (value) => {
 }
 
 // 分類
-const allCategory = ref<SelectProps['options']>([
-  {label: '通用', value: 'UTILITY'},
-  {label: '營銷', value: 'MARKETING'},
-  {label: '認證', value: 'AUTHENTICATION'}
-]);
+const allCategory = ref<SelectProps['options']>(categoryMap);
 const categoryChange = (value) => {
   formState.selectCategory = value;
 }
 
 // 語言
-const allLanguage = ref<SelectProps['options']>([
-  {label: '簡體中文', value: 'zh_CN'},
-  {label: '繁體中文', value: 'zh_HK'},
-  {label: '英文', value: 'en_US'},
-]);
+const allLanguage = ref<SelectProps['options']>(languageMap);
 const languageChange = (value) => {
   formState.selectLanguage = value;
 }
 
 // 頂部類型
-const allHeader = ref<SelectProps['options']>([
-  {label: '無', value: 'NONE'},
-  {label: '文本', value: 'TEXT'},
-  {label: '媒體', value: 'MEDIA'}
-]);
+const allHeader = ref<SelectProps['options']>(headerMap);
 const headerChange = (value) => {
   formState.selectHeader = value;
 }
@@ -203,11 +190,7 @@ const titleChange = (value) => {
 }
 
 // 媒體類型
-const allMedia = ref<SelectProps['options']>([
-  {label: '圖片', value: 'IMAGE'},
-  {label: '影片', value: 'VIDEO'},
-  {label: '文檔', value: 'DOCUMENT'}
-]);
+const allMedia = ref<SelectProps['options']>(mediaMap);
 const mediaChange = (value) => {
   formState.selectMedia = value;
 }
@@ -280,6 +263,11 @@ const formState: UnwrapRef<FormState> = reactive({
 const rules: Record<string, Rule[]> = {
   tempName: [
     {required: true, message: '模板名稱不能為空', trigger: 'blur'},
+    {
+      pattern: /^[a-z0-9_]{1,512}$/,
+      message: '模板名稱只能包含小寫字母和數字，且長度為1到512位',
+      trigger: 'blur'
+    }
   ],
   selectCategory: [
     {required: true, message: '分類不能為空', trigger: 'blur'},
@@ -303,68 +291,43 @@ const rules: Record<string, Rule[]> = {
     {required: true, message: '請輸入内容', trigger: 'blur'},
   ],
   footer: [
-    {required: true, message: '請輸入底部', trigger: 'blur'},
+    {required: false, message: '請輸入底部', trigger: 'blur'},
   ],
 };
 
 // 提交
 const submitKey = 'submit';
 const submitContent = ref('模板數據校驗中');
-const onSubmit = () => {
+const onSubmit = async () => {
   message.loading({content: submitContent.value, key: submitKey, duration: 1});  // 显示加载中的消息
 
   formRef.value
       .validate()
-      .then(() => {
+      .then(async () => {
         submitContent.value = '模板數據提交中';
         message.loading({content: submitContent.value, key: submitKey, duration: 2});  // 显示加载中的消息
-        console.log('values', formState, toRaw(formState));
-        const formData = {};
+        // console.log('values', formState, toRaw(formState));
         const rawFormState = toRaw(formState);
-        Object.keys(rawFormState).forEach(key => {
-          switch(key) {
-            case 'tempName':
-              formData.name = rawFormState.tempName;  // 模板名称
-              break;
-            case 'selectLanguage':
-              formData.language = rawFormState.selectLanguage;  // 语言
-              break;
-            case 'selectCategory':
-              formData.category = rawFormState.selectCategory;  // 类别
-              break;
-            case 'editor':
-              formData.components = formData.components || [];
-              formData.components.push({ type: 'BODY', text: rawFormState.editor });  // 内容部分
-              break;
-            case 'footer':
-              formData.components = formData.components || [];
-              formData.components.push({ type: 'FOOTER', text: rawFormState.footer });  // 页脚部分
-              break;
-            case 'selectHeader':
-              formData.components = formData.components || [];
-              formData.components.push({ type: 'HEADER', text: rawFormState.selectHeader, format: 'TEXT' });  // 头部部分
-              break;
-            case 'selectFile':
-              formData.components = formData.components || [];
-              formData.components.push({ type: 'HEADER', format: rawFormState.selectMedia });
-              formData.components.push({ example: { header_url: rawFormState.selectFile}});
-              break;
-              // 其他字段处理
-            default:
-              break;
+        // console.log('rawFormState', rawFormState);
+
+        const reqData = processFormData(rawFormState);
+        let response: any;
+        try {
+          if (isUpdated.value) {
+            response = await templateApi.editTemplate(reqData);
+          } else {
+            response = await templateApi.createTemplate(reqData);
           }
-
-        })
-
-        const response = templateApi.createTemplate({
-              name: formState.tempName,
-              language: formState.selectLanguage,
-              category: formState.selectCategory,
-
-            }
-        )
-        // 處理數據調用接口
-        message.success({content: '模板數據提交成功', key: submitKey, duration: 2});
+          console.log('接口返回數據:', response); // 打印返回數據
+          message.success({content: '模板數據提交成功', key: submitKey, duration: 2});
+        } catch (error) {
+          // console.log('error', error);
+          message.error({
+            content: error.message + ' \n ' + error.response.data.error.message || '模板數據提交失敗',
+            key: submitKey,
+            duration: 2
+          });
+        }
       })
       .catch(error => {
         error.errorFields.forEach((item, index) => {
@@ -372,16 +335,111 @@ const onSubmit = () => {
         })
       });
 }
+
+// 表單請求體轉換
+const processFormData = (rwaData) => {
+  const components = []
+  if (rwaData.selectHeader) {
+    if (rwaData.selectHeader === 'TEXT') {
+      components.push({
+        text: rwaData.titleContents,
+        format: 'TEXT',
+        type: 'HEADER',
+      })
+    } else if (rwaData.selectHeader === 'MEDIA') {
+      components.push({
+        format: rwaData.selectMedia,
+        type: 'HEADER',
+        example: {
+          header_url: [
+            rwaData.selectFile
+          ]
+        },
+      })
+    }
+  }
+
+  if (rwaData.footer) {
+    components.push({
+      text: rwaData.footer,
+      type: 'FOOTER',
+    })
+  }
+
+  components.push({
+    type: 'BODY',
+    text: rwaData.editor
+  });
+
+  return {
+    category: rwaData.selectCategory, // 类别
+    name: rwaData.tempName, // 模板名称
+    language: rwaData.selectLanguage, // 语言
+    components, // 动态组件数组
+  };
+}
+
 // 重置表單的邏輯
 const resetFields = () => {
-  console.log('Reset button clicked');
   // 清空表單或重置數據邏輯
+  if (!isUpdated.value) {
+    formRef.value.resetFields();
+  } else {
+    formState.selectHeader = ''
+    formState.titleContents = ''
+    formState.selectMedia = ''
+    formState.selectFile = ''
+    formState.editor = ''
+    formState.footer = ''
+  }
 }
 
 
 const focus = () => {
   console.log('focus');
 };
+
+// 模板編輯原数据
+const isUpdated = ref(false) // 判斷是否為更新
+const isDisable = ref(false)
+const TempStore = useTempStore()
+onBeforeMount(() => {
+  const createTempData = TempStore.createTempData
+  // console.log('createTempData', createTempData)
+  if (createTempData.length !== 0) {
+    isUpdated.value = true
+    isDisable.value = true
+    formState.tempName = createTempData.name
+    formState.selectCategory = createTempData.category
+    formState.selectLanguage = createTempData.language
+
+    // 處理模板内容部分
+    createTempData.components.forEach(component => {
+      switch (component.type) {
+        case 'HEADER':
+          if (component.format === 'TEXT') {
+            formState.selectHeader = component.format
+            formState.titleContents = component.text
+          } else {
+            formState.selectHeader = 'MEDIA'
+            formState.selectMedia = component.format
+            formState.selectFile = component.example.header_url[0]
+          }
+          break;
+        case 'FOOTER':
+          formState.footer = component.text
+          break;
+        default:
+          console.warn(`Unhandled component type: ${component.type}`);
+          break;
+      }
+    })
+  }
+})
+
+onUnmounted(() => {
+  TempStore.resetCreateTempData()
+})
 
 </script>
 

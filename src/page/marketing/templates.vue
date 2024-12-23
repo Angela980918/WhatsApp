@@ -8,10 +8,10 @@
                 @handleChange="nameChange"/>
 
       <WASelect direction="vertical" title="Category" type="select-multiple" :select-item="selectCategory"
-                :options="category" @handleChange="categoryChange"/>
+                :options="allCategory" @handleChange="categoryChange"/>
 
       <WASelect direction="vertical" title="Language" type="select-multiple" :select-item="selectLanguage"
-                :options="language" @handleChange="langChange"/>
+                :options="allLanguage" @handleChange="langChange"/>
 
       <WASelect direction="vertical" title="Status" type="select-multiple" :select-item="selectStatus"
                 :options="tempStatus" @handleChange="statusChange"/>
@@ -38,13 +38,19 @@
           :pagination="{ pageSize: 5, showSizeChanger: false }"
       >
         <template #bodyCell="{ column, record }">
+          <template v-if="column.key === 2">
+            {{ getCategoryLabel(record.category) }}
+          </template>
+          <template v-if="column.key === 3">
+              {{ getLangLabel(record.language) }}
+          </template>
           <template v-if="column.key === 4">
             <a-tag
                 :color="record.status === 'APPROVED' ? 'success' : record.status === 'REJECTED' ? 'error' : 'default'">
               <template #icon>
                 <component :is="getTagIcon(record.status)"/>
               </template>
-              {{ record.status }}
+              {{ getStatusLabel(record.status) }}
             </a-tag>
           </template>
           <template v-if="column.key === 5">
@@ -90,17 +96,19 @@ import {useRouter} from "vue-router";
 import {useTempStore} from '@/store/useTempStore'
 import {
   CheckCircleOutlined,
-  SyncOutlined,
+  ClockCircleOutlined,
   CloseCircleOutlined,
   ExclamationCircleOutlined,
-  ClockCircleOutlined,
   MinusCircleOutlined,
+  SyncOutlined,
 } from '@ant-design/icons-vue';
+import {SelectProps} from "ant-design-vue";
+import {categoryMap, languageMap, statusMap} from '@/map/template';
 
 const router = useRouter();
 
 // icon、顔色變化
-const getTagColor = (status) =>{
+const getTagColor = (status) => {
   if (status === 'APPROVED') return 'success';
   if (status === 'REJECTED') return 'error';
   return 'default';
@@ -179,39 +187,17 @@ const searchContents = ref('');
 
 // 種類
 const selectCategory = ref([]);
-const category = [
-  {value: 'Utility', lang: 'UTILITY'},
-  {value: 'Marketing', lang: 'MARKETING'},
-  {value: 'Authentication', lang: 'AUTHENTICATION'}
-];
+const allCategory = ref<SelectProps['options']>(categoryMap);
 
 // 語言
 const selectLanguage = ref([]);
-const language = [
-  {value: '簡體中文', lang: 'zh_CN'},
-  {value: '繁體中文', lang: 'zh_HK'},
-  {value: '英文', lang: 'en_US'},
-]
+const allLanguage = ref<SelectProps['options']>(languageMap);
+
 
 // 狀態
 const selectStatus = ref([]);
-const tempStatus = [
-  {value: 'Active - Quality pending'},
-  {value: 'Active - High quality'},
-  {value: 'Active - Medium quality'},
-  {value: 'Active - Low quality'},
-  {value: 'In review', lang: "IN REVIEW"},
-  {value: 'Rejected', lang: "REJECTED"},
-  {value: 'Paused', lang: "PAUSED"},
-  {value: 'Disabled', lang: "DISABLED"},
-]
+const tempStatus = ref<SelectProps['options']>(statusMap);
 
-// 創建方式
-// const selectCreator = ref('');
-// const creators = [
-//     { value: 'All' },
-//     { value: 'API' }
-// ]
 
 const state = reactive<{
   selectedRowKeys: Key[];
@@ -260,7 +246,7 @@ const nameChange = (value) => {
 const categoryChange = (value) => {
   selectCategory.value = [];
   for (let i in value) {
-    category.map(item => {
+    allCategory.value.map(item => {
       if (item.value === value[i]) {
         selectCategory.value.push(item)
       }
@@ -273,7 +259,7 @@ const categoryChange = (value) => {
 const langChange = (value) => {
   selectLanguage.value = [];
   for (let i in value) {
-    language.map(item => {
+    allLanguage.value.map(item => {
       if (item.value === value[i]) {
         selectLanguage.value.push(item)
       }
@@ -285,13 +271,12 @@ const langChange = (value) => {
 const statusChange = (value) => {
   selectStatus.value = [];
   for (let i in value) {
-    tempStatus.map(item => {
+    tempStatus.value.map(item => {
       if (item.value === value[i]) {
         selectStatus.value.push(item)
       }
     })
   }
-
   dataFilter();
 }
 
@@ -308,7 +293,7 @@ const dataFilter = () => {
     let selectFilter = [];
     for (let i in selectCategory.value) {
       let result = [];
-      result = newFilter.filter(item => item.category === selectCategory.value[i].lang)
+      result = newFilter.filter(item => item.category === selectCategory.value[i].value)
       selectFilter = [...selectFilter, ...result];
     }
     newFilter = selectFilter;
@@ -319,7 +304,7 @@ const dataFilter = () => {
     for (let i in selectLanguage.value) {
       let result = [];
 
-      result = newFilter.filter(item => item.language === selectLanguage.value[i].lang);
+      result = newFilter.filter(item => item.language === selectLanguage.value[i].value);
       console.log("result", result)
       selectFilter = [...selectFilter, ...result];
 
@@ -331,7 +316,7 @@ const dataFilter = () => {
     let selectFilter = [];
     for (let i in selectStatus.value) {
       let result = [];
-      result = newFilter.filter(item => item.status === selectStatus.value[i].lang)
+      result = newFilter.filter(item => item.status === selectStatus.value[i].value)
       selectFilter = [...selectFilter, ...result];
     }
     newFilter = selectFilter;
@@ -340,6 +325,24 @@ const dataFilter = () => {
   filterData.value = newFilter;
 }
 
+// 狀態映射
+const getStatusLabel = (status) => {
+  const statusItem = statusMap.find(item => item.value === status);
+  return statusItem ? statusItem.label : '未知';
+}
+
+// 類別映射
+const getCategoryLabel = (category) => {
+  const categoryItem = categoryMap.find(item => item.value === category);
+  return categoryItem ? categoryItem.label : '未知';
+}
+
+// 語言映射
+const getLangLabel = (lang) => {
+  console.log('lang',lang)
+  const langItem = languageMap.find(item => item.value === lang);
+  return langItem ? langItem.label : '未知';
+}
 
 onBeforeMount(async () => {
   await TempStore.loadTemplates()
@@ -352,7 +355,7 @@ const onPreview = (index) => {
   // console.log('onPreview', data.value[index])
   TempStore.setTemplateData(data.value[index])
   router.push({
-    name: 'createTemp',
+    name: 'createTemp2',
   })
 }
 
@@ -360,7 +363,7 @@ const onPreview = (index) => {
 const onEdit = (index) => {
   TempStore.setTemplateData(data.value[index])
   router.push({
-    name: 'createTemp',
+    name: 'createTemp2',
   })
 }
 
