@@ -4,16 +4,16 @@
       <WASelect direction="vertical" title="賬號" type="select-common" :select-item="selectAccount"
                 :options="accounts" @handleChange="accountChange"/>
 
-      <WASelect direction="vertical" title="Search" type="search" :search-contents="searchContents"
+      <WASelect direction="vertical" title="搜索" type="search" :search-contents="searchContents"
                 @handleChange="nameChange"/>
 
-      <WASelect direction="vertical" title="Category" type="select-multiple" :select-item="selectCategory"
+      <WASelect direction="vertical" title="類別" type="select-multiple" :select-item="selectCategory"
                 :options="allCategory" @handleChange="categoryChange"/>
 
-      <WASelect direction="vertical" title="Language" type="select-multiple" :select-item="selectLanguage"
+      <WASelect direction="vertical" title="語言" type="select-multiple" :select-item="selectLanguage"
                 :options="allLanguage" @handleChange="langChange"/>
 
-      <WASelect direction="vertical" title="Status" type="select-multiple" :select-item="selectStatus"
+      <WASelect direction="vertical" title="狀態" type="select-multiple" :select-item="selectStatus"
                 :options="tempStatus" @handleChange="statusChange"/>
 
     </div>
@@ -45,13 +45,15 @@
               {{ getLangLabel(record.language) }}
           </template>
           <template v-if="column.key === 4">
-            <a-tag
-                :color="record.status === 'APPROVED' ? 'success' : record.status === 'REJECTED' ? 'error' : 'default'">
-              <template #icon>
-                <component :is="getTagIcon(record.status)"/>
-              </template>
-              {{ getStatusLabel(record.status) }}
-            </a-tag>
+            <a-tooltip :title="record.status === 'REJECTED'? getErrorLabel(record.reason):''" color="red">
+              <a-tag
+                  :color="record.status === 'APPROVED' ? 'success' : record.status === 'REJECTED' ? 'error' : 'default'">
+                <template #icon>
+                  <component :is="getTagIcon(record.status)"/>
+                </template>
+                {{ getStatusLabel(record.status) }}
+              </a-tag>
+            </a-tooltip>
           </template>
           <template v-if="column.key === 5">
             <span>{{ formatDate(record.updateTime) }}</span>
@@ -104,6 +106,7 @@ import {
 } from '@ant-design/icons-vue';
 import {SelectProps} from "ant-design-vue";
 import {categoryMap, languageMap, statusMap} from '@/map/template';
+import {errorMap } from '@/map/error';
 
 const router = useRouter();
 
@@ -342,6 +345,12 @@ const getLangLabel = (lang) => {
   console.log('lang',lang)
   const langItem = languageMap.find(item => item.value === lang);
   return langItem ? langItem.label : '未知';
+}
+
+// 錯誤映射
+const getErrorLabel = (error) => {
+  const errorItem = errorMap.find(item => item.value === error);
+  return errorItem ? errorItem.label : '未知';
 }
 
 onBeforeMount(async () => {
