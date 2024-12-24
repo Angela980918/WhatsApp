@@ -1,5 +1,6 @@
 import {defineStore} from 'pinia'
 import {templateApi} from "@/api/ycloud/index.js";
+import {isEqual} from "lodash";
 
 export const useTempStore = defineStore('template', {
     state: () => ({
@@ -13,9 +14,11 @@ export const useTempStore = defineStore('template', {
 
             const response = await templateApi.getTemplateList();
             if (response.status === 200) {
-                this.setRawTempData(response.data.items);
-                this.setTempData(response.data.items)
-                this.isTemplatesLoaded = true
+                if (!isEqual(this.rawTempData, response.data.items)) {
+                    this.setRawTempData(response.data.items);
+                    this.setTempData(response.data.items);
+                    this.isTemplatesLoaded = true;
+                }
             }
         }, setTemplateData(data) {
             this.createTempData = data;

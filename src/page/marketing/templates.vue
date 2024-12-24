@@ -233,7 +233,9 @@ const formatDate = (date) => {
 };
 
 const createTemplate = () => {
-
+  router.push({
+    name: 'createTemp2'
+  })
   console.log("searchContents", searchContents.value)
 }
 
@@ -354,6 +356,7 @@ const getErrorLabel = (error) => {
 }
 
 onBeforeMount(async () => {
+  TempStore.isTemplatesLoaded = false
   await TempStore.loadTemplates()
   console.log("itemitemitemitem", data.value)
   dataFilter();
