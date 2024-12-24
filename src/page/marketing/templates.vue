@@ -21,7 +21,7 @@
     <div class="Common">
       <div style="margin-bottom: 12px;padding: 0 12px">
         <a-space>
-          <a-button type="primary" @click="createTemplate" :disabled="state.isButtonDisabled">
+          <a-button type="primary" @click="createTemplate" :disabled="isButtonDisabled">
             創建模板
           </a-button>
 
@@ -42,7 +42,7 @@
             {{ getCategoryLabel(record.category) }}
           </template>
           <template v-if="column.key === 3">
-              {{ getLangLabel(record.language) }}
+            {{ getLangLabel(record.language) }}
           </template>
           <template v-if="column.key === 4">
             <a-tooltip :title="record.status === 'REJECTED'? getErrorLabel(record.reason):''" color="red">
@@ -92,7 +92,7 @@
 </template>
 
 <script lang="ts" setup>
-import {computed, onBeforeMount, reactive, ref} from 'vue';
+import {computed, nextTick, onBeforeMount, reactive, ref} from 'vue';
 import WASelect from "@/components/templates/WASelect.vue";
 import {useRouter} from "vue-router";
 import {useTempStore} from '@/store/useTempStore'
@@ -106,7 +106,8 @@ import {
 } from '@ant-design/icons-vue';
 import {SelectProps} from "ant-design-vue";
 import {categoryMap, languageMap, statusMap} from '@/map/template';
-import {errorMap } from '@/map/error';
+import {errorMap} from '@/map/error';
+import {getLabel} from '@/tools/common'
 
 const router = useRouter();
 
@@ -196,7 +197,6 @@ const allCategory = ref<SelectProps['options']>(categoryMap);
 const selectLanguage = ref([]);
 const allLanguage = ref<SelectProps['options']>(languageMap);
 
-
 // 狀態
 const selectStatus = ref([]);
 const tempStatus = ref<SelectProps['options']>(statusMap);
@@ -205,23 +205,19 @@ const tempStatus = ref<SelectProps['options']>(statusMap);
 const state = reactive<{
   selectedRowKeys: Key[];
   loading: boolean;
-  isButtonDisabled: boolean,
 }>({
   selectedRowKeys: [],
   loading: false,
-  isButtonDisabled: false,
 });
 
 const onSelectChange = (selectedRowKeys: Key[]) => {
-  console.log('selectedRowKeys changed: ', selectedRowKeys);
   state.selectedRowKeys = selectedRowKeys;
-  state.isButtonDisabled = selectedRowKeys.length !== 0;
-  console.log('state.isButtonDisabled', typeof state.isButtonDisabled)
 };
+
+const isButtonDisabled = computed(() => state.selectedRowKeys.length !== 0);
 
 const formatDate = (date) => {
   const d = new Date(date);
-
   const year = d.getFullYear();
   const month = (d.getMonth() + 1).toString().padStart(2, '0');  // 月份从0开始，+1确保月份正确
   const day = d.getDate().toString().padStart(2, '0');
@@ -248,117 +244,50 @@ const nameChange = (value) => {
   dataFilter();
 }
 
-const categoryChange = (value) => {
-  selectCategory.value = [];
-  for (let i in value) {
-    allCategory.value.map(item => {
-      if (item.value === value[i]) {
-        selectCategory.value.push(item)
-      }
-    })
-
-  }
+// 更新選擇
+const updateSelection = (value, allItems, selectArray) => {
+  selectArray.value = allItems.filter(item => value.includes(item.value));
   dataFilter();
-}
+};
+
+const categoryChange = (value) => {
+  updateSelection(value, allCategory.value, selectCategory);
+};
 
 const langChange = (value) => {
-  selectLanguage.value = [];
-  for (let i in value) {
-    allLanguage.value.map(item => {
-      if (item.value === value[i]) {
-        selectLanguage.value.push(item)
-      }
-    })
-  }
-  dataFilter();
-}
+  updateSelection(value, allLanguage.value, selectLanguage);
+};
 
 const statusChange = (value) => {
-  selectStatus.value = [];
-  for (let i in value) {
-    tempStatus.value.map(item => {
-      if (item.value === value[i]) {
-        selectStatus.value.push(item)
-      }
-    })
-  }
-  dataFilter();
-}
+  updateSelection(value, tempStatus.value, selectStatus);
+};
 
+// 数据过滤
 const dataFilter = () => {
-  let newFilter = []
+  const {value: searchValue} = searchContents;
+  const {value: categoryValues} = selectCategory;
+  const {value: languageValues} = selectLanguage;
+  const {value: statusValues} = selectStatus;
 
-  if (searchContents.value !== "") {
-    newFilter = data.value.filter(item => item.name.includes(searchContents.value));
-  } else {
-    newFilter = data.value;
-  }
+  filterData.value = data.value.filter(item => {
+    return (
+        (!searchValue || item.name.includes(searchValue)) &&
+        (categoryValues.length === 0 || categoryValues.some(c => c.value === item.category)) &&
+        (languageValues.length === 0 || languageValues.some(l => l.value === item.language)) &&
+        (statusValues.length === 0 || statusValues.some(s => s.value === item.status))
+    );
+  });
+};
 
-  if (selectCategory.value.length !== 0) {
-    let selectFilter = [];
-    for (let i in selectCategory.value) {
-      let result = [];
-      result = newFilter.filter(item => item.category === selectCategory.value[i].value)
-      selectFilter = [...selectFilter, ...result];
-    }
-    newFilter = selectFilter;
-  }
-  if (selectLanguage.value.length !== 0) {
-    let selectFilter = [];
-    console.log("selectLanguage.value[i].lang", selectLanguage.value)
-    for (let i in selectLanguage.value) {
-      let result = [];
-
-      result = newFilter.filter(item => item.language === selectLanguage.value[i].value);
-      console.log("result", result)
-      selectFilter = [...selectFilter, ...result];
-
-    }
-    newFilter = selectFilter;
-  }
-
-  if (selectStatus.value.length !== 0) {
-    let selectFilter = [];
-    for (let i in selectStatus.value) {
-      let result = [];
-      result = newFilter.filter(item => item.status === selectStatus.value[i].value)
-      selectFilter = [...selectFilter, ...result];
-    }
-    newFilter = selectFilter;
-  }
-
-  filterData.value = newFilter;
-}
-
-// 狀態映射
-const getStatusLabel = (status) => {
-  const statusItem = statusMap.find(item => item.value === status);
-  return statusItem ? statusItem.label : '未知';
-}
-
-// 類別映射
-const getCategoryLabel = (category) => {
-  const categoryItem = categoryMap.find(item => item.value === category);
-  return categoryItem ? categoryItem.label : '未知';
-}
-
-// 語言映射
-const getLangLabel = (lang) => {
-  console.log('lang',lang)
-  const langItem = languageMap.find(item => item.value === lang);
-  return langItem ? langItem.label : '未知';
-}
-
-// 錯誤映射
-const getErrorLabel = (error) => {
-  const errorItem = errorMap.find(item => item.value === error);
-  return errorItem ? errorItem.label : '未知';
-}
+// label映射
+const getStatusLabel = (status) => getLabel(statusMap, status)
+const getCategoryLabel = (category) => getLabel(categoryMap, category)
+const getLangLabel = (lang) => getLabel(languageMap, lang)
+const getErrorLabel = (error) => getLabel(errorMap, error)
 
 onBeforeMount(async () => {
   TempStore.isTemplatesLoaded = false
   await TempStore.loadTemplates()
-  console.log("itemitemitemitem", data.value)
   dataFilter();
 })
 
