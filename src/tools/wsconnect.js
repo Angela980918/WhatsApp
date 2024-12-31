@@ -34,7 +34,7 @@ export const messageType = {
 }
 
 let wsConfigs = {
-    '449711484896804': { id: '449711484896804', url: 'ws://whatsapi.jackycode.cn:4000', isContect: false }
+    '449711484896804': { id: '449711484896804', url: 'wss://whatsapi.jackycode.cn:4001', isContect: false }
 };
 
 const wsconnect = {
@@ -69,11 +69,16 @@ const wsconnect = {
 
     resConnect: async (id) => {
         let config = wsConfigs[id];
+        console.log("config",config)
         let connectWS;
 
         if(!config.isContect) {
+            console.log("重連開始")
             connectWS = await io(config.url,{
-                query: { id: config.id },
+                query: {
+                    id: config.id,
+                },
+                transports: ['websocket'],
             });
         }
 
@@ -85,6 +90,7 @@ const wsconnect = {
         isReconnecting[id] = true;  // 标记当前连接正在重连
 
         connectWS.on(eventTypes.connect, (value) => {
+            console.log("valuevaluevalue",value)
             wsConfigs[config.id].isContect = true;
             wsList[config.id] = { id: config.id, socket: connectWS, isContect: true, missedPongs: 0 };
             clearTimeout(resetTimer);
@@ -95,25 +101,31 @@ const wsconnect = {
                 console.log("心跳")
                 if(connectWS.connected) {
                     // 心跳啟動
-                    connectWS.emit(eventTypes.heart, {
+                    connectWS.emit('heart', {
                         id: config.id,
-                        message: 'ping'
+                        message: 'ping',
+                        token: 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwibmFtZSI6IkphY2t5IiwiaWF0IjoxNzM1NjMyNjkwLCJleHAiOjE3MzU2MzQ0OTB9.o85nnN5MTfNpoD3a4kfPuCA2oNcgK6NBnjR-fiOClYk'
                     });
 
                     wsList[config.id].missedPongs++;
                     if(wsList[config.id].missedPongs > MAX_MISSED_PONGS) {
                         console.log("服務未響應超過3次");
                         connectWS.disconnect();
-
+                        wsConfigs[config.id].isContect = false;
                         clearInterval(heart);
                         heart = null;
                         // 重連
+                        console.log("wsConfigs[config.id]",wsConfigs[config.id])
                         wsconnect.resConnect(config.id);
                     }
                 }
 
-            },5000);
+            },2000);
         });
+
+        connectWS.on('serverMessage',(msg) => {
+            console.log("msg",msg);
+        })
 
         connectWS.on(eventTypes.error, (error) => {
             wsConfigs[config.id].isContect = false;
@@ -213,9 +225,6 @@ const wsconnect = {
                 // 插入新用戶
                 if(inserOrNot !== 1) {
                     const userName = whatsappMessage.customerProfile.name;
-
-
-
                     unAssignedCustomers.push({
                         phone: whatsappMessage.from,
                         name: userName,
