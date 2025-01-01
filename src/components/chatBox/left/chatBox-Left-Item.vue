@@ -25,7 +25,7 @@
 </template>
 
 <script lang="ts" setup>
-import {timeJS} from '@/tools'
+import {formatTime} from '@/tools'
 import {computed} from "vue";
 //传参
 const props = defineProps({
@@ -65,7 +65,7 @@ const props = defineProps({
 // const avatarColor = generateRandomColor();
 // 时间处理格式
 const formattedTime = computed(() => {
-  return timeJS.formatTime(props.time);
+  return formatTime(props.time);
 });
 
 // 当前时间

@@ -2,7 +2,7 @@
   <a-layout style="min-height: 100vh">
     <a-layout-sider v-model:collapsed="collapsed" collapsible>
       <a-menu theme="dark" mode="inline" @click="handleClickMenu">
-        <MenuItem />
+        <MenuItem/>
       </a-menu>
       <a-menu v-model:selectedKeys="selectedKeys" theme="dark" mode="inline" @click="handleClickMenu">
         <MenuItem :routes="routes"/>
@@ -22,7 +22,7 @@ import BreadcrumbItem from '@/components/Breadcrumb.vue';
 import {computed, onMounted, ref} from "vue";
 import MenuItem from "@/components/MenuItem.vue";
 import {useChatStore} from "@/store/chatStore";
-import wsconnect from "@/tools/wsconnect.js"
+import {wsconnect} from "@/tools"
 
 const route = useRoute();
 const router = useRouter();

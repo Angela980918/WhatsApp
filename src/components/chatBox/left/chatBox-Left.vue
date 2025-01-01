@@ -67,10 +67,10 @@ const generateRandomColor = () => {
 onMounted(async () => {
 
     if(assignedCustomers.value.length === 0) {
-        const { data } = await whatsappApi.chatApi.getAllCustomer();
-        console.log("response",data)
+        const res = await whatsappApi.chatApi.getAllCustomer();
+        console.log("response",res)
         const customer = [];
-        data.result.map(item => {
+        res.map(item => {
             // item.tags = ['test1', 'test2'];
             item.key = item._id;
             const color = generateRandomColor();

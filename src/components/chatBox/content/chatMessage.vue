@@ -69,7 +69,7 @@ import * as ycloudApi from "@/api/ycloud/index.js";
 import {computed, defineProps, ref} from "vue";
 import {useCustomerStore} from "@/store/customerStore.js";
 import {useChatStore} from "@/store/chatStore";
-import { messageType } from '@/tools/wsconnect.js';
+import { messageType } from '@/tools';
 import TemplateList from "@/components/chatBox/content/message/TemplateList.vue";
 
 const customerStore = useCustomerStore();

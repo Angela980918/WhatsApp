@@ -37,7 +37,7 @@ let wsConfigs = {
     '449711484896804': { id: '449711484896804', url: 'wss://whatsapi.jackycode.cn:4001', isContect: false }
 };
 
-const wsconnect = {
+export const wsconnect = {
     createConnect: () => {
         // ws = await new WebSocket('ws://ws.jackycode.cn:4000', {});
 
@@ -319,5 +319,3 @@ const wsconnect = {
         return message;
     }
 };
-
-export default wsconnect;

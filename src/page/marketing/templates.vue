@@ -107,7 +107,7 @@ import {
 import {SelectProps} from "ant-design-vue";
 import {categoryMap, languageMap, statusMap} from '@/map/template';
 import {errorMap} from '@/map/error';
-import {getLabel} from '@/tools/common'
+import {getLabel} from '@/tools/modules/common'
 
 const router = useRouter();
 

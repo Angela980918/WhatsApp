@@ -130,7 +130,7 @@
                             </div>
 
                             <div :class="item.position === 'inbound' ? ['message-footer'] : ['message-footer', 'message-footer-right']">
-                                <span>{{ timeJS.formatTime(item.time) }}</span>
+                                <span>{{ formatTime(item.time) }}</span>
                                 <span class="status-icon" v-if="item.position === 'outbound'">
                                     <div v-if="item.status === 'delivered'">
                                         <CheckOutlined
@@ -187,7 +187,7 @@ import {
     CheckCircleTwoTone
 } from '@ant-design/icons-vue';
 import ChatMessage from "@/components/chatBox/content/chatMessage.vue";
-import {timeJS} from '@/tools'
+import {formatTime} from '@/tools'
 
 import {useChatStore} from "@/store/chatStore";
 import ImageView from "./message/ImageView.vue";

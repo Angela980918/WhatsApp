@@ -1,7 +1,7 @@
 // 所有label、value映射
 import {errorMap} from "@/map/error.js";
 import {categoryMap, headerMap, languageMap, mediaMap, statusMap} from "@/map/template.js";
-import {getLabel} from '@/tools/common.js'
+import {getLabel} from '@/tools'
 
 export const getStatusLabel = (status) => getLabel(statusMap, status);
 export const getCategoryLabel = (category) => getLabel(categoryMap, category);
