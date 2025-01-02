@@ -4,7 +4,7 @@
       <a-menu theme="dark" mode="inline" @click="handleClickMenu">
         <MenuItem/>
       </a-menu>
-      <a-menu v-model:selectedKeys="selectedKeys" theme="dark" mode="inline" @click="handleClickMenu">
+      <a-menu v-model:selectedKeys="selectedKeys" :open-keys="openKeys" theme="dark" mode="inline" @click="handleClickMenu">
         <MenuItem :routes="routes"/>
       </a-menu>
     </a-layout-sider>
@@ -19,7 +19,7 @@
 <script lang="ts" setup>
 import {useRoute, useRouter} from "vue-router";
 import BreadcrumbItem from '@/components/Breadcrumb.vue';
-import {computed, onMounted, ref} from "vue";
+import {computed, onBeforeMount, onMounted, ref} from "vue";
 import MenuItem from "@/components/MenuItem.vue";
 import {useChatStore} from "@/store/chatStore";
 import {wsconnect} from "@/tools"
@@ -38,11 +38,18 @@ const handleClickMenu = (menmenuInfo) => {
 
 const collapsed = ref<boolean>(false);
 const selectedKeys = ref<string[]>(['/home']);
+const openKeys = ref<string[]>(['/marketing'])
 
 const chatStore = useChatStore();
 
+onBeforeMount(() => {
+    const pathname = window.location.pathname;
+    router.push({path: pathname});
+    selectedKeys.value = [pathname]
+})
+
 onMounted(() => {
-  wsconnect.createConnect();
+  // wsconnect.createConnect();
 })
 </script>
 <style scoped>
