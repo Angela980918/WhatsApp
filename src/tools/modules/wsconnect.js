@@ -34,7 +34,7 @@ export const messageType = {
 }
 
 let wsConfigs = {
-    '449711484896804': { id: '449711484896804', url: 'wss://whatsapi.jackycode.cn:4001', isContect: false }
+    '449711484896804': { id: '449711484896804', url: 'https://whatsapi.jackycode.cn/socket.io', isContect: false }
 };
 
 export const wsconnect = {
@@ -73,12 +73,11 @@ export const wsconnect = {
         let connectWS;
 
         if(!config.isContect) {
-            console.log("重連開始")
+            // console.log("重連開始")
             connectWS = await io(config.url,{
                 query: {
                     id: config.id,
-                },
-                transports: ['websocket'],
+                }
             });
         }
 
@@ -120,7 +119,7 @@ export const wsconnect = {
                     }
                 }
 
-            },2000);
+            },5000);
         });
 
         connectWS.on('serverMessage',(msg) => {
