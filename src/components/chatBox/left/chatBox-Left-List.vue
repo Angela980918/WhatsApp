@@ -96,7 +96,7 @@ onMounted(() => {
 })
 
 watch(() => customerStore.assignedCustomers, (newValue) => {
-    console.log("newValuenewValue",newValue)
+    // console.log("newValuenewValue",newValue)
     let count = 0;
     newValue.map(item => {
         count += item.badgeCount ?? 0
@@ -105,7 +105,7 @@ watch(() => customerStore.assignedCustomers, (newValue) => {
 })
 
 watch(() => customerStore.unassignedCustomers, (newValue) => {
-    console.log("newValuenewValue",newValue)
+    // console.log("newValuenewValue",newValue)
     let count = 0;
     newValue.map(item => {
         count += item.badgeCount ?? 0

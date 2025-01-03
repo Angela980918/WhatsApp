@@ -1,19 +1,19 @@
 <template>
   <div class="tempContainer">
     <div class="Common tempSearch">
-      <WASelect direction="vertical" title="賬號" type="select-common" :select-item="selectAccount"
+      <WASelect name="selectAccount" direction="vertical" title="賬號" type="select-common" :select-item="selectAccount"
                 :options="accounts" @handleChange="accountChange"/>
 
-      <WASelect direction="vertical" title="搜索" type="search" :search-contents="searchContents"
+      <WASelect name="searchContents" direction="vertical" title="搜索" type="search" :search-contents="searchContents"
                 @handleChange="nameChange"/>
 
-      <WASelect direction="vertical" title="類別" type="select-multiple" :select-item="selectCategory"
+      <WASelect name="selectCategory"  direction="vertical" title="類別" type="select-multiple" :select-item="selectCategory"
                 :options="allCategory" @handleChange="categoryChange"/>
 
-      <WASelect direction="vertical" title="語言" type="select-multiple" :select-item="selectLanguage"
+      <WASelect name="selectLanguage"  direction="vertical" title="語言" type="select-multiple" :select-item="selectLanguage"
                 :options="allLanguage" @handleChange="langChange"/>
 
-      <WASelect direction="vertical" title="狀態" type="select-multiple" :select-item="selectStatus"
+      <WASelect name="selectStatus"  direction="vertical" title="狀態" type="select-multiple" :select-item="selectStatus"
                 :options="tempStatus" @handleChange="statusChange"/>
 
     </div>
@@ -31,7 +31,10 @@
         </a-space>
       </div>
       <a-table
-          :row-selection="{ selectedRowKeys: state.selectedRowKeys, onChange: onSelectChange }"
+          :row-selection="{ selectedRowKeys: state.selectedRowKeys, onChange: onSelectChange, getCheckboxProps: (record) => ({
+      id: `checkbox-${record.key}`,
+      name: `checkbox-${record.key}`
+    }) }"
           :columns="columns"
           :data-source="filterData"
           class="tempList"
@@ -108,8 +111,10 @@ import {SelectProps} from "ant-design-vue";
 import {categoryMap, languageMap, statusMap} from '@/map/template';
 import {errorMap} from '@/map/error';
 import {getLabel} from '@/tools/modules/common'
+import {useMenuJump} from "@/tools"
 
 const router = useRouter();
+const { menupush, btnpush } = useMenuJump();
 
 // icon、顔色變化
 const getTagColor = (status) => {
@@ -229,10 +234,11 @@ const formatDate = (date) => {
 };
 
 const createTemplate = () => {
-  router.push({
-    name: 'createTemp2'
-  })
-  console.log("searchContents", searchContents.value)
+  // router.push({
+  //   name: 'createTemp2'
+  // })
+  btnpush('createTemp2')
+  // console.log("searchContents", searchContents.value)
 }
 
 const accountChange = (value) => {
@@ -268,7 +274,7 @@ const dataFilter = () => {
   const {value: categoryValues} = selectCategory;
   const {value: languageValues} = selectLanguage;
   const {value: statusValues} = selectStatus;
-
+    // console.log("data.value",data.value)
   filterData.value = data.value.filter(item => {
     return (
         (!searchValue || item.name.includes(searchValue)) &&
@@ -310,7 +316,7 @@ const onEdit = (index) => {
 
 // 删除模板
 const onDelete = (index) => {
-  console.log('onDelete', data.value[index])
+  // console.log('onDelete', data.value[index])
 }
 
 </script>

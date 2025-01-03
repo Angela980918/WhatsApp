@@ -204,13 +204,13 @@ const chatStore = useChatStore();
 const currentCustomerInfo = computed(() => customerStore.currentCustomerInfo)
 
 watch(() => customerStore.currentUserId, (newUserId) => {
-    console.log('newUserId', newUserId)
+    // console.log('newUserId', newUserId)
     const user = customerStore.assignedCustomers.find(user => user.id === newUserId) ||
         customerStore.unassignedCustomers.find(user => user.id === newUserId);
-    console.log('user', user);
+    // console.log('user', user);
     if (user) {
         customerStore.currentCustomerInfo = user;
-        console.log(customerStore.currentCustomerInfo)
+        // console.log(customerStore.currentCustomerInfo)
     } else {
         console.warn(`未找到 ID 为 ${newUserId} 的用户。`);
         // 处理未找到用户的情况
@@ -240,7 +240,7 @@ interface DataItem {
 
 
 const data = computed(() => {
-    console.log("chatStore.chatMessages",chatStore.chatMessages)
+    // console.log("chatStore.chatMessages",chatStore.chatMessages)
     return chatStore.chatMessages
 });
 const currentPhone = computed(() => chatStore.currentPhone);
@@ -331,7 +331,7 @@ const scrollToBottom = () => {
     nextTick(() => {
         const chatRoomElement = chatRoom26.value ? chatRoom26.value.$el : null;
         if (chatRoomElement) {
-            console.log('scrollHeight:', chatRoomElement.scrollHeight); // 获取 scrollHeight
+            // console.log('scrollHeight:', chatRoomElement.scrollHeight); // 获取 scrollHeight
             chatRoomElement.scrollTop = chatRoomElement.scrollHeight; // 设置 scrollTop
         }
     });
@@ -341,7 +341,7 @@ const handleVisiable = (link) => {
     if (link !== undefined) {
         imgUrl.value = link;
     }
-    console.log("link", link)
+    // console.log("link", link)
     visiable.value = !visiable.value;
 }
 
@@ -351,7 +351,7 @@ onMounted(async () => {
     scrollToBottom();
 
     window.addEventListener('beforeunload', function (){
-        console.log("onBeforeMount triggered");
+        // console.log("onBeforeMount triggered");
         const key = chatStore.currentPhone + "_" + "+8613672967202";
         localStorage.setItem(key, JSON.stringify([...data.value]))
         localStorage.setItem("test", "test")

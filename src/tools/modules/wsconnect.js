@@ -69,7 +69,7 @@ export const wsconnect = {
 
     resConnect: async (id) => {
         let config = wsConfigs[id];
-        console.log("config",config)
+        // console.log("config",config)
         let connectWS;
 
         if(!config.isContect) {
@@ -82,14 +82,14 @@ export const wsconnect = {
         }
 
         if (isReconnecting[id]) {
-            console.log("已经在重连中，跳过连接请求");
+            // console.log("已经在重连中，跳过连接请求");
             return;
         }
 
         isReconnecting[id] = true;  // 标记当前连接正在重连
 
         connectWS.on(eventTypes.connect, (value) => {
-            console.log("valuevaluevalue",value)
+            // console.log("valuevaluevalue",value)
             wsConfigs[config.id].isContect = true;
             wsList[config.id] = { id: config.id, socket: connectWS, isContect: true, missedPongs: 0 };
             clearTimeout(resetTimer);
@@ -114,7 +114,7 @@ export const wsconnect = {
                         clearInterval(heart);
                         heart = null;
                         // 重連
-                        console.log("wsConfigs[config.id]",wsConfigs[config.id])
+                        // console.log("wsConfigs[config.id]",wsConfigs[config.id])
                         wsconnect.resConnect(config.id);
                     }
                 }
@@ -123,7 +123,7 @@ export const wsconnect = {
         });
 
         connectWS.on('serverMessage',(msg) => {
-            console.log("msg",msg);
+            // console.log("msg",msg);
         })
 
         connectWS.on(eventTypes.error, (error) => {
@@ -143,7 +143,7 @@ export const wsconnect = {
         connectWS.on(eventTypes.inbound_message, (value) => {
 
             let newValue = JSON.parse(value);
-            console.log("newValuenewValuenewValue",newValue);
+            // console.log("newValuenewValuenewValue",newValue);
 
             const jsonData = newValue.data;
             let whatsappMessage = "";
@@ -155,7 +155,7 @@ export const wsconnect = {
             // 如果拿出的消息是当前沟通用户，添加到当前记录
             if(chatStore.currentPhone === whatsappMessage.from) {
                 let message = wsconnect.handleMessage(whatsappMessage, 'inbound')
-                console.log("messagemessagemessage",message)
+                // console.log("messagemessagemessage",message)
                 // 為當前用戶添加未讀
                 assignedCustomers.map(item => {
                     if(item.phoneNumber === whatsappMessage.from) {
@@ -178,10 +178,10 @@ export const wsconnect = {
                 let inserOrNot = 0;
 
                 let message = "";
-                console.log("whatsappMessage.type",whatsappMessage.type,whatsappMessage.type==='text');
+                // console.log("whatsappMessage.type",whatsappMessage.type,whatsappMessage.type==='text');
 
                 if(whatsappMessage.type === 'text') {
-                    console.log("whatsappMessage.type",whatsappMessage.text.body);
+                    // console.log("whatsappMessage.type",whatsappMessage.text.body);
                     message = whatsappMessage.text.body;
                 }else {
                     // message.title = whatsappMessage[whatsappMessage.type].caption;
@@ -245,7 +245,7 @@ export const wsconnect = {
 
             let newValue = JSON.parse(value);
             const jsonData = newValue.data;
-            console.log("newValuenewValuenewValue", newValue);
+            // console.log("newValuenewValuenewValue", newValue);
             let whatsappMessage = "";
             whatsappMessage = jsonData.whatsappMessage;
 
@@ -293,7 +293,7 @@ export const wsconnect = {
         })
 
         connectWS.on('template', (value) => {
-            console.log("value",value)
+            // console.log("value",value)
         });
 
     },

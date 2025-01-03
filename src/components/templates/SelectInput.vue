@@ -189,7 +189,7 @@ const uploadTxt = (uploadType) => {
 const editorRef = shallowRef();
 const valueHtml = inputContents.value === '' ? ref('<p>請輸入內容</p>') : ref(props.inputContents)
 watch(() => props.inputContents, (newVal) => {
-  console.log(newVal)
+  // console.log(newVal)
   valueHtml.value = newVal || '<p>請輸入內容</p>';
 });
 const toolbarConfig = {

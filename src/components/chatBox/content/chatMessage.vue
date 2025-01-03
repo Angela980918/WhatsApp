@@ -102,7 +102,7 @@ function insertAtCursor(text) {
         contentTxt.value.slice(0, startPos) +
         text +
         contentTxt.value.slice(endPos);
-    console.log("contentTxt.value",contentTxt.value)
+    // console.log("contentTxt.value",contentTxt.value)
     // 更新光标位置
     textarea.focus();
     showSmile();
@@ -117,7 +117,7 @@ async function sendMessage() {
         message: contentTxt.value
     })
     const result = resultObj.data;
-    console.log("发送消息",result)
+    // console.log("发送消息",result)
 
     let message = {
         position: "outbound",
@@ -139,7 +139,7 @@ async function sendMessage() {
 }
 
 function showSmile() {
-    console.log("8888888")
+    // console.log("8888888")
     showEmoji.value = !showEmoji.value
 }
 

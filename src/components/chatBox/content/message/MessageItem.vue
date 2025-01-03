@@ -20,7 +20,7 @@ const props = defineProps({
         default: "horizontal"
     },
 });
-console.log("props",props)
+// console.log("props",props)
 
 </script>
 

@@ -183,18 +183,18 @@ export const useCustomerStore = defineStore('customerStore', {
 
             // 设置 WebSocket 连接消息事件
             this.ws.onmessage = (event) => {
-                console.log("event",event)
-                console.log('[CLIENT] Received message:', event.data);
+                // console.log("event",event)
+                // console.log('[CLIENT] Received message:', event.data);
             };
 
             // 设置 WebSocket 连接关闭事件
             this.ws.onclose = () => {
-                console.log('[CLIENT] Connection closed');
+                // console.log('[CLIENT] Connection closed');
             };
 
             // 设置 WebSocket 错误事件
             this.ws.onerror = (err) => {
-                console.error('[CLIENT] Error:', err);
+                // console.error('[CLIENT] Error:', err);
             };
         },
         sendMessage(message) {

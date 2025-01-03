@@ -168,7 +168,7 @@ const emits = defineEmits(['handleChange'])
 const selectItem = ref(props.selectItem);
 const fileItem = ref(props.fileItem);
 if (typeof fileItem.value === 'string') {
-  console.log('fileItem.value', fileItem.value)
+  // console.log('fileItem.value', fileItem.value)
   fileItem.value = [fileItem.value]
 }
 const selectOptions = ref(props.options);
@@ -214,7 +214,7 @@ const handleChange = (value) => {
   } else if (props.type === 'input-text') {
     emits('handleChange', inputContents.value)
   } else if (props.type === 'upload-file') {
-    console.log('handleChange', value)
+    // console.log('handleChange', value)
     fileList.value = [value]
     emits('handleChange', fileList.value)
     return false;
@@ -226,7 +226,7 @@ const handleChange = (value) => {
 };
 
 editorRef.onclick = () => {
-  console.log("test")
+  // console.log("test")
 }
 
 </script>

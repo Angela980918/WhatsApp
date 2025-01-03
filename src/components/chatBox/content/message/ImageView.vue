@@ -16,7 +16,7 @@ const props = defineProps({
         default: false
     }
 });
-console.log("props",props)
+// console.log("props",props)
 </script>
 <style scoped>
 .preview-modal {

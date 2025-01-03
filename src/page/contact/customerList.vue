@@ -1,6 +1,6 @@
 <template>
   <div class="Container">
-    <ContactModel/>
+<!--    <ContactModel/>-->
     <div style="margin-bottom: 16px">
       <a-button type="primary" :loading="state.loading" @click="start">
         创建用户
@@ -12,9 +12,14 @@
       </span>
     </div>
     <a-table
-        :row-selection="{ selectedRowKeys: state.selectedRowKeys, onChange: onSelectChange }"
+        :row-selection="{ selectedRowKeys: state.selectedRowKeys, onChange: onSelectChange, getCheckboxProps: (record) => ({
+      id: `checkbox-${record.key}`,
+      name: `checkbox-${record.key}`
+    })
+  }"
         :columns="columns"
         :data-source="data"
+
         :pagination="{ pageSize: 10, showSizeChanger: true, pageSizeOptions: ['5', '10', '20', '50'] }"
     >
 

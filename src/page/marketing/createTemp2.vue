@@ -304,7 +304,7 @@ const onSubmit = async () => {
           } else {
             response = await templateApi.createTemplate(reqData);
           }
-          console.log('接口返回數據:', response); // 打印返回數據
+          // console.log('接口返回數據:', response); // 打印返回數據
           message.success({content: '模板數據提交成功', key: submitKey, duration: 2});
         } catch (error) {
           // console.log('error', error);
@@ -382,7 +382,7 @@ const resetFields = () => {
 
 
 const focus = () => {
-  console.log('focus');
+  // console.log('focus');
 };
 
 // 模板編輯原数据
@@ -417,7 +417,7 @@ onBeforeMount(() => {
           formState.footer = component.text
           break;
         default:
-          console.warn(`Unhandled component type: ${component.type}`);
+          // console.warn(`Unhandled component type: ${component.type}`);
           break;
       }
     })
@@ -425,7 +425,7 @@ onBeforeMount(() => {
     // 判斷是否為审核中
     if (createTempData.status === 'PENDING') {
       isPending.value = true
-      console.log('isPending.value', isPending.value)
+      // console.log('isPending.value', isPending.value)
     }
   }
 })

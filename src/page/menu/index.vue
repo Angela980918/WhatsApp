@@ -4,7 +4,7 @@
       <a-menu theme="dark" mode="inline" @click="handleClickMenu">
         <MenuItem/>
       </a-menu>
-      <a-menu v-model:selectedKeys="selectedKeys" :open-keys="openKeys" theme="dark" mode="inline" @click="handleClickMenu">
+      <a-menu v-model:selectedKeys="selectedKeys" v-model:openKeys="openKeys" theme="dark" mode="inline" @click="handleClickMenu">
         <MenuItem :routes="routes"/>
       </a-menu>
     </a-layout-sider>
@@ -22,30 +22,44 @@ import BreadcrumbItem from '@/components/Breadcrumb.vue';
 import {computed, onBeforeMount, onMounted, ref} from "vue";
 import MenuItem from "@/components/MenuItem.vue";
 import {useChatStore} from "@/store/chatStore";
-import {wsconnect} from "@/tools"
+import {useMenuStore} from "@/store/useMenuStore";
+import {wsconnect, useMenuJump} from "@/tools"
+
+// console.log("useMenuJump",useMenuJump.menupush)
+import {storeToRefs} from "pinia";
 
 const route = useRoute();
 const router = useRouter();
+const menuStore = useMenuStore();
+const { menupush } = useMenuJump();
 const routes = computed(() => {
   return router.getRoutes().filter((route) => {
     return route.meta?.toplevel == true;
   })
 })
 const handleClickMenu = (menmenuInfo) => {
-  console.log("menmenuInfo", menmenuInfo)
-  router.push({path: menmenuInfo.key});
+    menupush(menmenuInfo.key);
 };
 
 const collapsed = ref<boolean>(false);
-const selectedKeys = ref<string[]>(['/home']);
-const openKeys = ref<string[]>(['/marketing'])
+// const selectedKeys = computed({
+//     get: () => menuStore.selectedKeys,
+//     set: (newKeys) => {
+//         menuStore.selectedKeys = newKeys; // 更新 store 中的值
+//     },
+// });
+const { selectedKeys, openKeys } = storeToRefs(menuStore)
+// const openKeys = computed(() => menuStore.openKeys);
 
 const chatStore = useChatStore();
 
 onBeforeMount(() => {
     const pathname = window.location.pathname;
-    router.push({path: pathname});
-    selectedKeys.value = [pathname]
+    menupush(pathname);
+    // useMenuJump.menupush(pathname);
+    // router.push({path: pathname});
+    // selectedKeys.value = [pathname]
+
 })
 
 onMounted(() => {

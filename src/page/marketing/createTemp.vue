@@ -233,7 +233,7 @@ const contentChange = (value) => {
   fileUrl.value = ''
   mediaOptions.map(item => {
     if (item.value === value) {
-      console.log("item", item)
+      // console.log("item", item)
       mediaValue.value = item.value
     }
   })
@@ -334,7 +334,7 @@ const confirm = async () => {
     category: selectCategory.value.lang,
     components: createComponent()
   }
-  console.log("datadatadata", data)
+  // console.log("datadatadata", data)
   // const response = await templateApi.createTemplate(data)
   // if (response.status === 200) {
   //   router.back();
@@ -347,7 +347,7 @@ const cancel = () => {
 
 onBeforeMount(() => {
   const createTempData = TempStore.createTempData
-  console.log('createTempData', createTempData)
+  // console.log('createTempData', createTempData)
   if (createTempData.length !== 0) {
     isDisable.value = true
     inputContents.value = createTempData.name
@@ -359,7 +359,7 @@ onBeforeMount(() => {
     // 頭部
     let headerComponent = components.filter(item => item.type === "HEADER")
     if (headerComponent) {
-      console.log('headers', headers.find(item => item.value === headerComponent[0].format))
+      // console.log('headers', headers.find(item => item.value === headerComponent[0].format))
       selectHeader.value = headers.find(item => item.value === headerComponent[0].format).value
       if (headerComponent[0].format === 'TEXT') {
       }

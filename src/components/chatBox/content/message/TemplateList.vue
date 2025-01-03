@@ -77,7 +77,7 @@ const currentPhone = computed(() => chatStore.currentPhone);
 const templateList = computed(() => {
     let list = []
     template.rawTempData.map((item) => {
-        console.log("item", item)
+        // console.log("item", item)
         if (item.status === "APPROVED" && item.wabaId === wabaId.value) {
             let cloumn = {
                 key: item.key,
@@ -143,14 +143,14 @@ const handleSubmit = () => {
 
 defineExpose({
     controlTemp: () => {
-        console.log("4444444")
+        // console.log("4444444")
         handleSubmit();
     }
 })
 
 const sendTemplate = async (value) => {
 
-    console.log("value", value);
+    // console.log("value", value);
 
     const {components} = value
 
@@ -173,7 +173,7 @@ const sendTemplate = async (value) => {
             msgContent.header = {
                 format: components[index].format,
             }
-            console.log("components[index].format", components[index].format)
+            // console.log("components[index].format", components[index].format)
             if (components[index].format === "TEXT") {
                 msgContent.header.content = components[index].text;
             } else {
@@ -192,7 +192,7 @@ const sendTemplate = async (value) => {
                     link: components[index].example.header_url[0]
                 };
                 sendData.template.components = [body];
-                console.log("sendData", sendData)
+                // console.log("sendData", sendData)
             }
 
         } else if (components[index].type === "BODY") {
@@ -207,8 +207,8 @@ const sendTemplate = async (value) => {
     }
 
     const {data: resultObj} = await ycloudApi.messageApi.sendMessage(sendData)
-    console.log("resultObj", resultObj);
-    console.log("msgContent", msgContent);
+    // console.log("resultObj", resultObj);
+    // console.log("msgContent", msgContent);
     let message = {
         position: "outbound",
         id: resultObj.id,
@@ -217,7 +217,7 @@ const sendTemplate = async (value) => {
         time: resultObj.createTime,
     }
     let res = Object.assign(message, msgContent);
-    console.log("tres", res)
+    // console.log("tres", res)
     chatStore.addMessage(res);
 }
 

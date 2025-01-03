@@ -21,7 +21,7 @@ import {useRoute} from 'vue-router';
 // 获取当前路由
 const route = useRoute();
 
-console.log(route)
+// console.log(route)
 
 // 计算面包屑列表
 const breadcrumbList = computed(() => {

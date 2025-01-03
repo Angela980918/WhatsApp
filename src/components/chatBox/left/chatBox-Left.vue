@@ -37,11 +37,11 @@ const handleSelectCustomer = (phone, id) => {
 };
 
 async function loadLocalMessage(guestPhone, userPhone) {
-    console.log("guestPhone, userPhone",guestPhone, userPhone)
+    // console.log("guestPhone, userPhone",guestPhone, userPhone)
   const key = guestPhone + '_' + userPhone;
-    console.log("keykeykeykey",key)
+    // console.log("keykeykeykey",key)
   const chatMessageStr = await localStorage.getItem(key);
-    console.log("chatMessageStr",chatMessageStr)
+    // console.log("chatMessageStr",chatMessageStr)
   const MessageList = JSON.parse(chatMessageStr);
   if(MessageList !== null) {
     chatStore.setMessageList(MessageList);
@@ -68,7 +68,7 @@ onMounted(async () => {
 
     if(assignedCustomers.value.length === 0) {
         const res = await whatsappApi.chatApi.getAllCustomer();
-        console.log("response",res)
+        // console.log("response",res)
         const customer = [];
         res.map(item => {
             // item.tags = ['test1', 'test2'];
@@ -96,7 +96,7 @@ onMounted(async () => {
 
             customer.push(newMessage);
         });
-        console.log("customercustomer",customer)
+        // console.log("customercustomer",customer)
         customerStore.setAssignedCustomers(customer);
         handleSelectCustomer(customer[0].phoneNumber, customer[0]._id);
         customerStore.setCurrentUserInfo(customer[0]);
