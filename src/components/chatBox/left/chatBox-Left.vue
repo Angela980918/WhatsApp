@@ -52,6 +52,7 @@ async function loadLocalMessage(guestPhone, userPhone) {
 
 onBeforeMount(async () => {
     const assignedCustomers = await JSON.parse(localStorage.getItem("assignedCustomers"));
+    if (assignedCustomers == null) return
     customerStore.setAssignedCustomers(assignedCustomers);
 })
 
