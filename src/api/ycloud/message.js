@@ -39,7 +39,10 @@ export const sendMessage = ({
         data[dynamicKey] = template
     }
 
-    else if (type && message !== undefined) {
+    else if (type !== 'text' && message !== undefined) {
+        const dynamicKey = `${type}`; // 动态变量名，例如 "text_message"
+        data[dynamicKey] = { link: message }; // 动态赋值
+    }else {
         const dynamicKey = `${type}`; // 动态变量名，例如 "text_message"
         data[dynamicKey] = { body: message }; // 动态赋值
     }

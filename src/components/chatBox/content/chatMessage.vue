@@ -15,7 +15,10 @@
                 </a-tooltip>
                 <a-tooltip>
                     <template #title>上傳文檔</template>
-                    <PaperClipOutlined style="font-size: 20px; margin: 4px;" />
+                    <PaperClipOutlined style="font-size: 20px; margin: 4px;" @click="uploadDoc"/>
+                    <input id="upload"
+                           accept="image/*,video/*,application/pdf,application/doc,application/excel"
+                           ref="fileInput" style="display: none" type="file" @change="sendDocMessage"/>
                 </a-tooltip>
                 <a-tooltip>
                     <template #title>選擇產品/服務</template>
@@ -35,7 +38,7 @@
                 </a-tooltip>
             </div>
             <div>
-                <a-button @click="sendMessage" type="primary" shape="circle" :size="size">
+                <a-button @click="sendMessage(`type`)" type="primary" shape="circle" :size="size">
                     <template #icon>
                         <SendOutlined />
                     </template>
@@ -49,7 +52,7 @@
 <!--        <Picker :data="emojiIndex" set="twitter" @select="showEmoji" />-->
 </template>
 
-<script setup>
+<script lang="ts" setup>
 import {
     ContainerOutlined,
     SmileOutlined,
@@ -66,6 +69,7 @@ import data from "emoji-mart-vue-fast/data/all.json";
 import "emoji-mart-vue-fast/css/emoji-mart.css";
 import { Picker, EmojiIndex } from "emoji-mart-vue-fast/src";
 import * as ycloudApi from "@/api/ycloud/index.js";
+import {cosApi} from "@/api/whatsapp/index.js";
 import {computed, defineProps, ref} from "vue";
 import {useCustomerStore} from "@/store/customerStore.js";
 import {useChatStore} from "@/store/chatStore";
@@ -82,6 +86,34 @@ const showEmoji = ref(false);
 const colTemp = ref(null)
 let emojiIndex = new EmojiIndex(data);
 const textAreaRef = ref(null);
+const fileInput = ref<HTMLInputElement | null>(null);
+
+const uploadDoc = () => {
+    fileInput.value?.click();
+};
+// 触发上传文件
+const sendDocMessage = async (event: Event) => {
+    const target = event.target as HTMLInputElement;
+    const files = target.files;
+    console.log("response",files[0])
+    if (files && files.length > 0) {
+        const response = await cosApi.uploadFile(files[0]);  // 上传文件
+
+        let type = files[0].type.split('/')[0];
+
+        if(type === "application") {
+            type = "document"
+        }
+        contentTxt.value = response;
+        // const resultObj = await ycloudApi.messageApi.sendMessage({
+        //     from: "+8613672967202",
+        //     to: currentPhone.value,
+        //     type: type,
+        //     message: response
+        // })
+        sendMessage(type)
+    }
+};
 function selectEmoji(emoji) {
     insertAtCursor(emoji.native);
 }
@@ -108,17 +140,16 @@ function insertAtCursor(text) {
     showSmile();
 }
 
-async function sendMessage() {
+async function sendMessage(type) {
 
-    const resultObj = await ycloudApi.messageApi.sendMessage({
+    const result = await ycloudApi.messageApi.sendMessage({
         from: "+8613672967202",
         to: currentPhone.value,
-        type: "text",
+        type: type,
         message: contentTxt.value
     })
-    const result = resultObj.data;
-    // console.log("发送消息",result)
-
+    // const result = resultObj.data;
+    // console.log("")
     let message = {
         position: "outbound",
         id: result.id,
@@ -126,7 +157,7 @@ async function sendMessage() {
         type: result.type,
         time: result.createTime
     }
-
+    console.log("message",message)
     if(result.type === 'text') {
         message.title = result.text.body;
     }else {

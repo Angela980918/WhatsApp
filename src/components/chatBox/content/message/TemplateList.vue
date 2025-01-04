@@ -72,12 +72,13 @@ import {FileImageOutlined, FilePdfOutlined, VideoCameraOutlined} from "@ant-desi
 
 const chatStore = useChatStore();
 const wabaId = computed(() => chatStore.wabaId);
+console.log("wabaId",wabaId.value)
 const template = useTempStore();
 const currentPhone = computed(() => chatStore.currentPhone);
 const templateList = computed(() => {
     let list = []
     template.rawTempData.map((item) => {
-        // console.log("item", item)
+        console.log("item", item)
         if (item.status === "APPROVED" && item.wabaId === wabaId.value) {
             let cloumn = {
                 key: item.key,
@@ -90,7 +91,7 @@ const templateList = computed(() => {
     })
     return list;
 })
-
+console.log("templateList",templateList.value)
 interface DataItem {
     key: string;
     name: string;
@@ -206,8 +207,8 @@ const sendTemplate = async (value) => {
         }
     }
 
-    const {data: resultObj} = await ycloudApi.messageApi.sendMessage(sendData)
-    // console.log("resultObj", resultObj);
+    const resultObj = await ycloudApi.messageApi.sendMessage(sendData)
+    console.log("resultObj", resultObj);
     // console.log("msgContent", msgContent);
     let message = {
         position: "outbound",

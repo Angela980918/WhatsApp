@@ -69,13 +69,13 @@ onMounted(async () => {
 
     if(assignedCustomers.value.length === 0) {
         const res = await whatsappApi.chatApi.getAllCustomer();
-        // console.log("response",res)
+        console.log("response",res)
         const customer = [];
         res.map(item => {
             // item.tags = ['test1', 'test2'];
             item.key = item._id;
             const color = generateRandomColor();
-            let newMessage = {
+            let newCustomer = {
                 id: item._id,
                 key: item.key,
                 name: item.customerId,
@@ -86,16 +86,16 @@ onMounted(async () => {
             }
 
             if(item.customerProfile != undefined) {
-                newMessage.name = item.customerProfile.name;
+                newCustomer.name = item.customerProfile.name;
             }
 
             if(item.messageList[0].type === 'text') {
-                newMessage.message = item.messageList[0].content.body;
+                newCustomer.message = item.messageList[0].content.body;
             }else {
-                newMessage.message = `[${item.messageList[0].type} Message]`;
+                newCustomer.message = `[${item.messageList[0].type} Message]`;
             }
 
-            customer.push(newMessage);
+            customer.push(newCustomer);
         });
         // console.log("customercustomer",customer)
         customerStore.setAssignedCustomers(customer);

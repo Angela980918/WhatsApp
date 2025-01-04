@@ -7,7 +7,8 @@ export const useChatStore = defineStore('chatStore', {
         currentPhone: "",
         chatMessages: [],     // 当前聊天记录
         showEmoji: true,
-        nowEmoji: true
+        nowEmoji: true,
+        wabaId: "449711484896804"
     }),
 
     actions: {
