@@ -1,13 +1,15 @@
 
 <template>
     <div style="display: flex; height: 100%; flex-direction: column;">
-        <TemplateList :currentPhone="currentPhone" ref="colTemp"  />
+<!--        模板消息选择-->
+        <TemplateList  :currentPhone="currentPhone" ref="colTemp" v-show="showTemp"  />
+
         <a-textarea name="messageContent" ref="textAreaRef"  v-model:value="contentTxt" placeholder="輸入內容" :rows="4" />
         <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px;">
             <div>
                 <a-tooltip>
                     <template #title>表情</template>
-                    <SmileOutlined class="inputText" style="font-size: 20px; margin: 4px;" @click="showSmile" />
+                    <SmileOutlined class="inputText" style="font-size: 20px; margin: 4px;" @click="showSmile"  ref="smileIcon"/>
                 </a-tooltip>
                 <a-tooltip>
                     <template #title>快捷回復</template>
@@ -17,7 +19,7 @@
                     <template #title>上傳文檔</template>
                     <PaperClipOutlined style="font-size: 20px; margin: 4px;" @click="uploadDoc"/>
                     <input id="upload"
-                           accept="image/*,video/*,application/pdf,application/doc,application/excel"
+                           accept="image/jpeg,image/png,video/mp4,application/pdf"
                            ref="fileInput" style="display: none" type="file" @change="sendDocMessage"/>
                 </a-tooltip>
                 <a-tooltip>
@@ -46,10 +48,13 @@
             </div>
         </div>
 
-            <Picker v-if="showEmoji" class="emojiPicker" :data="emojiIndex" set="twitter" @select="selectEmoji" />
-
+        <!-- 蒙版和表情Picker -->
+        <div v-if="showEmoji" class="emoji-mask" @click="showSmile">
+            <div class="emoji-picker-container" @click.stop :style="pickerStyle">
+                <Picker :data="emojiIndex" set="twitter" @select="selectEmoji" />
+            </div>
+        </div>
     </div>
-<!--        <Picker :data="emojiIndex" set="twitter" @select="showEmoji" />-->
 </template>
 
 <script lang="ts" setup>
@@ -61,7 +66,6 @@ import {
     FileTextOutlined,
     EnvironmentOutlined,
     AudioOutlined,
-    BorderOutlined,
     SendOutlined
 
 } from '@ant-design/icons-vue';
@@ -74,12 +78,14 @@ import {computed, defineProps, ref} from "vue";
 import {useCustomerStore} from "@/store/customerStore.js";
 import {useChatStore} from "@/store/chatStore";
 import { messageType } from '@/tools';
+import {message} from "ant-design-vue";
 import TemplateList from "@/components/chatBox/content/message/TemplateList.vue";
 
 const customerStore = useCustomerStore();
 const chatStore = useChatStore();
 const currentCustomerInfo = computed(() => customerStore.currentCustomerInfo);
 const currentPhone = computed(() => chatStore.currentPhone);
+
 const size = ref('large');
 const contentTxt = ref('');
 const showEmoji = ref(false);
@@ -87,6 +93,9 @@ const colTemp = ref(null)
 let emojiIndex = new EmojiIndex(data);
 const textAreaRef = ref(null);
 const fileInput = ref<HTMLInputElement | null>(null);
+const smileIcon = ref(null);
+const showTemp = ref(false);
+const pickerStyle = ref({ top: '0', left: '0' }); // Picker的位置
 
 const uploadDoc = () => {
     fileInput.value?.click();
@@ -95,33 +104,34 @@ const uploadDoc = () => {
 const sendDocMessage = async (event: Event) => {
     const target = event.target as HTMLInputElement;
     const files = target.files;
-    console.log("response",files[0])
+    let type = files[0].type.split('/')[0];
+    let fileContent = files[0];
+
+    if(fileContent.size <= 100 * 1024 * 1024) {
+        message.error("文件大小应小于100MB");
+    }
+
+    if(type === "application") {
+        type = "document"
+    }
+
     if (files && files.length > 0) {
-        const response = await cosApi.uploadFile(files[0]);  // 上传文件
-
-        let type = files[0].type.split('/')[0];
-
-        if(type === "application") {
-            type = "document"
-        }
+        const response = await cosApi.uploadFile(fileContent);  // 上传文件
         contentTxt.value = response;
-        // const resultObj = await ycloudApi.messageApi.sendMessage({
-        //     from: "+8613672967202",
-        //     to: currentPhone.value,
-        //     type: type,
-        //     message: response
-        // })
         sendMessage(type)
     }
 };
+
 function selectEmoji(emoji) {
     insertAtCursor(emoji.native);
 }
 
 function handleSubmit() {
+    // showTemp.value = !showTemp.value
     colTemp.value.controlTemp();
 }
 
+// 表情插入文本
 function insertAtCursor(text) {
     const textarea = textAreaRef.value;
     if (!textarea) return;
@@ -140,6 +150,7 @@ function insertAtCursor(text) {
     showSmile();
 }
 
+// 发送消息
 async function sendMessage(type) {
 
     const result = await ycloudApi.messageApi.sendMessage({
@@ -170,24 +181,64 @@ async function sendMessage(type) {
 }
 
 function showSmile() {
-    // console.log("8888888")
     showEmoji.value = !showEmoji.value
+    if (showEmoji.value) {
+        setPickerPosition();
+    }
 }
+
+// 表情模板位置计算
+const setPickerPosition = () => {
+    console.log("smileIcon.value",smileIcon.value.$el)
+    if (smileIcon.value) {
+        const rect = smileIcon.value.getBoundingClientRect(); // 获取图标的位置信息
+
+        const pickerHeight = 480; // Picker的高度
+        const windowHeight = window.innerHeight;
+        console.log("rect", rect)
+        if (rect.top < pickerHeight) {
+
+            pickerStyle.value = {
+                top: `${rect.bottom}px`,
+                left: `${rect.left}px`,
+            };
+        } else {
+
+            pickerStyle.value = {
+                top: `${rect.top - pickerHeight}px`,
+                left: `${rect.left}px`,
+            };
+        }
+    }
+};
 
 </script>
 
 <style scoped>
 .custom-input input {
-    text-align: left; /* 左对齐 */
-    font-size: 16px; /* 字体大小 */
-    line-height: 1.2; /* 调整行高，确保文字从顶部开始 */
-    padding: 8px 11px; /* 内部间距 */
+    text-align: left;
+    font-size: 16px;
+    line-height: 1.2;
+    padding: 8px 11px;
 }
 .inputText {
     position: relative;
 }
-.emojiPicker {
+
+.emoji-mask {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: transparent;
+    z-index: 1000;
+}
+
+.emoji-picker-container {
     position: absolute;
-    bottom: 200px;
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 </style>

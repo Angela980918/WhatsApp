@@ -18,7 +18,7 @@
                  :key="customer.id">
           <chat-box-left-item :color="customer.color" :name="customer.name" :time="customer.time" :message="customer.message"
                               :badgeCount="customer.badgeCount"
-                              :class="currentPhone == customer.phoneNumber?'chat-box-left-item-active':''"
+                              :class="currentChatId == customer.id?'chat-box-left-item-active':''"
 
           ></chat-box-left-item>
         </a-space>
@@ -41,7 +41,7 @@
                               :name="customer.name"
                               :time="customer.time" :message="customer.message"
                               :badgeCount="customer.badgeCount"
-                              :class="currentCustomerId == customer.id?'chat-box-left-item-active':''"
+                              :class="currentChatId == customer.id?'chat-box-left-item-active':''"
           >
           </chat-box-left-item>
         </a-space>
@@ -69,8 +69,8 @@ const props = defineProps({
 const emits = defineEmits(['loadLocalMessage'])
 const customerStore = useCustomerStore();
 const chatStore = useChatStore();
-const currentCustomerId = computed(()=> customerStore.currentUserId)
-const currentPhone = computed(() => chatStore.currentPhone);
+// const currentCustomerId = computed(()=> customerStore.currentUserId)
+const currentChatId = computed(() => chatStore.currentChatId);
 
 const assCount = ref(0);
 const unAssCount = ref(0);
@@ -83,7 +83,7 @@ const handleItemClick = (id: number, phoneNumber: string) => {
   const key = chatStore.currentPhone + "_" + "+8613672967202";
   localStorage.setItem(key, JSON.stringify(data));
   chatStore.clearChat();
-  customerStore.setCurrentUser(id)
+  // customerStore.setCurrentUser(id)
   chatStore.setCurrentChatId(id)
   chatStore.setCurrentPhone(phoneNumber)
   emits('loadLocalMessage', phoneNumber, "+8613672967202")

@@ -37,22 +37,22 @@ const handleSelectCustomer = (phone, id) => {
 };
 
 async function loadLocalMessage(guestPhone, userPhone) {
-    // console.log("guestPhone, userPhone",guestPhone, userPhone)
   const key = guestPhone + '_' + userPhone;
-    // console.log("keykeykeykey",key)
   const chatMessageStr = await localStorage.getItem(key);
-    // console.log("chatMessageStr",chatMessageStr)
+
   const MessageList = JSON.parse(chatMessageStr);
   if(MessageList !== null) {
     chatStore.setMessageList(MessageList);
   }
-
-
 }
 
 onBeforeMount(async () => {
     const assignedCustomers = await JSON.parse(localStorage.getItem("assignedCustomers"));
-    if (assignedCustomers == null) return
+    if (assignedCustomers == null) loadCustomerList();
+    loadLocalMessage(assignedCustomers[0].phoneNumber, '+8613672967202');
+    customerStore.setCurrentUserInfo(assignedCustomers[0]);
+    chatStore.setCurrentChatId(assignedCustomers[0].id)
+    chatStore.setCurrentPhone(assignedCustomers[0].phoneNumber)
     customerStore.setAssignedCustomers(assignedCustomers);
 })
 
@@ -65,46 +65,48 @@ const generateRandomColor = () => {
     return color;
 };
 
-onMounted(async () => {
+const loadCustomerList = async () => {
+    const res = await whatsappApi.chatApi.getAllCustomer();
+    console.log("response",res)
+    const customer = [];
+    res.map(item => {
+        // item.tags = ['test1', 'test2'];
+        item.key = item._id;
+        const color = generateRandomColor();
+        let newCustomer = {
+            id: item._id,
+            key: item.key,
+            name: item.customerId,
+            time: item.messageList[0].deliverTime,
+            badgeCount: item.messageCount,
+            phoneNumber: item.customerId,
+            color: color
+        }
 
-    if(assignedCustomers.value.length === 0) {
-        const res = await whatsappApi.chatApi.getAllCustomer();
-        console.log("response",res)
-        const customer = [];
-        res.map(item => {
-            // item.tags = ['test1', 'test2'];
-            item.key = item._id;
-            const color = generateRandomColor();
-            let newCustomer = {
-                id: item._id,
-                key: item.key,
-                name: item.customerId,
-                time: item.messageList[0].deliverTime,
-                badgeCount: item.messageCount,
-                phoneNumber: item.customerId,
-                color: color
-            }
+        if(item.customerProfile != undefined) {
+            newCustomer.name = item.customerProfile.name;
+        }
 
-            if(item.customerProfile != undefined) {
-                newCustomer.name = item.customerProfile.name;
-            }
+        if(item.messageList[0].type === 'text') {
+            newCustomer.message = item.messageList[0].content.body;
+        }else {
+            newCustomer.message = `[${item.messageList[0].type} Message]`;
+        }
 
-            if(item.messageList[0].type === 'text') {
-                newCustomer.message = item.messageList[0].content.body;
-            }else {
-                newCustomer.message = `[${item.messageList[0].type} Message]`;
-            }
+        customer.push(newCustomer);
+    });
+    // console.log("customercustomer",customer)
+    customerStore.setAssignedCustomers(customer);
+    handleSelectCustomer(customer[0].phoneNumber, customer[0]._id);
+    customerStore.setCurrentUserInfo(customer[0]);
+    loadLocalMessage(customer[0].phoneNumber, "+8613672967202")
+}
 
-            customer.push(newCustomer);
-        });
-        // console.log("customercustomer",customer)
-        customerStore.setAssignedCustomers(customer);
-        handleSelectCustomer(customer[0].phoneNumber, customer[0]._id);
-        customerStore.setCurrentUserInfo(customer[0]);
-        loadLocalMessage(customer[0].phoneNumber, "+8613672967202")
-    }
-
-})
+// onMounted(async () => {
+//     if(assignedCustomers.value.length === 0) {
+//
+//     }
+// })
 
 const siderStyle: CSSProperties = {
   textAlign: 'center',

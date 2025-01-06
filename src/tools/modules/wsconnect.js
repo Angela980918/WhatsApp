@@ -159,6 +159,7 @@ export const wsconnect = {
                 // 為當前用戶添加未讀
                 assignedCustomers.map(item => {
                     if(item.phoneNumber === whatsappMessage.from) {
+                        if(item.badgeCount === undefined) item.badgeCount = 0;
                         item.badgeCount++;
 
                         if(message.type === 'text') {
@@ -197,7 +198,7 @@ export const wsconnect = {
                         // item.message = message;
 
                         item.message = message;
-
+                        if(item.badgeCount === undefined) item.badgeCount = 0;
                         item.badgeCount++;
                     }
                 })
@@ -212,6 +213,7 @@ export const wsconnect = {
                             // item.message = message;
 
                             item.message = message;
+                            if(item.badgeCount === undefined) item.badgeCount = 0;
                             item.badgeCount++;
                         }
                     })

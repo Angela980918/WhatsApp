@@ -19,13 +19,12 @@
 <script lang="ts" setup>
 import {useRoute, useRouter} from "vue-router";
 import BreadcrumbItem from '@/components/Breadcrumb.vue';
-import {computed, onBeforeMount, onMounted, ref} from "vue";
+import {computed, onBeforeMount, onMounted, ref, watch} from "vue";
 import MenuItem from "@/components/MenuItem.vue";
 import {useChatStore} from "@/store/chatStore";
 import {useMenuStore} from "@/store/useMenuStore";
+import {useCustomerStore} from "@/store/customerStore"
 import {wsconnect, useMenuJump} from "@/tools"
-
-// console.log("useMenuJump",useMenuJump.menupush)
 import {storeToRefs} from "pinia";
 
 const route = useRoute();
@@ -42,28 +41,52 @@ const handleClickMenu = (menmenuInfo) => {
 };
 
 const collapsed = ref<boolean>(false);
-// const selectedKeys = computed({
-//     get: () => menuStore.selectedKeys,
-//     set: (newKeys) => {
-//         menuStore.selectedKeys = newKeys; // 更新 store 中的值
-//     },
-// });
+
 const { selectedKeys, openKeys } = storeToRefs(menuStore)
 // const openKeys = computed(() => menuStore.openKeys);
 
 const chatStore = useChatStore();
+const customerStore = useCustomerStore();
 
 onBeforeMount(() => {
     const pathname = window.location.pathname;
     menupush(pathname);
-    // useMenuJump.menupush(pathname);
-    // router.push({path: pathname});
-    // selectedKeys.value = [pathname]
-
 })
 
+
+// 动态更新页面标题
+const updateTitle = (unreadCount) => {
+    if (unreadCount > 0) {
+        document.title = `(${unreadCount}) 未读消息 - WhatsApp`;
+    } else {
+        document.title = 'WhatsApp平台';
+    }
+};
+
+// 监听未读消息变化
+watch(
+    [() => customerStore.assignedCustomers, () => customerStore.unassignedCustomers],
+    () => {
+        console.log("测试");
+        let result = customerStore.getAllUnReadNum;
+        updateTitle(result);
+        showNotification(result);
+    },
+    { deep: true } // 深度监听
+);
+
+// 显示浏览器通知（可选）
+const showNotification = (unreadCount) => {
+    if (unreadCount > 0 && Notification.permission === 'granted') {
+        new Notification('您有新消息', {
+            body: `您有 ${unreadCount} 条未读消息`,
+            // icon: '/path/to/icon.png', // 通知图标
+        });
+    }
+};
+
 onMounted(() => {
-  // wsconnect.createConnect();
+  wsconnect.createConnect();
 })
 </script>
 <style scoped>

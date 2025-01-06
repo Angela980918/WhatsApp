@@ -28,7 +28,7 @@ const chatStore = useChatStore()
 
 const currentChatId = computed(() => chatStore.currentChatId);
 
-const showRight = ref(true);
+const showRight = ref(false);
 
 function setShowRight() {
     showRight.value = !showRight.value;

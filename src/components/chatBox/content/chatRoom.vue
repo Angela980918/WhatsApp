@@ -44,9 +44,15 @@
                     <div v-for="item in data" >
                         <div>
                             <div :class="item.position === 'inbound' ? ['message-content'] : ['message-content right']">
-                                <div style="display: flex;flex-direction: column-reverse;">
+                                <div style="display: flex;flex-direction: column-reverse;" v-if="item.position === 'outbound'">
                                     <a-avatar style="margin-bottom: 10px;" size="large"
                                               src="https://randomuser.me/api/portraits/women/7.jpg"/>
+                                </div>
+                                <div style="display: flex;flex-direction: column-reverse;" v-else>
+                                    <a-avatar style="margin-bottom: 10px;" size="large"
+                                              src="https://randomuser.me/api/portraits/women/7.jpg"/>
+<!--                                    <a-avatar size="large" :style="{ backgroundColor: item.color }">{{ item.name }}</a-avatar>-->
+
                                 </div>
 
                                 <div :class="item.position === 'inbound' ? ['list-item-content'] : ['list-item-content content-right']">
@@ -345,16 +351,24 @@ const handleVisiable = (link) => {
     visiable.value = !visiable.value;
 }
 
+const getAvatarText = (name: string) => {
+    if(name === undefined) return
+    // 使用正则表达式过滤掉数字，只取字母或汉字
+    const filteredName = name.replace(/[0-9]/g, '');  // 移除数字
+    return filteredName.charAt(0).toUpperCase();  // 获取第一个非数字字母或汉字
+};
+
 
 // 在数据更新后自动滚动到底部
 onMounted(async () => {
     scrollToBottom();
 
     window.addEventListener('beforeunload', function (){
-        // console.log("onBeforeMount triggered");
         const key = chatStore.currentPhone + "_" + "+8613672967202";
         localStorage.setItem(key, JSON.stringify([...data.value]))
-        localStorage.setItem("test", "test")
+
+        const assignedCustomers = customerStore.getAssignedCustomers;
+        localStorage.setItem("assignedCustomers", JSON.stringify([...assignedCustomers]));
     })
 });
 //
