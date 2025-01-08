@@ -83,7 +83,7 @@ const handleItemClick = (id: number, phoneNumber: string) => {
   const key = chatStore.currentPhone + "_" + "+8613672967202";
   localStorage.setItem(key, JSON.stringify(data));
   chatStore.clearChat();
-  // customerStore.setCurrentUser(id)
+  customerStore.setCurrentUser(id)
   chatStore.setCurrentChatId(id)
   chatStore.setCurrentPhone(phoneNumber)
   emits('loadLocalMessage', phoneNumber, "+8613672967202")
