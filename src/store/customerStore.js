@@ -84,6 +84,7 @@ export const useCustomerStore = defineStore('customerStore', {
             this.ws.send('message', message);
         },
         setCurrentUserInfo(user) {
+            // console.log("usr",user)
             this.currentCustomerInfo = user;
         },
     },

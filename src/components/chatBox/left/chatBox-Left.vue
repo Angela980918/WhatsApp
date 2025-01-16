@@ -5,7 +5,7 @@
 
     <!--  分配列表  -->
     <chat-box-left-list :assignedCustomersData="assignedCustomers"
-                        :unassignedCustomersData="unassignedCustomers" @loadLocalMessage="loadLocalMessage"></chat-box-left-list>
+                        :unassignedCustomersData="unassignedCustomers" @loadChatMessage="loadChatMessage"></chat-box-left-list>
 
   </a-layout-sider>
 </template>
@@ -14,7 +14,7 @@
 import {computed, CSSProperties, onBeforeMount, onMounted, ref} from "vue";
 import ChatBoxLeftSearch from "@/components/chatBox/left/chatBox-Left-Search.vue";
 import ChatBoxLeftList from "@/components/chatBox/left/chatBox-Left-List.vue";
-
+import {handleTemplateMsg} from '@/tools/modules/common'
 import {useCustomerStore} from "@/store/customerStore";
 import {useChatStore} from "@/store/chatStore";
 
@@ -25,35 +25,27 @@ import * as whatsappApi from "@/api/whatsapp/index.js";
 const customerStore = useCustomerStore();
 const chatStore = useChatStore();
 
-// const assignedCustomers = computed(() => customerStore.getAssignedCustomers);
 const assignedCustomers = computed(() => customerStore.getAssignedCustomers);
 const unassignedCustomers = computed(() => customerStore.getUnassignedCustomers);
 
+
 // 选中的客户
-const handleSelectCustomer = (phone, id) => {
-  // 更新当前聊天的用户 ID
-  // customerStore.setCurrentUser(id);
-  chatStore.setCurrentPhone(phone, id);  // 设置当前聊天 ID，并加载聊天记录
-};
-
-async function loadLocalMessage(guestPhone, userPhone) {
-  const key = guestPhone + '_' + userPhone;
-  const chatMessageStr = await localStorage.getItem(key);
-
-  const MessageList = JSON.parse(chatMessageStr);
-  if(MessageList !== null) {
-    chatStore.setMessageList(MessageList);
+async function loadChatMessage(guestPhone, userPhone) {
+  if(chatStore.currentPhone != guestPhone) {
+      chatStore.setPage();
+      chatStore.setCurrentPhone(guestPhone)
+      loadMessageList();
   }
 }
 
 onBeforeMount(async () => {
-    const assignedCustomers = await JSON.parse(localStorage.getItem("assignedCustomers"));
-    if (assignedCustomers == null) loadCustomerList();
-    loadLocalMessage(assignedCustomers[0].phoneNumber, '+8613672967202');
-    customerStore.setCurrentUserInfo(assignedCustomers[0]);
-    chatStore.setCurrentChatId(assignedCustomers[0].id)
-    chatStore.setCurrentPhone(assignedCustomers[0].phoneNumber)
-    customerStore.setAssignedCustomers(assignedCustomers);
+    if(assignedCustomers.value.length === 0) {
+        await loadCustomerList()
+    }else {
+        chatStore.setCurrentUserInfo(assignedCustomers.value[0]);
+        chatStore.setCurrentChatId(assignedCustomers.value[0].id);
+        loadChatMessage(assignedCustomers.value[0].phoneNumber, '+8613672967202');
+    }
 })
 
 const generateRandomColor = () => {
@@ -65,12 +57,11 @@ const generateRandomColor = () => {
     return color;
 };
 
+// 加载用户列表
 const loadCustomerList = async () => {
     const res = await whatsappApi.chatApi.getAllCustomer();
-    console.log("response",res)
     const customer = [];
     res.map(item => {
-        // item.tags = ['test1', 'test2'];
         item.key = item._id;
         const color = generateRandomColor();
         let newCustomer = {
@@ -95,18 +86,51 @@ const loadCustomerList = async () => {
 
         customer.push(newCustomer);
     });
-    // console.log("customercustomer",customer)
+    // console.log("customer",customer)
     customerStore.setAssignedCustomers(customer);
-    handleSelectCustomer(customer[0].phoneNumber, customer[0]._id);
-    customerStore.setCurrentUserInfo(customer[0]);
-    loadLocalMessage(customer[0].phoneNumber, "+8613672967202")
+    // chatStore.setCurrentPhone(customer[0].phoneNumber);
+    chatStore.setCurrentUserInfo(customer[0]);
+    chatStore.setCurrentChatId(assignedCustomers.value[0].id)
+    loadChatMessage(customer[0].phoneNumber, "+8613672967202")
 }
 
-// onMounted(async () => {
-//     if(assignedCustomers.value.length === 0) {
-//
-//     }
-// })
+// 加载消息列表
+const loadMessageList = async () => {
+    let currentChatId = chatStore.getCurrentChatId;
+    let currentCustomerInfo = chatStore.currentCustomerInfo;
+    chatStore.setPage();
+    let data = {
+        id: currentChatId,
+        page: 1,
+        pageSize: 20
+    }
+    const res = await whatsappApi.chatApi.getMessageList(data);
+
+    res.messageList.reverse().map((item,index) => {
+        let fileExtension = "";
+        item.name = currentCustomerInfo.name;
+        item.color = currentCustomerInfo.color;
+        item.msgIndex = '1' + `-${index}` +'-index';
+        if(item.type === 'template') {
+            const name = item.content.name;
+            const language = item.content.language.code;
+            item.content = handleTemplateMsg(name, language);
+            if(item.content.header != undefined && item.content.header.format === 'DOCUMENT') {
+                const url = item.content.header.content;
+                fileExtension = url.split('.').pop();
+                item.fileExtension = fileExtension;
+            }
+        }else if(item.type === 'document') {
+            const url = item.content.link;
+            const filename = url.split('/').pop();
+            fileExtension = filename.split('.');
+            item.content.filename = filename;
+            item.fileExtension = fileExtension[1];
+        }
+    })
+
+    chatStore.setMessageList(res.messageList);
+}
 
 const siderStyle: CSSProperties = {
   textAlign: 'center',

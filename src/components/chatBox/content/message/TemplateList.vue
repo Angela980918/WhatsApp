@@ -1,8 +1,8 @@
 <template>
-
+    <div>
     <a-modal v-model:open="open" title="選擇模板" @ok="handleSubmit" :width="800">
         <div class="flex-container">
-            <a-table :columns="columns" :customRow="handleRowClick" rowKey="key" :row-class-name="setRowClassName" :data-source="templateList" style="width: 400px">
+            <a-table class="ant-table-striped" :columns="columns" :customRow="handleRowClick" rowKey="key" :row-class-name="(_record, index) => (index % 2 === 1 ? 'table-striped' : null)" :data-source="templateList" style="width: 400px" >
                 <template #bodyCell="{ column, record }">
                     <template v-if="column.key === 'action'">
                         <a @click="preViewTemp(record)">預覽</a>
@@ -64,10 +64,7 @@
             </div>
         </div>
     </a-modal>
-  <!--        <div class="contentRight" style="align-items: center">-->
-
-  <!--        </div>-->
-
+    </div>
 </template>
 
 <script lang="ts" setup>
@@ -76,32 +73,17 @@ import * as ycloudApi from "@/api/ycloud/index.js";
 import {useChatStore} from "@/store/chatStore";
 import {useTempStore} from "@/store/useTempStore";
 import {FileImageOutlined, FilePdfOutlined, VideoCameraOutlined} from "@ant-design/icons-vue";
-
+import {handleTemplateMsg} from '@/tools/modules/common'
 const chatStore = useChatStore();
 const wabaId = computed(() => chatStore.wabaId);
-console.log("wabaId", wabaId.value)
+
 const template = useTempStore();
 const currentPhone = computed(() => chatStore.currentPhone);
 const containerTemp = ref({});
 const selectedRow = ref<number | null>(0);
-const templateList = computed(() => {
-    let list = []
-    template.rawTempData.map((item) => {
-        console.log("item", item)
-        if (item.status === "APPROVED" && item.wabaId === wabaId.value) {
-            let cloumn = {
-                key: item.key,
-                name: item.name,
-                language: item.language,
-                components: item.components
-            }
-            list.push(cloumn)
-        }
-    })
-    return list;
-})
-console.log("templateList", templateList.value)
+const templateList = computed(() => template.getRawTemplateList);
 
+// 点击列
 const handleRowClick = (record: any) => {
     return {
         onClick: () => {
@@ -112,7 +94,7 @@ const handleRowClick = (record: any) => {
 };
 
 const setRowClassName = (record: any) => {
-    return record.key === selectedRow.value ? "highlight-row" : "";
+    return record.key === selectedRow.value ? 'highlight-row table-striped' : 'table-striped';
 };
 
 interface DataItem {
@@ -140,10 +122,10 @@ const columns = [
 ];
 
 let open = ref(false);
+// 蒙版
 const handleSubmit = () => {
     open.value = !open.value
 }
-
 
 defineExpose({
     controlTemp: () => {
@@ -152,11 +134,10 @@ defineExpose({
     }
 })
 
+// 发送模板信息处理
 const sendTemplate = async (value) => {
-
     // console.log("value", value);
-
-    const {components} = value
+    const {name, language, components} = value
 
     let sendData = {
         type: "template",
@@ -169,65 +150,50 @@ const sendTemplate = async (value) => {
         from: "+8613672967202",
         to: currentPhone.value
     }
-
-    let msgContent = {}
-
-    for (let index in components) {
-        if (components[index].type === "HEADER") {
-            msgContent.header = {
-                format: components[index].format,
-            }
-            // console.log("components[index].format", components[index].format)
-            if (components[index].format === "TEXT") {
-                msgContent.header.content = components[index].text;
-            } else {
-                msgContent.header.content = components[index].example.header_url[0]
-
-                //     修改调api传值(当header为媒体文件，特殊附加)
-                let body = {
-                    type: "header",
-                    parameters: [{
-                        type: components[index].format.toLowerCase()
-                    }]
-                }
-                const dynamicKey = `${body.parameters[0].type}`;
-                let typeIndex = body.parameters[0];
+    let msgContent = handleTemplateMsg(name, language);
+    for(let i in msgContent) {
+        let item = msgContent[i];
+        let obj = {};
+        obj.type = i;
+        if(i === 'header') {
+            if(item.format === 'TEXT') {
+                obj.parameters = [{ type: item.format.toLowerCase(), text: item.content }]
+            }else {
+                sendData.template.components = [];
+                obj.parameters = [{ type: item.format.toLowerCase() }]
+                const dynamicKey = `${obj.parameters[0].type}`;
+                let typeIndex = obj.parameters[0];
                 typeIndex[dynamicKey] = {
-                    link: components[index].example.header_url[0]
+                    link: item.content
                 };
-                sendData.template.components = [body];
-                // console.log("sendData", sendData)
-            }
-
-        } else if (components[index].type === "BODY") {
-            msgContent.body = {
-                content: components[index].text
-            }
-        } else if (components[index].type === "FOOTER") {
-            msgContent.footer = {
-                content: components[index].text
+                sendData.template.components.push(obj);
             }
         }
     }
 
     const resultObj = await ycloudApi.messageApi.sendMessage(sendData)
-    console.log("resultObj", resultObj);
-    // console.log("msgContent", msgContent);
+
     let message = {
-        position: "outbound",
-        id: resultObj.id,
+        direction: "outbound",
+        _id: resultObj.id,
         status: resultObj.status,
         type: resultObj.type,
-        time: resultObj.createTime,
+        deliverTime: resultObj.createTime,
+        content: msgContent
     }
-    let res = Object.assign(message, msgContent);
-    // console.log("tres", res)
-    chatStore.addMessage(res);
+
+    if(msgContent.header !== undefined && msgContent.header.format === 'DOCUMENT') {
+        const url = msgContent.header.content;
+        const filename = url.split('/').pop();
+        const fileExtension = filename.split('.');
+        message.fileExtension = fileExtension[1];
+    }
+
+    chatStore.addMessage(message);
 }
 
+// 预览模板处理
 const preViewTemp = (data) => {
-    // console.log("data",data.components);
-
     if(data.components === undefined) return;
     let components = data.components;
     let template = {
@@ -244,7 +210,7 @@ const preViewTemp = (data) => {
             if(item.format != 'TEXT') {
                 let obj = {};
                 obj = {
-                    url: item.example.header_url,
+                    url: item.example.header_url[0],
                     format: item.format,
                     type: item.type
                 }
@@ -255,7 +221,6 @@ const preViewTemp = (data) => {
 
         }
     })
-
     containerTemp.value = template;
 }
 
@@ -274,8 +239,12 @@ onMounted(() => {
     justify-content: space-between;
 }
 
-[data-doc-theme='light'] .ant-table-striped :deep(.highlight-row) td {
-    background-color: #f0f8ff !important;
+/* 浅色主题下的高亮行样式 */
+[data-doc-theme='light'] .ant-table-striped :deep(.table-striped) td {
+    background-color: #fafafa;
+}
+[data-doc-theme='dark'] .ant-table-striped :deep(.table-striped) td {
+    background-color: rgb(29, 29, 29);
 }
 
 .phoneBox {

@@ -11,7 +11,6 @@
       <div class="rmarkMain">
         <span>備註</span>
         <a-tooltip>
-          <template #title>表情</template>
           <PlusCircleOutlined class="inputText" style="font-size: 16px; margin: 4px;color: #535bf2"/>
         </a-tooltip>
       </div>
@@ -46,16 +45,18 @@ import ChatBoxRightImage from "@/components/chatBox/right/chatBox-right-image.vu
 import ChatBoxRightTips from "@/components/chatBox/right/chatBox-right-tips.vue"
 
 import {useCustomerStore} from "@/store/customerStore.js";
+import {useChatStore} from "@/store/chatStore.js";
 import {PlusCircleOutlined} from "@ant-design/icons-vue";
 import {storeToRefs} from "pinia";
 import {computed, onMounted, ref} from "vue";
 
 const activeKey = ref('1');
 const customerStore = useCustomerStore();
+const chatStore = useChatStore();
 const currentCustomerInfo = computed(() => {
   // 如果 currentCustomerInfo 是空对象，则返回 customers 中的第一个客户信息
-  return customerStore.currentCustomerInfo && Object.keys(customerStore.currentCustomerInfo).length > 0
-      ? customerStore.currentCustomerInfo
+  return chatStore.currentCustomerInfo && Object.keys(chatStore.currentCustomerInfo).length > 0
+      ? chatStore.currentCustomerInfo
       : customerStore.assignedCustomers[0] || {};
 });
 

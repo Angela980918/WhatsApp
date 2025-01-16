@@ -3,9 +3,9 @@
         <!-- 聊天框 -->
         <a-layout style="height: 100%; flex-direction: column;">
             <ImageView
-                :imgUrl="imgUrl"
-                :visiable="visiable"
-                @handleChange="handleVisiable"
+                    :imgUrl="imgUrl"
+                    :visiable="visiable"
+                    @handleChange="handleVisiable"
             />
             <!-- 头部：聊天标题或信息 -->
             <a-layout-header :style="headerStyle">
@@ -39,31 +39,34 @@
             </a-layout-header>
 
             <!-- 中间内容区域：显示聊天记录，可滚动 -->
-            <a-layout-content class="chatroom22" ref="chatRoom26" :style="contentStyle" style="width: 100%;">
-                <div class="chatRoom" ref="chatRoom">
-                    <div v-for="item in data" >
-                        <div>
-                            <div :class="item.position === 'inbound' ? ['message-content'] : ['message-content right']">
-                                <div style="display: flex;flex-direction: column-reverse;" v-if="item.position === 'outbound'">
+            <a-layout-content class="chatroom22" ref="chatRoom26" @scroll="scrolling" :style="contentStyle" style="width: 100%;">
+                <LoadingOutlined style="font-size: 50px" v-if="syncLoading" />
+                <div class="chatRoom" ref="chatRoom"  >
+                    <div v-for="item in data">
+                        <div :id="item.msgIndex">
+                            <div :class="item.direction === 'inbound' ? ['message-content'] : ['message-content right']">
+                                <div style="display: flex;flex-direction: column-reverse;"
+                                     v-if="item.direction === 'outbound'">
                                     <a-avatar style="margin-bottom: 10px;" size="large"
                                               src="https://randomuser.me/api/portraits/women/7.jpg"/>
                                 </div>
                                 <div style="display: flex;flex-direction: column-reverse;" v-else>
-                                    <a-avatar style="margin-bottom: 10px;" size="large"
-                                              src="https://randomuser.me/api/portraits/women/7.jpg"/>
-<!--                                    <a-avatar size="large" :style="{ backgroundColor: item.color }">{{ item.name }}</a-avatar>-->
+<!--                                    <a-avatar style="margin-bottom: 10px;" size="large"-->
+<!--                                              src="https://randomuser.me/api/portraits/women/7.jpg"/>-->
+                                    <a-avatar size="large" :style="{ backgroundColor: item.color }">{{ getAvatarText(item.name) }}</a-avatar>
+                                    <!--                                    <a-avatar size="large" :style="{ backgroundColor: item.color }">{{ item.name }}</a-avatar>-->
 
                                 </div>
 
-                                <div :class="item.position === 'inbound' ? ['list-item-content'] : ['list-item-content content-right']">
+                                <div :class="item.direction === 'inbound' ? ['list-item-content'] : ['list-item-content content-right']">
                                     <div v-if="item.type === 'text'">
-                                        <span>{{ item.title }}</span>
+                                        <span>{{ item.content.body  }}</span>
                                     </div>
 
                                     <div v-else-if="item.type === 'image'">
                                         <div style="position: relative;max-width: 350px;max-height: 350px;overflow: hidden">
                                             <a-image
-                                                :src="item.link"
+                                                    :src="item.content.link"
                                             />
                                         </div>
                                         <span>{{ item.title }}</span>
@@ -72,7 +75,7 @@
                                     <div v-else-if="item.type === 'video'">
                                         <div>
                                             <video ref="videoPlayer" width="100%" controls class="mt-2">
-                                                <source :src="item.link" type="video/mp4">
+                                                <source :src="item.content.link" type="video/mp4">
                                             </video>
                                             <span>{{ item.title }}</span>
                                         </div>
@@ -80,78 +83,79 @@
 
                                     <div v-else-if="item.type === 'document'">
                                         <div>
-                                            <a :href="item.link"
+                                            <a :href="item.content.link"
                                                download
                                                target="_blank"
-                                               style="display: flex; justify-content: center; font-size: 50px;width: 100%;padding: 15px; border-width: 1px; border-style: solid; border-radius: 10px; border-color: #0e0e0e0e;">
+                                               style="display: flex; justify-content: center; font-size: 50px;max-width: 100px;padding: 15px; border-width: 1px; border-style: solid; border-radius: 10px; border-color: #0e0e0e0e;">
+                                                <FilePdfOutlined v-if="item.fileExtension === 'pdf'" style="color: red; cursor: pointer;"/>
 
-                                                <FilePdfOutlined style="color: red; cursor: pointer;"/>
+                                                <FileExcelOutlined v-else-if="item.fileExtension === 'xls' || item.fileExtension === 'xlsx'" style="color: green; cursor: pointer;"/>
 
+                                                <FileWordOutlined v-else-if="item.fileExtension === 'doc' || item.fileExtension === 'docx'" style="color: blue; cursor: pointer;"/>
+
+                                                <FileOutlined v-else style="color: #DCDCDC; cursor: pointer;"/>
                                             </a>
-                                            <span>{{ item.title }}</span>
+                                            <span style="font-size: 14px;color:#A9A9A9">{{ item.content.filename }}</span>
                                         </div>
                                     </div>
 
                                     <div v-else-if="item.type === 'template'" style="width: 100%">
 
                                         <div class="content">
-                                            <div class="contentHeader" v-if="item.header != undefined">
-                                                <div v-if="item.header.format === 'TEXT'">
-                                                    <h6>{{item.header.content}}</h6>
-                                                </div>
+                                            <div class="contentHeader" v-if="item.content.header != undefined">
+                                                    <p v-if="item.content.header.format === 'TEXT'" style="font-size: 18px;color: rgb(162, 157, 174);">{{ item.content.header.content }}</p>
 
-                                                <div v-else-if="item.header.format === 'IMAGE'">
-<!--                                                    <img :src="item.header.content"-->
-<!--                                                 style="object-fit: cover;min-height: 220px;max-height: 300px;max-width: 100%;cursor: pointer;"-->
-<!--                                                 @click="handleVisiable(item.header.content)">-->
                                                     <a-image
-                                                        :src="item.header.content"
+                                                        v-else-if="item.content.header.format === 'IMAGE'"
+                                                            :src="item.content.header.content"
                                                     />
-                                                </div>
 
-                                                <div v-else-if="item.header.format === 'VIDEO'">
-                                                    <video ref="videoPlayer" width="100%" controls class="mt-2">
-                                                <source :src="item.header.content" type="video/mp4">
-                                            </video>
-                                                </div>
+                                                    <video v-else-if="item.content.header.format === 'VIDEO'" ref="videoPlayer" width="100%" controls class="mt-2">
+                                                        <source :src="item.content.header.content" type="video/mp4">
+                                                    </video>
 
-                                                <div v-else-if="item.header.format === 'DOCUMENT'">
-                                                    <a :href="item.header.content"
-                                               download
-                                               target="_blank"
-                                               style="display: flex; justify-content: center; font-size: 50px;width: 100%;padding: 15px; border-width: 1px; border-style: solid; border-radius: 10px; border-color: #0e0e0e0e;">
+                                                    <a :href="item.content.header.content"
+                                                       v-else-if="item.content.header.format === 'DOCUMENT'"
+                                                       download
+                                                       target="_blank"
+                                                       style="display: flex; justify-content: center; font-size: 50px;width: 100px;padding: 15px; border-width: 1px; border-style: solid; border-radius: 10px; border-color: #0e0e0e0e;">
+                                                        <FilePdfOutlined v-if="item.fileExtension === 'pdf'" style="color: red; cursor: pointer;"/>
 
-                                                <FilePdfOutlined style="color: red; cursor: pointer;"/>
+                                                        <FileExcelOutlined v-else-if="item.fileExtension === 'xls' || item.fileExtension === 'xlsx'" style="color: green; cursor: pointer;"/>
 
-                                            </a>
-                                                </div>
+                                                        <FileWordOutlined v-else-if="item.fileExtension === 'doc' || item.fileExtension === 'docx'" style="color: blue; cursor: pointer;"/>
+
+                                                        <FileOutlined v-else style="color: #DCDCDC; cursor: pointer;"/>
+                                                    </a>
                                             </div>
-                                            <span class="contentBody">{{item.body.content}}</span>
-                                            <span class="contentFooter" v-if="item.footer != undefined">
-                                                {{ item.footer.content }}
+                                            <span class="contentBody" v-html="item.content.body.content"></span>
+                                            <span class="contentFooter" v-if="item.content.footer != undefined">
+                                                 {{ item.content.footer.content }}
                                             </span>
                                         </div>
                                     </div>
                                 </div>
                             </div>
 
-                            <div :class="item.position === 'inbound' ? ['message-footer'] : ['message-footer', 'message-footer-right']">
-                                <span>{{ formatTime(item.time) }}</span>
-                                <span class="status-icon" v-if="item.position === 'outbound'">
+                            <div :class="item.direction === 'inbound' ? ['message-footer'] : ['message-footer', 'message-footer-right']">
+                                <span>{{ formatTime(item.deliverTime) }}</span>
+                                <span class="status-icon" v-if="item.direction === 'outbound'">
                                     <div v-if="item.status === 'delivered'">
                                         <CheckOutlined
-                                            style="padding-left: 12px;padding-right: 12px;color: black;font-size: 14px"/>
+                                                style="padding-left: 12px;padding-right: 12px;color: black;font-size: 14px"/>
                                     </div>
                                     <div v-else-if="item.status === 'read'">
                                         <CheckCircleTwoTone
-                                            style="padding-left: 12px;padding-right: 12px;color: green;font-size: 14px" two-tone-color="#52c41a"/>
+                                                style="padding-left: 12px;padding-right: 12px;color: green;font-size: 14px"
+                                                two-tone-color="#52c41a"/>
                                     </div>
                                     <div v-else-if="item.status === 'failed'">
                                         <ExclamationCircleOutlined
-                                            style="color: red;padding-left: 12px;padding-right: 12px;font-size: 14px"/>
+                                                style="color: red;padding-left: 12px;padding-right: 12px;font-size: 14px"/>
                                     </div>
                                     <div v-else-if="item.status === 'sent' || 'accepted'">
-                                        <LoadingOutlined style="color: black;padding-left: 12px;padding-right: 12px;font-size: 14px"/>
+                                        <LoadingOutlined
+                                                style="color: black;padding-left: 12px;padding-right: 12px;font-size: 14px"/>
                                     </div>
                                 </span>
                             </div>
@@ -176,7 +180,7 @@ import {
     nextTick,
     onBeforeMount,
     onBeforeUnmount,
-    onMounted,
+    onMounted, onUnmounted,
     onUpdated,
     ref,
     watch
@@ -189,8 +193,12 @@ import {
     ExclamationCircleOutlined,
     CheckOutlined,
     FilePdfOutlined,
+    FileExcelOutlined,
+    FileWordOutlined,
+    FileOutlined,
     LoadingOutlined,
-    CheckCircleTwoTone
+    CheckCircleTwoTone,
+    SyncOutlined
 } from '@ant-design/icons-vue';
 import ChatMessage from "@/components/chatBox/content/chatMessage.vue";
 import {formatTime} from '@/tools'
@@ -199,7 +207,7 @@ import {useChatStore} from "@/store/chatStore";
 import ImageView from "./message/ImageView.vue";
 
 const emits = defineEmits(['setShowRight'])
-
+const syncLoading = ref(false);
 // 获取 userStore 和 chatStore
 const customerStore = useCustomerStore();
 const assignedCustomers = computed(() => customerStore.assignedCustomers)
@@ -207,15 +215,15 @@ const assignedCustomers = computed(() => customerStore.assignedCustomers)
 const chatStore = useChatStore();
 
 
-const currentCustomerInfo = computed(() => customerStore.currentCustomerInfo)
+const currentCustomerInfo = computed(() => chatStore.currentCustomerInfo)
 
-watch(() => customerStore.currentUserId, (newUserId) => {
+watch(() => chatStore.currentChatId, (newUserId) => {
     // console.log('newUserId', newUserId)
     const user = customerStore.assignedCustomers.find(user => user.id === newUserId) ||
         customerStore.unassignedCustomers.find(user => user.id === newUserId);
     // console.log('user', user);
     if (user) {
-        customerStore.currentCustomerInfo = user;
+        chatStore.currentCustomerInfo = user;
         // console.log(customerStore.currentCustomerInfo)
     } else {
         console.warn(`未找到 ID 为 ${newUserId} 的用户。`);
@@ -225,6 +233,7 @@ watch(() => customerStore.currentUserId, (newUserId) => {
 
 const visiable = ref(false);
 const imgUrl = ref("");
+const prevScrollHeight = ref(0);
 
 // 模拟数据
 const customers = ref([
@@ -244,19 +253,11 @@ interface DataItem {
     link: string
 }
 
-
 const data = computed(() => {
     // console.log("chatStore.chatMessages",chatStore.chatMessages)
     return chatStore.chatMessages
 });
 const currentPhone = computed(() => chatStore.currentPhone);
-
-
-// const key = computed(() => {
-//   return chatStore.currentPhone + '_' + '+8613672967202'
-// });
-// console.log("key", key);
-
 
 const message = ref('');
 
@@ -333,17 +334,20 @@ const footerStyle = {
 // 滚动到最底部的函数
 const chatRoom = ref(null);
 const chatRoom26 = ref(null);
-const scrollToBottom = () => {
+const scrollToBottom = (prevHeight = null) => {
     nextTick(() => {
         const chatRoomElement = chatRoom26.value ? chatRoom26.value.$el : null;
         if (chatRoomElement) {
-            // console.log('scrollHeight:', chatRoomElement.scrollHeight); // 获取 scrollHeight
-            chatRoomElement.scrollTop = chatRoomElement.scrollHeight; // 设置 scrollTop
+            if (prevHeight === null) {
+                chatRoomElement.scrollTop = chatRoomElement.scrollHeight;
+            }else {
+                const firstMessageElement = document.getElementById(prevHeight);
+                if (firstMessageElement) firstMessageElement.scrollIntoView({ behavior: 'auto', block: 'start' });
+            }
         }
     });
 };
 const handleVisiable = (link) => {
-
     if (link !== undefined) {
         imgUrl.value = link;
     }
@@ -352,33 +356,43 @@ const handleVisiable = (link) => {
 }
 
 const getAvatarText = (name: string) => {
-    if(name === undefined) return
+    if (name === undefined) return
     // 使用正则表达式过滤掉数字，只取字母或汉字
     const filteredName = name.replace(/[0-9]/g, '');  // 移除数字
     return filteredName.charAt(0).toUpperCase();  // 获取第一个非数字字母或汉字
 };
 
-
+// 处理滚动条
+const scrolling = (e) => {
+    const scrollTop = e.target.scrollTop
+    // console.log("scrollTopscrollTopscrollTop", scrollTop)
+    // console.log("syncLoading.valuesyncLoading.value", syncLoading.value)
+    if(data.value.length === 0) return;
+    if (scrollTop === 0 && !syncLoading.value) {
+        syncLoading.value=true;
+        // console.log("滚动")
+        chatStore.loadMoreMessages();
+    }
+}
 // 在数据更新后自动滚动到底部
 onMounted(async () => {
-    scrollToBottom();
-
-    window.addEventListener('beforeunload', function (){
-        const key = chatStore.currentPhone + "_" + "+8613672967202";
-        localStorage.setItem(key, JSON.stringify([...data.value]))
-
-        const assignedCustomers = customerStore.getAssignedCustomers;
-        localStorage.setItem("assignedCustomers", JSON.stringify([...assignedCustomers]));
-    })
+    // scrollToBottom();
 });
-//
+
 onUpdated(async () => {
-    scrollToBottom();
+    // scrollToBottom();
 });
 
-watch(() => data,async () => {
+watch(() => data, async () => {
     await nextTick(); // 确保 DOM 已经更新
-    scrollToBottom();
+    // console.log("chatStore.page",chatStore.page)
+    if(chatStore.page === 1) {
+        scrollToBottom();
+    }else {
+        syncLoading.value=false;
+        const msgIndex = (chatStore.page-1) + '-0-index' ;
+        scrollToBottom(msgIndex);
+    }
 }, {deep: true})
 
 </script>
@@ -457,48 +471,48 @@ watch(() => data,async () => {
 }
 
 .content {
-          position: relative;
-          max-width: 350px;
-          /*max-height: 300px;*/
-          overflow: hidden;
-          background-color: rgb(255, 255, 255);
-          border-radius: 8px;
-          padding: 8px;
-          display: flex;
-          flex-direction: column;
+    position: relative;
+    max-width: 350px;
+    /*max-height: 300px;*/
+    overflow: hidden;
+    background-color: rgb(255, 255, 255);
+    border-radius: 8px;
+    padding: 8px;
+    display: flex;
+    flex-direction: column;
 
-          .contentHeader {
-            margin: 0px 0px 4px;
-            font-size: 16px;
-            font-weight: 600;
-            line-height: 24px;
-            font-family: Roboto, Helvetica, Arial, sans-serif;
-            letter-spacing: 0.00938em;
-            word-break: break-word;
-            white-space: break-spaces;
-          }
+    .contentHeader {
+        margin: 0px 0px 4px;
+        font-size: 16px;
+        font-weight: 600;
+        line-height: 24px;
+        font-family: Roboto, Helvetica, Arial, sans-serif;
+        letter-spacing: 0.00938em;
+        word-break: break-word;
+        white-space: break-spaces;
+    }
 
-          .contentBody {
-            margin: 0;
-            font-size: 16px;
-            font-weight: 400;
-            font-family: Roboto, Helvetica, Arial, sans-serif;
-            letter-spacing: 0.01071em;
-            line-height: 24px;
-            word-break: break-word;
-            white-space: break-spaces;
-          }
+    .contentBody {
+        margin: 0;
+        font-size: 16px;
+        font-weight: 400;
+        font-family: Roboto, Helvetica, Arial, sans-serif;
+        letter-spacing: 0.01071em;
+        line-height: 24px;
+        word-break: break-word;
+        white-space: break-spaces;
+    }
 
-          .contentFooter {
-            margin: 4px 0 0 0;
-            font-size: 14px;
-            font-weight: 400;
-            line-height: 22px;
-            font-family: Roboto, Helvetica, Arial, sans-serif;
-            letter-spacing: 0.00938em;
-            color: rgb(162, 157, 174);
-            overflow-wrap: break-word;
-          }
-        }
+    .contentFooter {
+        margin: 4px 0 0 0;
+        font-size: 14px;
+        font-weight: 400;
+        line-height: 22px;
+        font-family: Roboto, Helvetica, Arial, sans-serif;
+        letter-spacing: 0.00938em;
+        color: #A9A9A9;
+        overflow-wrap: break-word;
+    }
+}
 
 </style>

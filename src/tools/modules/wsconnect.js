@@ -1,8 +1,9 @@
 import {useChatStore} from "@/store/chatStore.js";
 import {useCustomerStore} from "@/store/customerStore.js";
 import { io } from 'socket.io-client';
-const chatStore = useChatStore();
-const customerStore = useCustomerStore();
+import {handleTemplateMsg} from "@/tools/index.js";
+
+
 let missedPongs = 0; // 记录服务器未响应的心跳次数
 const MAX_MISSED_PONGS = 3; // 最大未响应心跳次数
 let wsList = {};
@@ -141,7 +142,8 @@ export const wsconnect = {
 
         // 接收用戶消息
         connectWS.on(eventTypes.inbound_message, (value) => {
-
+            const customerStore = useCustomerStore();
+            const chatStore = useChatStore();
             let newValue = JSON.parse(value);
             // console.log("newValuenewValuenewValue",newValue);
 
@@ -154,8 +156,7 @@ export const wsconnect = {
 
             // 如果拿出的消息是当前沟通用户，添加到当前记录
             if(chatStore.currentPhone === whatsappMessage.from) {
-                let message = wsconnect.handleMessage(whatsappMessage, 'inbound')
-                // console.log("messagemessagemessage",message)
+                let message = wsconnect.handleMessage(whatsappMessage, 'inbound', jsonData.time)
                 // 為當前用戶添加未讀
                 assignedCustomers.map(item => {
                     if(item.phoneNumber === whatsappMessage.from) {
@@ -163,7 +164,7 @@ export const wsconnect = {
                         item.badgeCount++;
 
                         if(message.type === 'text') {
-                            item.message = message.title;
+                            item.message = message.content.body;
                         }else {
                             item.message = `${message.type} Message`
                         }
@@ -244,16 +245,14 @@ export const wsconnect = {
 
         // 本人發送消息
         connectWS.on(eventTypes.message, (value) => {
-
+            const chatStore = useChatStore();
             let newValue = JSON.parse(value);
             const jsonData = newValue.data;
             // console.log("newValuenewValuenewValue", newValue);
             let whatsappMessage = "";
             whatsappMessage = jsonData.whatsappMessage;
-
-            let message = wsconnect.handleMessage(whatsappMessage, "outbound")
-
-            const type = whatsappMessage.status;
+            let message = wsconnect.handleMessage(whatsappMessage, "outbound", jsonData.createTime)
+            const type = message.status;
 
             // let message = {
             //     position: "outbound",
@@ -272,16 +271,16 @@ export const wsconnect = {
 
             switch (type) {
                 case messageType.sent:
-                    chatStore.updateMessage(whatsappMessage.id, messageType.sent, message);
+                    chatStore.updateMessage(message._id, messageType.sent, message);
                     break;
                 case messageType.arrow:
-                    chatStore.updateMessage(whatsappMessage.id, messageType.arrow);
+                    chatStore.updateMessage(message._id, messageType.arrow);
                     break;
                 case messageType.failed:
-                    chatStore.updateMessage(whatsappMessage.id, messageType.failed);
+                    chatStore.updateMessage(message._id, messageType.failed);
                     break;
                 case messageType.read:
-                    chatStore.updateMessage(whatsappMessage.id, messageType.read);
+                    chatStore.updateMessage(message._id, messageType.read);
                     break;
                 default:
                     break
@@ -295,26 +294,28 @@ export const wsconnect = {
         })
 
         connectWS.on('template', (value) => {
-            // console.log("value",value)
         });
 
     },
-
-    handleMessage: (whatsAppMessage, position) => {
+    // 处理信息模块
+    handleMessage: (whatsAppMessage, position, time) => {
         whatsAppMessage.sendTime = undefined;
         let message = {
-            position: position,
-            id: whatsAppMessage.id,
+            direction: position,
+            _id: whatsAppMessage.id,
             type: whatsAppMessage.type,
             status: whatsAppMessage.status,
-            time: whatsAppMessage.sendTime
+            deliverTime: time,
+            content: {}
         }
 
         if(whatsAppMessage.type === 'text') {
-            message.title = whatsAppMessage.text.body;
+            message.content.body = whatsAppMessage.text.body;
         }else if(whatsAppMessage.type === 'image' || whatsAppMessage.type === 'video' || whatsAppMessage.type === 'document'){
-            message.link = whatsAppMessage[whatsAppMessage.type].link
-            message.title = whatsAppMessage[whatsAppMessage.type].caption
+            message.content.link = whatsAppMessage[whatsAppMessage.type].link
+            message.content.title = whatsAppMessage[whatsAppMessage.type].caption
+        }else if(whatsAppMessage.type === 'template') {
+            message.content = handleTemplateMsg(whatsAppMessage.template.name, whatsAppMessage.template.language.code)
         }
 
         return message;

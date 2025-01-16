@@ -1,14 +1,19 @@
 // stores/chatStore.js
 import { defineStore } from 'pinia';
+import {handleTemplateMsg} from "@/tools/index.js";
+import * as whatsappApi from "@/api/whatsapp/index.js";
+// import {useCustomerStore} from "@/store/customerStore";
 
 export const useChatStore = defineStore('chatStore', {
     state: () => ({
         currentChatId: 1,  // 当前聊天的 ID
         currentPhone: "",
+        currentCustomerInfo:{},
         chatMessages: [],     // 当前聊天记录
         showEmoji: true,
         nowEmoji: true,
-        wabaId: "449711484896804"
+        wabaId: "449711484896804",
+        page: 1
     }),
 
     actions: {
@@ -16,10 +21,10 @@ export const useChatStore = defineStore('chatStore', {
         setCurrentChatId(id) {
             this.currentChatId = id;
             // 每次切换用户时，模拟从 API 加载对应的聊天记录
-            this.loadChatMessages(id);
+            // this.loadChatMessages(id);
         },
         setCurrentPhone(phone) {
-            console.log("phonephone",phone)
+            // console.log("phonephone",phone)
             this.currentPhone = phone;
             // this.loadChatMessages(id);
         },
@@ -30,26 +35,45 @@ export const useChatStore = defineStore('chatStore', {
             this.nowEmoji = false;
             this.showEmoji = false;
         },
-
+        setPage() {
+            // console.log("777789789789789")
+           this.page = 1
+        },
         // 加载聊天记录的模拟数据
-        loadChatMessages(userId) {
-            // 这里模拟根据用户 ID 获取聊天记录
-            // 实际情况下，你可以从接口获取数据，下面是一些模拟数据
-            if (userId === 1) {
-                this.chatMessages = [
-                    { id: 1, user: 'John Doe', message: 'Hello, how are you?', time: '2024-12-03T12:36:00Z' },
-                    { id: 2, user: 'John Doe', message: 'Let me know your thoughts on the design.', time: '2024-12-03T13:20:00Z' },
-                ];
-            } else if (userId === 2) {
-                this.chatMessages = [
-                    { id: 1, user: 'Jane Smith', message: 'Can you help with the report?', time: '2024-12-03T14:00:00Z' },
-                ];
-            } else if (userId === 3) {
-                this.chatMessages = [
-                    { id: 1, user: 'Alice Johnson', message: 'Reminder about the meeting at 4 PM.', time: '2024-12-03T15:30:00Z' },
-                ];
+        async loadMoreMessages() {
+            // console.log("test17777")
+            ++this.page;
+            let data = {
+                id: this.currentChatId,
+                page: this.page,
+                pageSize: 20
             }
-            // 可以根据用户的 id 来模拟不同的聊天记录
+            const res = await whatsappApi.chatApi.getMessageList(data);
+            let currentCustomerInfo = this.currentCustomerInfo;
+            res.messageList.reverse().map((item,index) => {
+                let fileExtension = "";
+                item.name = currentCustomerInfo.name;
+                item.color = currentCustomerInfo.color;
+                item.msgIndex = this.page + `-${index}` +'-index';
+                if(item.type === 'template') {
+                    const name = item.content.name;
+                    const language = item.content.language.code;
+                    item.content = handleTemplateMsg(name, language);
+                    if(item.content.header !== undefined && item.content.header.format === 'DOCUMENT') {
+                        const url = item.content.header.content;
+                        // console.log("url",url)
+                        fileExtension = url.split('.').pop();
+                        item.fileExtension = fileExtension;
+                    }
+                }else if(item.type === 'document') {
+                    const url = item.content.link;
+                    const filename = url.split('/').pop();
+                    fileExtension = filename.split('.');
+                    item.content.filename = filename;
+                    item.fileExtension = fileExtension[1];
+                }
+            })
+            this.chatMessages = [...res.messageList,...this.chatMessages]
         },
         setMessageList(messageList) {
             this.chatMessages = [...messageList];
@@ -73,20 +97,22 @@ export const useChatStore = defineStore('chatStore', {
         updateMessage(id, status, message = {}) {
             let add = true;
             this.chatMessages.map(item => {
-                if(item.position === 'outbound' && item.id === id) {
+                if(item.direction === 'outbound' && item._id === id) {
                     add = false;
                     item.status = status;
                 }
             })
             if(add && status === 'sent') {
-                console.log("message", message)
                 this.chatMessages.push(message)
             }
+        },
+        setCurrentUserInfo(user) {
+            // console.log("usr",user)
+            this.currentCustomerInfo = user;
         },
 
         // 清空聊天记录
         clearChat() {
-            console.log("清空")
             this.chatMessages = [];
         },
     },

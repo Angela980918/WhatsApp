@@ -5,6 +5,7 @@ export function useMenuJump() {
     const router = useRouter();
     const menuStore = useMenuStore();
 
+    // 点击菜单跳转
     const menupush = (path, back = false) => {
         // console.log("pathpath",path)
         const indexNode = findParentRoute(path);
@@ -15,6 +16,7 @@ export function useMenuJump() {
         }
     };
 
+    // 菜单外按钮跳转
     const btnpush = (pathname) => {
         const indexNode = findKeys(pathname);
         if (indexNode) {
@@ -25,6 +27,7 @@ export function useMenuJump() {
         }
     }
 
+    // 父节点查找
     const findParentRoute = (path) => {
         // console.log("path",path)
         const allRouter = router.getRoutes().filter(route => route.path !== '/');

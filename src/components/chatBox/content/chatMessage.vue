@@ -19,7 +19,7 @@
                     <template #title>上傳文檔</template>
                     <PaperClipOutlined style="font-size: 20px; margin: 4px;" @click="uploadDoc"/>
                     <input id="upload"
-                           accept="image/jpeg,image/png,video/mp4,application/pdf"
+                           accept="image/jpeg,image/png,video/mp4,application/*"
                            ref="fileInput" style="display: none" type="file" @change="sendDocMessage"/>
                 </a-tooltip>
                 <a-tooltip>
@@ -40,7 +40,7 @@
                 </a-tooltip>
             </div>
             <div>
-                <a-button @click="sendMessage(`type`)" type="primary" shape="circle" :size="size">
+                <a-button @click="sendMessage(`text`)" type="primary" shape="circle" :size="size">
                     <template #icon>
                         <SendOutlined />
                     </template>
@@ -83,7 +83,7 @@ import TemplateList from "@/components/chatBox/content/message/TemplateList.vue"
 
 const customerStore = useCustomerStore();
 const chatStore = useChatStore();
-const currentCustomerInfo = computed(() => customerStore.currentCustomerInfo);
+const currentCustomerInfo = computed(() => chatStore.currentCustomerInfo);
 const currentPhone = computed(() => chatStore.currentPhone);
 
 const size = ref('large');
@@ -107,8 +107,10 @@ const sendDocMessage = async (event: Event) => {
     let type = files[0].type.split('/')[0];
     let fileContent = files[0];
 
-    if(fileContent.size <= 100 * 1024 * 1024) {
+    if(fileContent.size > 100 * 1024 * 1024) {
+        // console.log("fileContent",fileContent)
         message.error("文件大小应小于100MB");
+        return
     }
 
     if(type === "application") {
@@ -117,6 +119,7 @@ const sendDocMessage = async (event: Event) => {
 
     if (files && files.length > 0) {
         const response = await cosApi.uploadFile(fileContent);  // 上传文件
+
         contentTxt.value = response;
         sendMessage(type)
     }
@@ -159,21 +162,24 @@ async function sendMessage(type) {
         type: type,
         message: contentTxt.value
     })
-    // const result = resultObj.data;
-    // console.log("")
+
     let message = {
-        position: "outbound",
-        id: result.id,
+        direction: "outbound",
+        _id: result.id,
         status: result.status,
         type: result.type,
-        time: result.createTime
+        deliverTime: result.createTime,
+        content: {}
     }
-    console.log("message",message)
     if(result.type === 'text') {
-        message.title = result.text.body;
+        message.content.body = result.text.body;
     }else {
-        message.link = result[result.type].link
-        message.title = result[result.type].caption
+        message.content.link = result[result.type].link
+        // message.content.title = result[result.type].caption
+        const url = message.content.link;
+        const fileExtension = url.split('.').pop();
+        message.content.filename = fileExtension;
+        message.fileExtension = fileExtension[1];
     }
 
     contentTxt.value = "";
@@ -189,13 +195,11 @@ function showSmile() {
 
 // 表情模板位置计算
 const setPickerPosition = () => {
-    console.log("smileIcon.value",smileIcon.value.$el)
     if (smileIcon.value) {
         const rect = smileIcon.value.getBoundingClientRect(); // 获取图标的位置信息
 
         const pickerHeight = 480; // Picker的高度
         const windowHeight = window.innerHeight;
-        console.log("rect", rect)
         if (rect.top < pickerHeight) {
 
             pickerStyle.value = {

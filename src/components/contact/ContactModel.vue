@@ -75,7 +75,7 @@ const formRef = ref();
 const handleSubmit = () => {
     formRef.value.validate((valid) => {
         if (valid) {
-            console.log('提交成功', form.value);
+            // console.log('提交成功', form.value);
         } else {
             console.error('验证失败');
         }

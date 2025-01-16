@@ -1,6 +1,7 @@
 import {defineStore} from 'pinia'
 import {templateApi} from "@/api/ycloud/index.js";
 import {isEqual} from "lodash";
+import {useChatStore} from "@/store/chatStore.js";
 
 export const useTempStore = defineStore('template', {
     state: () => ({
@@ -13,10 +14,11 @@ export const useTempStore = defineStore('template', {
             if (this.isTemplatesLoaded) return;
 
             const response = await templateApi.getTemplateList();
-            if (response.status === 200) {
-                if (!isEqual(this.rawTempData, response.data.items)) {
-                    this.setRawTempData(response.data.items);
-                    this.setTempData(response.data.items);
+            // console.log("response",response)
+            if (response.items.length !== 0) {
+                if (!isEqual(this.rawTempData, response.items)) {
+                    this.setRawTempData(response.items);
+                    this.setTempData(response.items);
                     this.isTemplatesLoaded = true;
                 }
             }
@@ -31,6 +33,24 @@ export const useTempStore = defineStore('template', {
             this.tempData = data
         }, resetCreateTempData() {
             this.createTempData = [];
+        }
+    },getters:{
+        getRawTemplateList: (state) => {
+            const wabaId = useChatStore().wabaId;
+            let list = []
+            state.rawTempData.map((item) => {
+                if (item.status === "APPROVED" && item.wabaId === wabaId) {
+                    let cloumn = {
+                        key: item.key,
+                        name: item.name,
+                        language: item.language,
+                        components: item.components
+                    }
+                    list.push(cloumn)
+                }
+            })
+            // console.log("listlistlist",list)
+            return list;
         }
     }, persist: true
 })

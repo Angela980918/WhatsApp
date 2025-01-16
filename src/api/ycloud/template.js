@@ -54,12 +54,12 @@ export const createTemplate = ({
 
 export const getTemplateList = (
     page = 1,
-    limit = 10,
+    limit = 100,
     includeTotal = false,
     filter = {}
 ) => {
     return ycloudInstance({
-        url: '/whatsapp/templates', method: 'GET', data: {
+        url: '/whatsapp/templates', method: 'GET', params: {
             page,
             limit,
             includeTotal,
