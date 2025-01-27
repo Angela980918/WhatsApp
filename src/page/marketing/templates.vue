@@ -95,7 +95,7 @@
 </template>
 
 <script lang="ts" setup>
-import {computed, nextTick, onBeforeMount, reactive, ref} from 'vue';
+import {computed, onBeforeMount, reactive, ref} from 'vue';
 import WASelect from "@/components/templates/WASelect.vue";
 import {useRouter} from "vue-router";
 import {useTempStore} from '@/store/useTempStore'
@@ -114,7 +114,7 @@ import {getLabel} from '@/tools/modules/common'
 import {useMenuJump} from "@/tools"
 
 const router = useRouter();
-const { menupush, btnpush } = useMenuJump();
+const { btnpush } = useMenuJump();
 
 // icon、顔色變化
 const getTagColor = (status) => {
@@ -148,31 +148,38 @@ const columns = [
     title: '模板名稱',
     dataIndex: 'name',
     fixed: 'left',
+    width: '25%',
+    ellipsis: true,
   },
   {
     key: 2,
     title: '類別',
     dataIndex: 'category',
+    width: '15%',
   },
   {
     key: 3,
     title: '語言',
     dataIndex: 'language',
+    width: '20%',
   },
   {
     key: 4,
     title: '狀態',
     dataIndex: 'status',
+    width: '15%',
   },
   {
     key: 5,
     title: '最近更新',
     dataIndex: 'updateTime',
+    width: '20%',
   },
   {
     title: 'Action',
     key: 'operation',
-    fixed: 'right'
+    fixed: 'right',
+    width: '15%',
   },
 ];
 
