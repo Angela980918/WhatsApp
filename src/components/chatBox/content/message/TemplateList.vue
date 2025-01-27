@@ -1,69 +1,78 @@
 <template>
     <div>
-    <a-modal v-model:open="open" title="選擇模板" @ok="handleSubmit" :width="800">
-        <div class="flex-container">
-            <a-table class="ant-table-striped" :columns="columns" :customRow="handleRowClick" rowKey="key" :row-class-name="(_record, index) => (index % 2 === 1 ? 'table-striped' : null)" :data-source="templateList" style="width: 400px" >
-                <template #bodyCell="{ column, record }">
-                    <template v-if="column.key === 'action'">
-                        <a @click="preViewTemp(record)">預覽</a>
-                        <a-divider type="vertical"/>
-                        <span>
-                        <a-button @click="sendTemplate(record)" type="primary">发送</a-button>
+        <a-modal :footer="false" v-model:open="open" title="選擇模板" @ok="handleSubmit" :width="1000">
+            <div class="flex-container">
+                <a-table class="ant-table-striped" :columns="columns" :pagination="pagination"
+                         :customRow="handleRowClick" rowKey="key" :row-class-name="setRowClassName"
+                         :data-source="templateList" style="min-width: 600px">
+                    <template #bodyCell="{ column, record }">
+                        <template v-if="column.key === 'action'">
+                            <a @click="preViewTemp(record)">預覽</a>
+                            <a-divider type="vertical"/>
+                            <span>
+                        <a-button @click="confirm(record)" type="primary">发送</a-button>
                       </span>
+                        </template>
                     </template>
-                </template>
-            </a-table>
-            <div class="phoneBox"> <!-- 确保居中 -->
-                <div class="phone">
-                    <div class="phoneTop"/>
-                    <div class="phoneCenter">
-                        <div class="arrow"/>
-                        <div class="content">
-                            <h6 class="contentHeader" v-if="containerTemp.header.format === 'TEXT'">{{ containerTemp.header.text }}</h6>
-                            <div class="mediaCenter" v-else>
-                                <div v-if="containerTemp.header.format  === 'IMAGE'">
-                                    <a-flex v-if="containerTemp.header.url  !== ''" justify="center" align="center"
-                                            style="width: 100%; height: 130px">
-                                        <a-image height="100%" width="100%" :src="containerTemp.header.url"></a-image>
-                                    </a-flex>
-                                    <a-flex style="width: 100%; height: 130px; background: rgb(215, 213, 223)" v-else justify="center"
-                                            align="center">
-                                        <FileImageOutlined style="font-size: 50px; color: #ffffff;"/>
-                                    </a-flex>
+                </a-table>
+                <div class="phoneBox"> <!-- 确保居中 -->
+                    <div class="phone">
+                        <div class="phoneTop"/>
+                        <div class="phoneCenter">
+                            <div class="arrow"/>
+                            <div class="content">
+                                <h6 class="contentHeader" v-if="containerTemp.header.format === 'TEXT'">
+                                    {{ containerTemp.header.text }}</h6>
+                                <div class="mediaCenter" v-else>
+                                    <div v-if="containerTemp.header.format  === 'IMAGE'">
+                                        <a-flex v-if="containerTemp.header.url  !== ''" justify="center" align="center"
+                                                style="width: 100%; height: 130px">
+                                            <a-image height="100%" width="100%"
+                                                     :src="containerTemp.header.url"></a-image>
+                                        </a-flex>
+                                        <a-flex style="width: 100%; height: 130px; background: rgb(215, 213, 223)"
+                                                v-else justify="center"
+                                                align="center">
+                                            <FileImageOutlined style="font-size: 50px; color: #ffffff;"/>
+                                        </a-flex>
+                                    </div>
+                                    <div v-else-if="containerTemp.header.format  === 'VIDEO'">
+                                        <a-flex v-if="containerTemp.header.url !== ''" justify="center" align="center"
+                                                style="width: 100%; height: 130px">
+                                            <iframe :src="containerTemp.header.url" style="width: 100%; height: 100%">
+                                            </iframe>
+                                        </a-flex>
+                                        <a-flex style="width: 100%; height: 130px; background: rgb(215, 213, 223)"
+                                                v-else justify="center"
+                                                align="center">
+                                            <VideoCameraOutlined style="font-size: 50px; color: #ffffff;"/>
+                                        </a-flex>
+                                    </div>
+                                    <div v-else-if="containerTemp.header.format === 'DOCUMENT'">
+                                        <a-flex v-if="containerTemp.header.url !== ''" justify="center" align="center"
+                                                style="width: 100%; height: 130px">
+                                            <iframe :src="containerTemp.header.url" style="width: 100%; height: 130px">
+                                            </iframe>
+                                        </a-flex>
+                                        <a-flex style="width: 100%; height: 130px; background: rgb(215, 213, 223)"
+                                                v-else justify="center"
+                                                align="center">
+                                            <FilePdfOutlined style="font-size: 50px; color: #ffffff;"/>
+                                        </a-flex>
+                                    </div>
                                 </div>
-                                <div v-else-if="containerTemp.header.format  === 'VIDEO'">
-                                    <a-flex v-if="containerTemp.header.url !== ''" justify="center" align="center"
-                                            style="width: 100%; height: 130px">
-                                        <iframe :src="containerTemp.header.url" style="width: 100%; height: 100%">
-                                        </iframe>
-                                    </a-flex>
-                                    <a-flex style="width: 100%; height: 130px; background: rgb(215, 213, 223)" v-else justify="center"
-                                            align="center">
-                                        <VideoCameraOutlined style="font-size: 50px; color: #ffffff;"/>
-                                    </a-flex>
-                                </div>
-                                <div v-else-if="containerTemp.header.format === 'DOCUMENT'">
-                                    <a-flex v-if="containerTemp.header.url !== ''" justify="center" align="center"
-                                            style="width: 100%; height: 130px">
-                                        <iframe :src="containerTemp.header.url" style="width: 100%; height: 130px">
-                                        </iframe>
-                                    </a-flex>
-                                    <a-flex style="width: 100%; height: 130px; background: rgb(215, 213, 223)" v-else justify="center"
-                                            align="center">
-                                        <FilePdfOutlined style="font-size: 50px; color: #ffffff;"/>
-                                    </a-flex>
-                                </div>
-                            </div>
 
-                            <p class="contentBody" v-html="containerTemp.body.text"></p>
-                            <p class="contentFooter" v-if="containerTemp.footer != undefined">{{ containerTemp.footer.text }}</p>
+                                <p class="contentBody" v-html="containerTemp.body.text"></p>
+                                <p class="contentFooter" v-if="containerTemp.footer != undefined">
+                                    {{ containerTemp.footer.text }}</p>
+                            </div>
                         </div>
+                        <div class="phoneBottom"/>
                     </div>
-                    <div class="phoneBottom"/>
                 </div>
             </div>
-        </div>
-    </a-modal>
+            <Confirm ref="confirmRef" @sendMsg="sendTemplate" :msgName="selectName" msgType="模板消息"/>
+        </a-modal>
     </div>
 </template>
 
@@ -74,13 +83,18 @@ import {useChatStore} from "@/store/chatStore";
 import {useTempStore} from "@/store/useTempStore";
 import {FileImageOutlined, FilePdfOutlined, VideoCameraOutlined} from "@ant-design/icons-vue";
 import {handleTemplateMsg} from '@/tools/modules/common'
+import Confirm from "@/components/chatBox/content/message/Confirm.vue";
+
 const chatStore = useChatStore();
 const wabaId = computed(() => chatStore.wabaId);
 
 const template = useTempStore();
 const currentPhone = computed(() => chatStore.currentPhone);
 const containerTemp = ref({});
-const selectedRow = ref<number | null>(0);
+const selectedRow = ref<number | null>(1);
+const confirmRef = ref(null);
+const selectRecord = ref(null);
+const selectName = ref(null);
 const templateList = computed(() => template.getRawTemplateList);
 
 // 点击列
@@ -94,7 +108,21 @@ const handleRowClick = (record: any) => {
 };
 
 const setRowClassName = (record: any) => {
-    return record.key === selectedRow.value ? 'highlight-row table-striped' : 'table-striped';
+    return record.key === selectedRow.value ? 'table-striped' : '';
+};
+
+const confirm = (record) => {
+    const {name} = record
+    selectName.value = name;
+    selectRecord.value = record;
+    confirmRef.value.showModal();
+}
+
+// 分页配置
+const pagination = {
+    pageSize: 8,
+    // showSizeChanger: true,  // 是否显示切换每页数量的选择器
+    // pageSizeOptions: ['5', '10', '15'],  // 可选择的每页显示条数
 };
 
 interface DataItem {
@@ -135,32 +163,31 @@ defineExpose({
 })
 
 // 发送模板信息处理
-const sendTemplate = async (value) => {
-    // console.log("value", value);
-    const {name, language, components} = value
-
+const sendTemplate = async () => {
+    const {name, language, components} = selectRecord.value
+    //
     let sendData = {
         type: "template",
         template: {
-            name: value.name,
+            name: name,
             language: {
-                code: value.language
+                code: language
             }
         },
         from: "+8613672967202",
         to: currentPhone.value
     }
     let msgContent = handleTemplateMsg(name, language);
-    for(let i in msgContent) {
+    for (let i in msgContent) {
         let item = msgContent[i];
         let obj = {};
         obj.type = i;
-        if(i === 'header') {
-            if(item.format === 'TEXT') {
-                obj.parameters = [{ type: item.format.toLowerCase(), text: item.content }]
-            }else {
+        if (i === 'header') {
+            if (item.format === 'TEXT') {
+                obj.parameters = [{type: item.format.toLowerCase(), text: item.content}]
+            } else {
                 sendData.template.components = [];
-                obj.parameters = [{ type: item.format.toLowerCase() }]
+                obj.parameters = [{type: item.format.toLowerCase()}]
                 const dynamicKey = `${obj.parameters[0].type}`;
                 let typeIndex = obj.parameters[0];
                 typeIndex[dynamicKey] = {
@@ -182,7 +209,7 @@ const sendTemplate = async (value) => {
         content: msgContent
     }
 
-    if(msgContent.header !== undefined && msgContent.header.format === 'DOCUMENT') {
+    if (msgContent.header !== undefined && msgContent.header.format === 'DOCUMENT') {
         const url = msgContent.header.content;
         const filename = url.split('/').pop();
         const fileExtension = filename.split('.');
@@ -190,11 +217,12 @@ const sendTemplate = async (value) => {
     }
 
     chatStore.addMessage(message);
+    handleSubmit();
 }
 
 // 预览模板处理
 const preViewTemp = (data) => {
-    if(data.components === undefined) return;
+    if (data.components === undefined) return;
     let components = data.components;
     let template = {
         body: undefined,
@@ -202,12 +230,12 @@ const preViewTemp = (data) => {
         header: {},
     };
     components.map(item => {
-        if(item.type === 'BODY') {
+        if (item.type === 'BODY') {
             template.body = item;
-        }else if(item.type === 'FOOTER') {
+        } else if (item.type === 'FOOTER') {
             template.footer = item;
-        }else if(item.type === 'HEADER') {
-            if(item.format != 'TEXT') {
+        } else if (item.type === 'HEADER') {
+            if (item.format != 'TEXT') {
                 let obj = {};
                 obj = {
                     url: item.example.header_url[0],
@@ -215,7 +243,7 @@ const preViewTemp = (data) => {
                     type: item.type
                 }
                 template.header = obj;
-            }else {
+            } else {
                 template.header = item;
             }
 
@@ -240,11 +268,8 @@ onMounted(() => {
 }
 
 /* 浅色主题下的高亮行样式 */
-[data-doc-theme='light'] .ant-table-striped :deep(.table-striped) td {
-    background-color: #fafafa;
-}
-[data-doc-theme='dark'] .ant-table-striped :deep(.table-striped) td {
-    background-color: rgb(29, 29, 29);
+.ant-table-striped :deep(.table-striped) td {
+    background-color: #E8E8E8;
 }
 
 .phoneBox {

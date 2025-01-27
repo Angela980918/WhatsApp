@@ -152,11 +152,13 @@ export const wsconnect = {
             whatsappMessage = jsonData.whatsappInboundMessage;
 
             const assignedCustomers = customerStore.getAssignedCustomers;
-            const unAssignedCustomers = customerStore.getUnassignedCustomers;
+            // const unAssignedCustomers = customerStore.getUnassignedCustomers;
 
             // 如果拿出的消息是当前沟通用户，添加到当前记录
             if(chatStore.currentPhone === whatsappMessage.from) {
+                console.log("查看来到的消息", whatsappMessage)
                 let message = wsconnect.handleMessage(whatsappMessage, 'inbound', jsonData.time)
+                console.log("查看处理的消息", message)
                 // 為當前用戶添加未讀
                 assignedCustomers.map(item => {
                     if(item.phoneNumber === whatsappMessage.from) {
@@ -168,6 +170,9 @@ export const wsconnect = {
                         }else {
                             item.message = `${message.type} Message`
                         }
+
+                        message.name = item.name;
+                        message.color = item.color;
                     }
                 })
 
@@ -205,39 +210,45 @@ export const wsconnect = {
                 })
 
 
-                // 查詢是否是來自未訂閱的用戶信息
-                if(inserOrNot !== 1) {
-                    unAssignedCustomers.map(item => {
-                        if(item.phone === whatsappMessage.from) {
-                            inserOrNot = 1;
-                            item.time = whatsappMessage.sendTime;
-                            // item.message = message;
-
-                            item.message = message;
-                            if(item.badgeCount === undefined) item.badgeCount = 0;
-                            item.badgeCount++;
-                        }
-                    })
-                }else {
-                //     已訂閱更新
+                if(inserOrNot === 1) {
                     customerStore.setAssignedCustomers(assignedCustomers);
                     return;
                 }
 
+                // 查詢是否是來自未訂閱的用戶信息
+                // if(inserOrNot !== 1) {
+                //     unAssignedCustomers.map(item => {
+                //         if(item.phone === whatsappMessage.from) {
+                //             inserOrNot = 1;
+                //             item.time = whatsappMessage.sendTime;
+                //             // item.message = message;
+                //
+                //             item.message = message;
+                //             if(item.badgeCount === undefined) item.badgeCount = 0;
+                //             item.badgeCount++;
+                //         }
+                //     })
+                // }else {
+                // //     已訂閱更新
+                //
+                // }
+
                 // 插入新用戶
                 if(inserOrNot !== 1) {
+                    const color = wsconnect.generateRandomColor();
                     const userName = whatsappMessage.customerProfile.name;
-                    unAssignedCustomers.push({
+                    assignedCustomers.push({
                         phone: whatsappMessage.from,
                         name: userName,
                         time: whatsappMessage.sendTime,
                         message: message,
-                        badgeCount: 1
+                        badgeCount: 1,
+                        color: color
                     })
                 }
 
                 // 更新未訂閱
-                customerStore.setUnassignedCustomers(unAssignedCustomers);
+                customerStore.setAssignedCustomers(assignedCustomers);
                 // chatStore.addMessage(message);
 
             }
@@ -313,11 +324,19 @@ export const wsconnect = {
             message.content.body = whatsAppMessage.text.body;
         }else if(whatsAppMessage.type === 'image' || whatsAppMessage.type === 'video' || whatsAppMessage.type === 'document'){
             message.content.link = whatsAppMessage[whatsAppMessage.type].link
-            message.content.title = whatsAppMessage[whatsAppMessage.type].caption
+            message.content.caption = whatsAppMessage[whatsAppMessage.type].caption
         }else if(whatsAppMessage.type === 'template') {
             message.content = handleTemplateMsg(whatsAppMessage.template.name, whatsAppMessage.template.language.code)
         }
 
         return message;
+    },
+    generateRandomColor: () => {
+        const letters = '0123456789ABCDEF';
+        let color = '#';
+        for (let i = 0; i < 6; i++) {
+            color += letters[Math.floor(Math.random() * 16)];
+        }
+        return color;
     }
 };

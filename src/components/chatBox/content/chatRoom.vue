@@ -69,7 +69,7 @@
                                                     :src="item.content.link"
                                             />
                                         </div>
-                                        <span>{{ item.title }}</span>
+                                        <span>{{ item.content.caption }}</span>
                                     </div>
 
                                     <div v-else-if="item.type === 'video'">
@@ -77,7 +77,7 @@
                                             <video ref="videoPlayer" width="100%" controls class="mt-2">
                                                 <source :src="item.content.link" type="video/mp4">
                                             </video>
-                                            <span>{{ item.title }}</span>
+                                            <span>{{ item.content.caption }}</span>
                                         </div>
                                     </div>
 
@@ -95,7 +95,7 @@
 
                                                 <FileOutlined v-else style="color: #DCDCDC; cursor: pointer;"/>
                                             </a>
-                                            <span style="font-size: 14px;color:#A9A9A9">{{ item.content.filename }}</span>
+                                            <span style="font-size: 14px;color:#A9A9A9">{{ item.content.caption }}</span>
                                         </div>
                                     </div>
 
@@ -204,7 +204,7 @@ import ChatMessage from "@/components/chatBox/content/chatMessage.vue";
 import {formatTime} from '@/tools'
 
 import {useChatStore} from "@/store/chatStore";
-import ImageView from "./message/ImageView.vue";
+import ImageView from "@/components/chatBox/content/message/ImageView.vue";
 
 const emits = defineEmits(['setShowRight'])
 const syncLoading = ref(false);
@@ -219,8 +219,8 @@ const currentCustomerInfo = computed(() => chatStore.currentCustomerInfo)
 
 watch(() => chatStore.currentChatId, (newUserId) => {
     // console.log('newUserId', newUserId)
-    const user = customerStore.assignedCustomers.find(user => user.id === newUserId) ||
-        customerStore.unassignedCustomers.find(user => user.id === newUserId);
+    const user = customerStore.assignedCustomers.find(user => user.id === newUserId)
+        // customerStore.unassignedCustomers.find(user => user.id === newUserId);
     // console.log('user', user);
     if (user) {
         chatStore.currentCustomerInfo = user;

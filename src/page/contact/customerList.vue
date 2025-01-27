@@ -47,8 +47,8 @@
 </template>
 <script lang="ts" setup>
 import {computed, onMounted, reactive, ref} from 'vue';
-import * as ycloudApi from "../../api/ycloud/index.js";
-import ContactModel from "../../components/contact/ContactModel.vue";
+import * as ycloudApi from "@/api/ycloud/index.js";
+// import QuickMsg from "@/components/contact/QuickMsg.vue";
 
 type Key = string | number;
 

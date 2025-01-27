@@ -65,7 +65,7 @@ const updateTitle = (unreadCount) => {
 
 // 监听未读消息变化
 watch(
-    [() => customerStore.assignedCustomers, () => customerStore.unassignedCustomers],
+    [() => customerStore.assignedCustomers],
     () => {
         console.log("测试");
         let result = customerStore.getAllUnReadNum;

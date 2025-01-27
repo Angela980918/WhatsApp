@@ -18,6 +18,7 @@ export const sendMessage = ({
     to,
     type,
     message,
+    link,
     context,
     externalId,
     filterUnsubscribed,
@@ -40,7 +41,7 @@ export const sendMessage = ({
     }
     else if (type !== 'text' && message !== undefined) {
         const dynamicKey = `${type}`; // 动态变量名，例如 "text_message"
-        data[dynamicKey] = { link: message }; // 动态赋值
+        data[dynamicKey] = { link: link, caption: message }; // 动态赋值
     }else {
         const dynamicKey = `${type}`; // 动态变量名，例如 "text_message"
         data[dynamicKey] = { body: message }; // 动态赋值

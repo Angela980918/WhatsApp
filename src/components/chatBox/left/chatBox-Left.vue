@@ -3,9 +3,9 @@
     <!--  搜索框  -->
     <chat-box-left-search></chat-box-left-search>
 
-    <!--  分配列表  -->
+    <!--  分配列表 :unassignedCustomersData="unassignedCustomers" -->
     <chat-box-left-list :assignedCustomersData="assignedCustomers"
-                        :unassignedCustomersData="unassignedCustomers" @loadChatMessage="loadChatMessage"></chat-box-left-list>
+                         @loadChatMessage="loadChatMessage"></chat-box-left-list>
 
   </a-layout-sider>
 </template>
@@ -26,13 +26,15 @@ const customerStore = useCustomerStore();
 const chatStore = useChatStore();
 
 const assignedCustomers = computed(() => customerStore.getAssignedCustomers);
-const unassignedCustomers = computed(() => customerStore.getUnassignedCustomers);
+// const unassignedCustomers = computed(() => customerStore.getUnassignedCustomers);
 
 
 // 选中的客户
-async function loadChatMessage(guestPhone, userPhone) {
-  if(chatStore.currentPhone != guestPhone) {
+async function loadChatMessage(guestPhone, id) {
+  if(chatStore.currentPhone !== guestPhone) {
+      chatStore.clearChat();
       chatStore.setPage();
+      chatStore.setCurrentChatId(id)
       chatStore.setCurrentPhone(guestPhone)
       loadMessageList();
   }
@@ -43,8 +45,8 @@ onBeforeMount(async () => {
         await loadCustomerList()
     }else {
         chatStore.setCurrentUserInfo(assignedCustomers.value[0]);
-        chatStore.setCurrentChatId(assignedCustomers.value[0].id);
-        loadChatMessage(assignedCustomers.value[0].phoneNumber, '+8613672967202');
+        // chatStore.setCurrentChatId();
+        loadChatMessage(assignedCustomers.value[0].phoneNumber, assignedCustomers.value[0].id);
     }
 })
 
@@ -90,8 +92,8 @@ const loadCustomerList = async () => {
     customerStore.setAssignedCustomers(customer);
     // chatStore.setCurrentPhone(customer[0].phoneNumber);
     chatStore.setCurrentUserInfo(customer[0]);
-    chatStore.setCurrentChatId(assignedCustomers.value[0].id)
-    loadChatMessage(customer[0].phoneNumber, "+8613672967202")
+    // chatStore.setCurrentChatId()
+    loadChatMessage(customer[0].phoneNumber, assignedCustomers.value[0].id)
 }
 
 // 加载消息列表

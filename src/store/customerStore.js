@@ -91,9 +91,9 @@ export const useCustomerStore = defineStore('customerStore', {
 
     getters: {
         getAssignedCustomers: (state) => state.assignedCustomers,
-        getUnassignedCustomers: (state) => state.unassignedCustomers,
+        // getUnassignedCustomers: (state) => state.unassignedCustomers,
         getAllUnReadNum: (state) => {
-            const allCustomers = [...state.assignedCustomers, ...state.unassignedCustomers];
+            const allCustomers = [...state.assignedCustomers];
             return allCustomers.reduce((count, item) => count + (item.badgeCount || 0), 0);
         },
 

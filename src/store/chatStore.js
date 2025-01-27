@@ -10,8 +10,6 @@ export const useChatStore = defineStore('chatStore', {
         currentPhone: "",
         currentCustomerInfo:{},
         chatMessages: [],     // 当前聊天记录
-        showEmoji: true,
-        nowEmoji: true,
         wabaId: "449711484896804",
         page: 1
     }),
@@ -113,6 +111,7 @@ export const useChatStore = defineStore('chatStore', {
 
         // 清空聊天记录
         clearChat() {
+            console.log("123456798")
             this.chatMessages = [];
         },
     },

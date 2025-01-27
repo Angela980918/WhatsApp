@@ -1,10 +1,35 @@
 
 <template>
     <div style="display: flex; height: 100%; flex-direction: column;">
-<!--        模板消息选择-->
+        <!--        模板消息选择-->
         <TemplateList  :currentPhone="currentPhone" ref="colTemp" v-show="showTemp"  />
 
-        <a-textarea name="messageContent" ref="textAreaRef"  v-model:value="contentTxt" placeholder="輸入內容" :rows="4" />
+        <!--        快捷回复-->
+        <QuickMsg ref="quickRef" :showQuickList="true"/>
+
+        <!--        输入文本信息-->
+        <a-textarea @pressEnter="sendMessage()" name="messageContent" ref="textAreaRef"  v-model:value="contentTxt" placeholder="輸入內容" :rows="4" />
+
+        <!--        选择的文件显示栏位-->
+        <div v-if="messageType !== 'text'"
+             style="margin-top: 10px; width: 100%; max-height: 56px; overflow: hidden; padding: 10px; border-width: 1px; border-radius: 10px; border-color: #EFEDF5; border-style: solid; background-color:#EFEDF5;">
+            <div style="width: 100%; display: flex; align-items: center; position: relative; height: 40px; overflow: hidden;">
+
+                <!-- 图片或文件图标 -->
+                <img v-if="messageType === 'image'" :src="docTxt"
+                     style="width: 40px; height: 40px; object-fit: contain; cursor: pointer;" />
+                <FileTextFilled v-else style="color: #DCDCDC; cursor: pointer; font-size: 40px;"/>
+
+                <!-- 文件名，flex-grow使其占用剩余空间 -->
+                <span style="margin-left: 10px; font-size: 14px;">
+            {{ getFileName() }}
+        </span>
+
+                <!-- 关闭图标，靠右对齐 -->
+                <CloseCircleFilled class="closeBtn" @click="clearFile"/>
+            </div>
+        </div>
+
         <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px;">
             <div>
                 <a-tooltip>
@@ -13,7 +38,7 @@
                 </a-tooltip>
                 <a-tooltip>
                     <template #title>快捷回復</template>
-                    <MessageOutlined style="font-size: 20px; margin: 4px;" />
+                    <MessageOutlined style="font-size: 20px; margin: 4px;" @click="showQuickMsg"/>
                 </a-tooltip>
                 <a-tooltip>
                     <template #title>上傳文檔</template>
@@ -40,7 +65,7 @@
                 </a-tooltip>
             </div>
             <div>
-                <a-button @click="sendMessage(`text`)" type="primary" shape="circle" :size="size">
+                <a-button @click="sendMessage" type="primary" shape="circle" :size="size">
                     <template #icon>
                         <SendOutlined />
                     </template>
@@ -59,27 +84,29 @@
 
 <script lang="ts" setup>
 import {
+    AudioOutlined,
+    CloseCircleFilled,
     ContainerOutlined,
-    SmileOutlined,
+    EnvironmentOutlined,
+    FileTextFilled,
+    FileTextOutlined,
     MessageOutlined,
     PaperClipOutlined,
-    FileTextOutlined,
-    EnvironmentOutlined,
-    AudioOutlined,
-    SendOutlined
-
+    SendOutlined,
+    SmileOutlined
 } from '@ant-design/icons-vue';
 import data from "emoji-mart-vue-fast/data/all.json";
 import "emoji-mart-vue-fast/css/emoji-mart.css";
-import { Picker, EmojiIndex } from "emoji-mart-vue-fast/src";
+import {EmojiIndex, Picker} from "emoji-mart-vue-fast/src";
 import * as ycloudApi from "@/api/ycloud/index.js";
 import {cosApi} from "@/api/whatsapp/index.js";
-import {computed, defineProps, ref} from "vue";
+import {computed, ref} from "vue";
 import {useCustomerStore} from "@/store/customerStore.js";
 import {useChatStore} from "@/store/chatStore";
-import { messageType } from '@/tools';
+import {messageType} from '@/tools';
 import {message} from "ant-design-vue";
 import TemplateList from "@/components/chatBox/content/message/TemplateList.vue";
+import QuickMsg from "@/components/contact/QuickMsg.vue";
 
 const customerStore = useCustomerStore();
 const chatStore = useChatStore();
@@ -88,6 +115,10 @@ const currentPhone = computed(() => chatStore.currentPhone);
 
 const size = ref('large');
 const contentTxt = ref('');
+const docTxt = ref(null);
+const messageType = ref('text');
+
+const quickRef = ref(null);
 const showEmoji = ref(false);
 const colTemp = ref(null)
 let emojiIndex = new EmojiIndex(data);
@@ -120,10 +151,21 @@ const sendDocMessage = async (event: Event) => {
     if (files && files.length > 0) {
         const response = await cosApi.uploadFile(fileContent);  // 上传文件
 
-        contentTxt.value = response;
-        sendMessage(type)
+        docTxt.value = response;
+        messageType.value = type;
+        // sendMessage(type)
+
     }
 };
+
+function getFileName() {
+    return  docTxt.value.split('/').pop();
+}
+
+function clearFile() {
+    messageType.value = 'text';
+    docTxt.value = null;
+}
 
 function selectEmoji(emoji) {
     insertAtCursor(emoji.native);
@@ -132,6 +174,10 @@ function selectEmoji(emoji) {
 function handleSubmit() {
     // showTemp.value = !showTemp.value
     colTemp.value.controlTemp();
+}
+
+function showQuickMsg() {
+    quickRef.value.setOpen()
 }
 
 // 表情插入文本
@@ -154,15 +200,21 @@ function insertAtCursor(text) {
 }
 
 // 发送消息
-async function sendMessage(type) {
-
-    const result = await ycloudApi.messageApi.sendMessage({
+async function sendMessage() {
+    console.log("docTxt.value", docTxt.value)
+    let data = {
         from: "+8613672967202",
         to: currentPhone.value,
-        type: type,
+        type: 'text',
         message: contentTxt.value
-    })
+    };
+    if(docTxt.value !== null) {
+        data.type = messageType.value;
+        data.link = docTxt.value;
+    }
 
+    const result = await ycloudApi.messageApi.sendMessage(data)
+    //
     let message = {
         direction: "outbound",
         _id: result.id,
@@ -175,14 +227,15 @@ async function sendMessage(type) {
         message.content.body = result.text.body;
     }else {
         message.content.link = result[result.type].link
-        // message.content.title = result[result.type].caption
         const url = message.content.link;
-        const fileExtension = url.split('.').pop();
-        message.content.filename = fileExtension;
-        message.fileExtension = fileExtension[1];
+        // message.content.filename = fileExtension;
+        message.fileExtension = url.split('.').pop();
+        message.content.caption = result[result.type].caption;
     }
-
+    //
     contentTxt.value = "";
+    messageType.value = "text";
+    docTxt.value = null;
     chatStore.addMessage(message);
 }
 
@@ -244,5 +297,15 @@ const setPickerPosition = () => {
     background-color: white;
     border-radius: 8px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.closeBtn {
+    color: #B5B5B5;
+    cursor: pointer;
+    font-size: 30px;
+    margin-left: auto;
+}
+.closeBtn:hover {
+    color: #7B68EE
 }
 </style>
