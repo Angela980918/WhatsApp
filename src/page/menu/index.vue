@@ -24,13 +24,19 @@ import MenuItem from "@/components/MenuItem.vue";
 import {useChatStore} from "@/store/chatStore";
 import {useMenuStore} from "@/store/useMenuStore";
 import {useCustomerStore} from "@/store/customerStore"
+import {useTempStore} from '@/store/useTempStore'
 import {wsconnect, useMenuJump} from "@/tools"
 import {storeToRefs} from "pinia";
 
 const route = useRoute();
 const router = useRouter();
+const chatStore = useChatStore();
+const customerStore = useCustomerStore();
+const tempStore = useTempStore();
 const menuStore = useMenuStore();
 const { menupush } = useMenuJump();
+
+// 路由list & menu菜单点击
 const routes = computed(() => {
   return router.getRoutes().filter((route) => {
     return route.meta?.toplevel == true;
@@ -39,20 +45,16 @@ const routes = computed(() => {
 const handleClickMenu = (menmenuInfo) => {
     menupush(menmenuInfo.key);
 };
-
 const collapsed = ref<boolean>(false);
-
 const { selectedKeys, openKeys } = storeToRefs(menuStore)
 // const openKeys = computed(() => menuStore.openKeys);
 
-const chatStore = useChatStore();
-const customerStore = useCustomerStore();
 
 onBeforeMount(() => {
+    // 当前路由刷新，维系菜单打开状态
     const pathname = window.location.pathname;
     menupush(pathname);
 })
-
 
 // 动态更新页面标题
 const updateTitle = (unreadCount) => {
@@ -67,15 +69,14 @@ const updateTitle = (unreadCount) => {
 watch(
     [() => customerStore.assignedCustomers],
     () => {
-        console.log("测试");
         let result = customerStore.getAllUnReadNum;
         updateTitle(result);
         showNotification(result);
     },
-    { deep: true } // 深度监听
+    { deep: true }
 );
 
-// 显示浏览器通知（可选）
+// 显示浏览器通知
 const showNotification = (unreadCount) => {
     if (unreadCount > 0 && Notification.permission === 'granted') {
         new Notification('您有新消息', {
@@ -85,9 +86,22 @@ const showNotification = (unreadCount) => {
     }
 };
 
-onMounted(() => {
+onMounted(async () => {
+  //   开启ws链接
   wsconnect.createConnect();
+
+  //   加载模板列表
+  await tempStore.loadTemplates();
+
+  //   加载快捷用语
+  await tempStore.loadQuickMsg();
+
+  //   加载快捷用语(固定首先加载登入用户所在公司的公共素材)
+  await tempStore.setMaterialListData('wabaId=449711484896804');
 })
+
+
+
 </script>
 <style scoped>
 #components-layout-demo-side .logo {

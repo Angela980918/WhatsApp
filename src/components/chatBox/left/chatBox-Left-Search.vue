@@ -1,10 +1,11 @@
 <script lang="ts" setup>
 import {ref} from 'vue';
+import {useCustomerStore} from "@/store/customerStore";
 
 const value = ref<string>('');
+const customerStore = useCustomerStore();
 const onSearch = (searchValue: string) => {
-  // console.log('use value', searchValue);
-  // console.log('or use this.value', value.value);
+    customerStore.setSearchWord(searchValue);
 };
 </script>
 

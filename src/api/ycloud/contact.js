@@ -34,7 +34,8 @@ export const getContactList = (page = 1, limit = 10, includeTotal = false, optio
  * @param ownerEmail 所屬郵箱
  * @returns {Promise<axios.AxiosResponse<any>>}
  */
-export const createContact = (nickname, phoneNumber, countryCode, email, tags, customAttributes, ownerEmail) => {
+export const createContact = ({nickname, phoneNumber, countryCode, email, tags, customAttributes, ownerEmail}) => {
+    console.log("")
     return ycloudInstance({
         url: '/contact/contacts', method: 'post', data: {
             nickname, phoneNumber, countryCode, email, tags, customAttributes, ownerEmail

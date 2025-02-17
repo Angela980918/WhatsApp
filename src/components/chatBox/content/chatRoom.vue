@@ -99,6 +99,13 @@
                                         </div>
                                     </div>
 
+                                    <div v-else-if="item.type === 'audio'">
+                                        <div>
+                                            <audio :src="item.content.link" controls></audio>
+                                            <span style="font-size: 14px;color:#A9A9A9">{{ item.content.caption }}</span>
+                                        </div>
+                                    </div>
+
                                     <div v-else-if="item.type === 'template'" style="width: 100%">
 
                                         <div class="content">
@@ -513,6 +520,12 @@ watch(() => data, async () => {
         color: #A9A9A9;
         overflow-wrap: break-word;
     }
+}
+
+audio {
+    background-color: white; /* 背景变白 */
+    border-radius: 8px; /* 圆角 */
+    padding: 5px; /* 内边距 */
 }
 
 </style>

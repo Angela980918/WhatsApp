@@ -53,7 +53,7 @@
       </div>
       <!--    客户列表    -->
       <a-space  @click="handleItemClick(customer.id, customer.phoneNumber)"
-                direction="vertical" style="width: 100%;" v-for="customer in props.assignedCustomersData"
+                direction="vertical" style="width: 100%;" v-for="customer in userData"
                 :key="customer.id">
           <chat-box-left-item :color="customer.color" :name="customer.name" :time="customer.time" :message="customer.message"
                               :badgeCount="customer.badgeCount"
@@ -74,14 +74,14 @@ import ChatBoxLeftItem from "@/components/chatBox/left/chatBox-Left-Item.vue";
 import {useCustomerStore} from "@/store/customerStore";
 import {useChatStore} from "@/store/chatStore";
 
+
 const props = defineProps({
   assignedCustomersData: {
     type: Array
   },
-  // unassignedCustomersData: {
-  //   type: Array
-  // }
 })
+const userData = ref(props.assignedCustomersData);
+
 const emits = defineEmits(['loadChatMessage'])
 const customerStore = useCustomerStore();
 const chatStore = useChatStore();
@@ -103,11 +103,23 @@ const handleItemClick = (id: number, phoneNumber: string) => {
   emits('loadChatMessage', phoneNumber, id)
 };
 
-onMounted(() => {
-  // 设置已分配和未分配客户
-  // customerStore.setAssignedCustomers(props.assignedCustomersData);
-  // customerStore.setUnassignedCustomers(props.unassignedCustomersData);
-})
+watch(() => customerStore.searchWord, (newValue) => {
+    if(newValue === "") {
+        userData.value = props.assignedCustomersData;
+    }else {
+        let list = [];
+        props.assignedCustomersData.map(item => {
+            if(item.name.indexOf(newValue) !== -1 || item.phoneNumber.indexOf(newValue) !== -1) {
+                list.push(item);
+            }
+        })
+        userData.value = list;
+    }
+});
+
+watch(() => props.assignedCustomersData, (newValue) => {
+    userData.value = newValue;
+}, {deep: true})
 
 watch(() => customerStore.assignedCustomers, (newValue) => {
     // console.log("newValuenewValue",newValue)

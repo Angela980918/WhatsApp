@@ -36,7 +36,8 @@ export const useCustomerStore = defineStore('customerStore', {
             //     badgeCount: 4
             // },
         ],
-        ws: null
+        ws: null,
+        searchWord: '', // 搜索詞
     }),
     actions: {
         setCurrentUser(id) {
@@ -87,6 +88,9 @@ export const useCustomerStore = defineStore('customerStore', {
             // console.log("usr",user)
             this.currentCustomerInfo = user;
         },
+        setSearchWord(word) {
+            this.searchWord = word;
+        }
     },
 
     getters: {

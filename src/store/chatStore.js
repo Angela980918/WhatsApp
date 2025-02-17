@@ -111,7 +111,7 @@ export const useChatStore = defineStore('chatStore', {
 
         // 清空聊天记录
         clearChat() {
-            console.log("123456798")
+            // console.log("123456798")
             this.chatMessages = [];
         },
     },

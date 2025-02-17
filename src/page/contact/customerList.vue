@@ -1,6 +1,6 @@
 <template>
   <div class="Container">
-<!--    <ContactModel/>-->
+    <ContactModal  ref="showContact" @createContact="createContact" :formData="formData"/>
     <div style="margin-bottom: 16px">
       <a-button type="primary" :loading="state.loading" @click="start">
         创建用户
@@ -39,7 +39,7 @@
 
 
         <template v-if="column.key === 'operation'">
-          <a>Publish</a>
+          <a @click="checkInfo(record)">編輯</a>
         </template>
       </template>
     </a-table>
@@ -48,9 +48,16 @@
 <script lang="ts" setup>
 import {computed, onMounted, reactive, ref} from 'vue';
 import * as ycloudApi from "@/api/ycloud/index.js";
-// import QuickMsg from "@/components/contact/QuickMsg.vue";
+import ContactModal from "@/components/contact/ContactModal.vue";
 
 type Key = string | number;
+
+const formData = reactive({
+    nickname: '',
+    countryCode: undefined,
+    phoneNumber: '',
+    email: '',
+});
 
 interface DataItem {
   key: number;
@@ -131,10 +138,12 @@ const state = reactive<{
   loading: false,
 });
 const hasSelected = computed(() => state.selectedRowKeys.length > 0);
+const showContact = ref(null);
 
 const start = () => {
   state.loading = true;
-  // ajax request after empty completing
+  showContact.value.showModal();
+
   setTimeout(() => {
     state.loading = false;
     state.selectedRowKeys = [];
@@ -144,14 +153,31 @@ const onSelectChange = (selectedRowKeys: Key[]) => {
   state.selectedRowKeys = selectedRowKeys;
 };
 
+const createContact = async (data) => {
+    let result = await ycloudApi.contactApi.createContact(data);
+    if(result !== undefined) {
+        updateContactList();
+    }
+}
 
-onMounted(async () => {
-  let response = await ycloudApi.contactApi.getContactList();
-  response.items.map(item => {
-    // item.tags = ['test1', 'test2'];
-    item.key = item.id;
-    data.value.push(item);
-  });
+const updateContactList = async () => {
+    let response = await ycloudApi.contactApi.getContactList();
+    response.items.map(item => {
+        // item.tags = ['test1', 'test2'];
+        item.key = item.id;
+        data.value.push(item);
+    });
+}
+
+const checkInfo = (data) => {
+    formData.value = {...data};
+    state.loading = true;
+    showContact.value.showModal();
+}
+
+
+onMounted( () => {
+  updateContactList();
 })
 
 </script>

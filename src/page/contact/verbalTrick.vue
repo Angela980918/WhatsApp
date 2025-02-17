@@ -12,7 +12,7 @@
     </div>
 </template>
 <script lang="ts" setup>
-import {computed, onBeforeMount, onMounted, reactive, ref} from 'vue';
+import {onMounted, ref} from 'vue';
 import {useTempStore} from "@/store/useTempStore";
 import QuickMsg from "@/components/contact/QuickMsg.vue";
 
@@ -55,8 +55,6 @@ const data = ref<DataItem[]>([]);
 //     templateStore.quickMessage.length === 0 ? [] : templateStore.quickMessage
 // });
 const checkMsg = (data) => {
-    console.log("data",data)
-
     fileArray.value = data.attachments
     fileContent.value = data.content
     msgName.value = data.title
@@ -69,10 +67,6 @@ const addQuickMsg = () => {
     msgName.value = "";
     quickRef.value.setOpen();
 }
-
-onBeforeMount(async () => {
-    await templateStore.loadQuickMsg();
-})
 
 onMounted(() => {
     data.value = templateStore.getQuickMsg;

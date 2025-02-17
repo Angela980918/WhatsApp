@@ -1,3 +1,4 @@
+<script src="../../store/useTempStore.js"></script>
 <template>
   <div class="tempContainer">
     <div class="Common tempSearch">
@@ -300,7 +301,7 @@ const getErrorLabel = (error) => getLabel(errorMap, error)
 
 onBeforeMount(async () => {
   TempStore.isTemplatesLoaded = false
-  await TempStore.loadTemplates()
+  // await TempStore.loadTemplates()
   dataFilter();
 })
 

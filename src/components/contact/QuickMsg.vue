@@ -1,7 +1,7 @@
 <template>
     <div>
         <a-modal v-model:open="open" :title="props.msgName !== '' ? props.msgName : '快捷回復'"
-                 style="justify-items: center" @ok="handleOk" >
+                 style="justify-items: center" @ok="handleOk">
             <div class="flex-container">
                 <!--                显示可选快捷信息列表-->
                 <a-table v-show="showQuickList" class="ant-table-striped" :columns="columns" :pagination="pagination"
@@ -22,68 +22,65 @@
                     <!--                   快捷回復標題 -->
                     <div style="display: flex;flex-direction: column; ">
                         <span style="font-size: 18px">標題</span>
-<!--                        <WASelect name="q_headerTxt" direction="vertical" type="input-text"-->
-<!--                                  :maxTxt="60"-->
-<!--                                  :inputContents="headerTxt" @handleChange="headerTxtChange"/>-->
-                        <div style="padding: 0 12px; margin-top: 10px; max-width: 400px">
+                        <div style="padding: 12px 0; margin-top: 10px; max-width: 400px">
                             <a-input
-                                name="headerInput"
-                                v-model:value="headerTxt"
-                                show-count
-                                @change="headerTxtChange"
-                                />
-                        </div>
-                    </div>
-                    <!--                   快捷回復文件 -->
-                    <div style="display: flex;flex-direction: column; margin-top: 10px">
-                        <span style="font-size: 18px">上傳文件</span>
-                        <a-upload style="padding: 0 12px; margin-top: 10px" :file-list="fileList" :auto-upload="false"
-                                  :before-upload="beforeUpload" @remove="handleRemove">
-                            <a-button>
-                                <upload-outlined></upload-outlined>
-                                Upload
-                            </a-button>
-                        </a-upload>
-                    </div>
-                    <!--                   快捷回復內容 -->
-                    <div style="display: flex;flex-direction: column; margin-top: 10px">
-                        <span style="font-size: 18px">編輯內容</span>
-<!--                        <WASelect name="q_editor" direction="vertical" type="editor"-->
-<!--                                  :inputContents="selectContent"-->
-<!--                                  @handleChange="htmlChange"/>-->
-<!--                        <div style="border: 1px solid #ccc; width: 100%; max-width: 100%; box-sizing: border-box;">-->
-<!--                            <Toolbar-->
-<!--                                style="border-bottom: 1px solid #ccc"-->
-<!--                                :editor="editorRef"-->
-<!--                                :defaultConfig="toolbarConfig"-->
-<!--                                mode="default"-->
-<!--                            />-->
-<!--                            <Editor-->
-<!--                                style="height: 300px;overflow-y: hidden;width: 100%;overflow-wrap: break-word;word-wrap: break-word;word-break: break-word;white-space: pre-wrap;box-sizing: border-box"-->
-<!--                                v-model="selectContent"-->
-<!--                                :defaultConfig="editorConfig"-->
-<!--                                @onChange="htmlChange"-->
-<!--                                mode="default"-->
-<!--                                @onCreated="handleCreated"-->
-<!--                            />-->
-<!--                        </div>-->
-                        <div style="border: 1px solid #ccc; width: 100%; max-width: 100%; box-sizing: border-box;">
-                            <Toolbar
-                                style="border-bottom: 1px solid #ccc"
-                                :editor="editorRef"
-                                :defaultConfig="toolbarConfig"
-                                mode="default"
-                            />
-                            <Editor
-                                style="height: 300px;overflow-y: hidden;width: 100%;overflow-wrap: break-word;word-wrap: break-word;word-break: break-word;white-space: pre-wrap;box-sizing: border-box"
-                                v-model="selectContent"
-                                :defaultConfig="editorConfig"
-                                mode="default"
-                                @onCreated="handleCreated"
+                                    name="headerInput"
+                                    v-model:value="headerTxt"
+                                    show-count
                             />
                         </div>
                     </div>
 
+                    <!--                   选择公共库还是个人账号 -->
+                    <div style="display: flex;flex-direction: column; ">
+                        <span style="font-size: 18px">賬號</span>
+                        <div style="padding: 12px 0; margin-top: 10px; max-width: 400px">
+                            <a-select
+                                v-model:value="value1"
+                                style="width: 200px"
+                                :options="options"
+                                @change="changeOptions"
+                            ></a-select>
+                        </div>
+                    </div>
+
+                    <!--                   快捷回復文件 -->
+                    <div style="display: flex;flex-direction: column; margin-top: 10px">
+                        <span style="font-size: 18px">选择素材</span>
+                        <div style="display: flex; flex-direction: row">
+                            <a-button @click="btnUpload('image')" style="margin-right: 12px">
+                                <upload-outlined></upload-outlined>
+                                上傳圖片
+                            </a-button>
+                            <a-button @click="btnUpload('document')" style="margin: 0 12px">
+                                <upload-outlined></upload-outlined>
+                                上傳文檔
+                            </a-button>
+                            <a-button @click="btnUpload('video')" style="margin: 0 12px">
+                                <upload-outlined></upload-outlined>
+                                上傳視頻
+                            </a-button>
+                        </div>
+                    </div>
+                    <!--                   快捷回復內容 -->
+                    <div style="display: flex;flex-direction: column; margin-top: 10px">
+                        <span style="font-size: 18px">編輯內容</span>
+                        <div style="border: 1px solid #ccc; width: 100%; max-width: 100%; box-sizing: border-box;">
+                            <Toolbar
+                                    style="border-bottom: 1px solid #ccc"
+                                    :editor="editorRef"
+                                    :defaultConfig="toolbarConfig"
+                                    mode="default"
+                            />
+                            <Editor
+                                    style="height: 300px;overflow-y: hidden;width: 100%;overflow-wrap: break-word;word-wrap: break-word;word-break: break-word;white-space: pre-wrap;box-sizing: border-box"
+                                    v-model="selectContent"
+                                    :defaultConfig="editorConfig"
+                                    mode="default"
+                                    @onCreated="handleCreated"
+                            />
+                        </div>
+                    </div>
                 </div>
 
                 <!--                预览消息效果-->
@@ -196,11 +193,12 @@
             </div>
             <Confirm ref="confirmRef" @sendMsg="sendQuickMsg" :msgName="selectName" msgType="快捷回復"/>
         </a-modal>
+        <SelectItem :account="accountChange" :type="type" @getSelected="getSelected" ref="selectItemRef"/>
     </div>
 </template>
 
 <script lang="ts" setup>
-import {computed, onMounted, onUpdated, ref, watch, shallowRef} from "vue";
+import {computed, onMounted, ref, watch, shallowRef, nextTick, onBeforeMount} from "vue";
 import {FileTextOutlined} from "@ant-design/icons-vue";
 import {useTempStore} from "@/store/useTempStore";
 import {useChatStore} from "@/store/chatStore";
@@ -210,17 +208,30 @@ import {UploadOutlined} from '@ant-design/icons-vue';
 import type {UploadProps} from 'ant-design-vue';
 import '@wangeditor/editor/dist/css/style.css' // 引入 css
 import {Editor, Toolbar} from '@wangeditor/editor-for-vue'
+import SelectItem from "@/components/contact/SelectItem.vue";
+import {cosApi} from "@/api/whatsapp/index.js";
 
 const fileList = ref<UploadProps['fileList']>([]);
 
 const open = ref(false);
 const selectedRow = ref<number | null>(1);
 const confirmRef = ref(null);
-const template = useTempStore();
+const templateStore = useTempStore();
 const chatStore = useChatStore();
 
+// 選擇上傳庫
+const selectItemRef = ref(null);
+const options = ref([
+    { value: '449711484896804', label: 'DataS素材库' },
+    { value: 'user-67890', label: '个人素材库' },
+]);
+const value1 = ref(options.value[0].value);
 
+// 上傳modal
+const type = ref("");
+const accountChange = ref("public");
 
+// 編輯器配置
 const editorRef = shallowRef();
 const toolbarConfig = {
     toolbarKeys: ['bold', 'italic', 'emotion'], // 仅显示加粗、斜体和表情菜单
@@ -231,12 +242,28 @@ const editorConfig = {
 const handleCreated = (editor) => {
     editorRef.value = editor
 }
+
+const selectOpen = () => {
+    selectItemRef.value.setOpen();
+}
+
+// 切換公共\個人素材庫
+const changeOptions = (value) => {
+    let source = "";
+    if(!value1.value.startsWith('user-')) {
+        source = "wabaId=" + value1.value;
+    }else {
+        source = "userId=" + value1.value;
+    }
+    templateStore.setMaterialListData(source);
+}
+
 const handleOk = async () => {
     let list = [];
+    console.log("selectFileArrselectFileArr", headerTxt.value)
     selectFileArr.value.map(item => {
-        list.push(item._id)
+        list.push(item.id)
     });
-    console.log("selectFileArrselectFileArr", selectFileArr.value)
 
     let data = {
         fileIds: list,
@@ -246,22 +273,26 @@ const handleOk = async () => {
         userType: 'user'
     }
 
-    await fetch('http://localhost:3001/materials/upload-quick-reply', {
-        method: 'POST',
-        body: JSON.stringify(data)
-    }).then(res => res.json())  // 先解析 JSON
-        .then(({ code, message, result }) => {
-            console.log("code, message, result", code, message, result);
-        }).catch(error => {
-            console.error("请求失败:", error);
-        });
-
-    // open.value = !open.value
+    let result = await cosApi.uploadQuickMsg(data);
+    console.log("code", result);
 }
 
 const setOpen = () => {
     open.value = !open.value
 }
+
+const btnUpload = (fileType) => {
+    type.value = fileType;
+    nextTick(() => selectItemRef.value.showModal());
+}
+
+const getSelected = (value) => {
+    let list = selectFileArr.value;
+    list.push(value);
+    // console.log("list-list", list)
+    selectFileArr.value = list;
+
+};
 
 const htmlChange = (value) => {
     selectContent.value = value
@@ -294,7 +325,7 @@ const columns = [
         key: 'operation',
     },
 ];
-const quickList = computed(() => template.getQuickMsg);
+const quickList = computed(() => templateStore.getQuickMsg);
 const currentPhone = computed(() => chatStore.currentPhone);
 // 点击列
 const handleRowClick = (record: any) => {
@@ -306,10 +337,9 @@ const handleRowClick = (record: any) => {
     };
 };
 
-
-const headerTxtChange = (value) => {
-    headerTxt.value = value
-}
+// const headerTxtChange = (inputValue) => {
+//     headerTxt.value = inputValue.value
+// }
 const setRowClassName = (record: any) => {
     return record._id === selectedRow.value ? 'table-striped' : '';
 };
@@ -317,7 +347,7 @@ const setRowClassName = (record: any) => {
 const handleRemove: UploadProps['onRemove'] = file => {
     const index = fileList.value.indexOf(file);
     const fileArrayIndex = selectFileArr.value.findIndex(item => file.name === item.file_name);
-    if(fileArrayIndex !== -1) {
+    if (fileArrayIndex !== -1) {
         const newFileArray = selectFileArr.value.slice();
         newFileArray.slice(fileArrayIndex, 1);
         selectFileArr.value = newFileArray;
@@ -346,25 +376,12 @@ const props = defineProps({
     }
 })
 
-onUpdated(() => {
-    // if (!props.showQuickList) {
-    //     console.log("props.fileArray", props.fileArray, props.fileContent)
-    //     selectFileArr.value = props.fileArray;
-    //     selectContent.value = props.fileContent;
-    // }
-
-    // if(open.value === false) {
-    //     selectFileArr.value = [];
-    //     selectContent.value = "";
-    // }
-})
-
 watch(
     () => props.fileArray,
     (newVal) => {
         selectFileArr.value = newVal;
-        if(newVal.length !== 0) {
-
+        if (newVal.length !== 0) {
+            console.log("")
             newVal.map(item => {
                 let newFile = {
                     uid: item?.file_id || '1',
@@ -378,7 +395,7 @@ watch(
 
         }
     },
-    { immediate: true }
+    {immediate: true}
 );
 
 watch(
@@ -386,7 +403,7 @@ watch(
     (newVal) => {
         selectContent.value = newVal;
     },
-    { immediate: true }
+    {immediate: true}
 );
 
 watch(
@@ -394,20 +411,8 @@ watch(
     (newVal) => {
         headerTxt.value = newVal;
     },
-    { immediate: true }
+    {immediate: true}
 );
-
-// watch(
-//     () => open.value,
-//     (newVal) => {
-//         if (!newVal) {
-//             // 关闭模态框时重置状态
-//             selectFileArr.value = [];
-//             selectContent.value = '';
-//             headerTxt.value = '';
-//         }
-//     }
-// );
 
 const preViewQuick = (data) => {
     console.log("datadata", data)
@@ -423,7 +428,6 @@ const confirm = (record) => {
     confirmRef.value.showModal();
 }
 const sendQuickMsg = async () => {
-    console.log("123456789");
 
     const fromNumber = "+8613672967202";
     const toNumber = currentPhone.value;
@@ -500,39 +504,54 @@ const beforeUpload = async (file) => {
         type = 'document'
     }
 
-    let data = new FormData();
-    data.append("file", file);
-    data.append("fileCategory", type)
-    data.append("userId", '67890')
-    try {
-        await fetch('http://localhost:3001/materials/upload-material', {
-            method: 'POST',
-            body: data
-        }).then(res => res.json())  // 先解析 JSON
-            .then(({ code, message, result }) => {
-                console.log("code, message, result", code, message, result);
-                let newFile = {
-                    uid: result?._id || '1',
-                    name: result?.file_name || file.name,
-                    status: code === 200 ? 'done' : 'error',
-                    response: code === 200 ? '' : message,  // 修复拼写错误
-                    url: result?.file_path ? 'https://cos.jackycode.cn/' + result.file_path : ''
-                };
-                console.log("codecodecodecode", code, selectFileArr.value)
-                fileList.value.push(newFile);
-                if (code === 200) {
-                    selectFileArr.value.push(result);
-                }
-            }).catch(error => {
-                console.error("请求失败:", error);
-            });
-    } catch (error) {
-        console.error('上传过程中发生错误:', error);
-    }
+    let {code,message,result} = await cosApi.uploadTempFile(file, type, '67890');
+
+    let newFile = {
+        uid: result?._id || '1',
+        name: result?.file_name || file.name,
+        status: code === 200 ? 'done' : 'error',
+        response: code === 200 ? '' : "错误信息",  // 修复拼写错误
+        url: result?.file_path ? 'https://cos.jackycode.cn/' + result.file_path : ''
+    };
+    fileList.value.push(newFile);
+    selectFileArr.value.push(result);
+
+    // let data = new FormData();
+    // data.append("file", file);
+    // data.append("fileCategory", type)
+    // data.append("userId", '67890')
+    // try {
+    //     await fetch('http://localhost:3001/materials/upload-material', {
+    //         method: 'POST',
+    //         body: data
+    //     }).then(res => res.json())  // 先解析 JSON
+    //         .then(({code, message, result}) => {
+    //             console.log("code, message, result", code, message, result);
+    //             let newFile = {
+    //                 uid: result?._id || '1',
+    //                 name: result?.file_name || file.name,
+    //                 status: code === 200 ? 'done' : 'error',
+    //                 response: code === 200 ? '' : message,  // 修复拼写错误
+    //                 url: result?.file_path ? 'https://cos.jackycode.cn/' + result.file_path : ''
+    //             };
+    //             console.log("codecodecodecode", code, selectFileArr.value)
+    //             fileList.value.push(newFile);
+    //             if (code === 200) {
+    //                 selectFileArr.value.push(result);
+    //             }
+    //         }).catch(error => {
+    //             console.error("请求失败:", error);
+    //         });
+    // } catch (error) {
+    //     console.error('上传过程中发生错误:', error);
+    // }
     return false;
 };
 
-console.log("789456123", props)
+onBeforeMount(() => {
+    !props.showQuickList && changeOptions(options.value[0].value)
+})
+
 onMounted(() => {
     props.showQuickList && preViewQuick(quickList.value[0]);
 })

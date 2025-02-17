@@ -1,5 +1,9 @@
 <template>
-    <div style="padding: 12px;">檔案</div>
+    <div style="padding: 12px;">
+        <div class="">
+
+        </div>
+    </div>
 </template>
 
 <script setup>

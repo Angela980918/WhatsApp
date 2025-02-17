@@ -8,14 +8,9 @@
 <script setup>
 import {useRoute, useRouter} from "vue-router";
 
-import {onMounted} from "vue";
 
 const router = useRouter();
 
-onMounted(() => {
-    // const userAgent = navigator.userAgent;
-    // console.log("userAgent",userAgent)
-})
 
 </script>
 
