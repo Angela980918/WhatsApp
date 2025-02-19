@@ -1,4 +1,3 @@
-<script src="../../store/useTempStore.js"></script>
 <template>
   <div class="tempContainer">
     <div class="Common tempSearch">
@@ -113,6 +112,7 @@ import {categoryMap, languageMap, statusMap} from '@/map/template';
 import {errorMap} from '@/map/error';
 import {getLabel} from '@/tools/modules/common'
 import {useMenuJump} from "@/tools"
+import {formatDate} from '@/tools'
 
 const router = useRouter();
 const { btnpush } = useMenuJump();
@@ -229,17 +229,7 @@ const onSelectChange = (selectedRowKeys: Key[]) => {
 
 const isButtonDisabled = computed(() => state.selectedRowKeys.length !== 0);
 
-const formatDate = (date) => {
-  const d = new Date(date);
-  const year = d.getFullYear();
-  const month = (d.getMonth() + 1).toString().padStart(2, '0');  // 月份从0开始，+1确保月份正确
-  const day = d.getDate().toString().padStart(2, '0');
-  const hours = d.getHours().toString().padStart(2, '0');
-  const minutes = d.getMinutes().toString().padStart(2, '0');
-  const seconds = d.getSeconds().toString().padStart(2, '0');
 
-  return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
-};
 
 const createTemplate = () => {
   // router.push({

@@ -31,34 +31,40 @@
 </template>
 <script lang="ts" setup>
 import {reactive, ref, toRaw, watch} from 'vue';
-import type { UnwrapRef } from 'vue';
 import type { Rule } from 'ant-design-vue/es/form';
+
 const open = ref<boolean>(false);
-import {contactApi} from "@/api/ycloud/index.js";
+const props = defineProps({
+    formData: {
+        type: Object,
+        default: {},
+    },
+    isCreate: {
+        type: Boolean,
+        default: true
+    },
+});
 
-const emits = defineEmits(['createContact'])
-
-interface FormState {
-    nickname: string;
-    countryCode: string | undefined;
-    phoneNumber: string;
-    email: string;
-}
+// 创建 or 更新
+const createVal = ref(props.isCreate);
+const emits = defineEmits(['createContact','updateContact']);
 
 const formRef = ref();
+
+const options = ref([
+    { value: "HK", label: "香港" }
+]);
+
+// 表單
 const labelCol = { span: 5 };
 const wrapperCol = { span: 13 };
 
-const formState: UnwrapRef<FormState> = reactive({
+let formState = reactive({
     nickname: '',
     countryCode: undefined,
     phoneNumber: '',
     email: '',
 });
-
-const options = ref([
-    { value: "HK", label: "香港" }
-]);
 
 const rules: Record<string, Rule[]> = {
     nickname: [
@@ -68,17 +74,33 @@ const rules: Record<string, Rule[]> = {
     countryCode: [{ required: true, message: '請選擇地區', trigger: 'change' }],
     phoneNumber: [{ required: true, message: '請填寫電話', trigger: 'change' },]
 };
+
+function getPhoneHeader(region) {
+    const phoneHead = {
+        "HK": "+852",
+        "US": "+1",
+        "CN": "+86"
+    }
+    return phoneHead[region]
+}
+
+// 提交
 const onSubmit = () => {
     formRef.value
         .validate()
         .then(() => {
-            // let result = contactApi.createContact(toRaw(formState));
-            emits("createContact", toRaw(formState));
+            if(createVal.value) {
+                emits('createContact', toRaw(formState));
+            }else {
+                emits('updateContact', toRaw(formState));
+            }
         })
         .catch(error => {
             console.log('error', error);
         });
 };
+
+// 移除
 const resetForm = () => {
     formRef.value.resetFields();
 };
@@ -88,18 +110,18 @@ const showModal = () => {
 };
 
 watch(() => formState.countryCode, (newValue) => {
-    formState.phoneNumber = getPhoneHeader(newValue);
+    if(createVal.value) {
+        formState.phoneNumber = getPhoneHeader(newValue);
+    }
 })
 
-function getPhoneHeader(region) {
-    const phoneHead = {
-        "HK": "+852",
-        "US": "+1",
-        "CN": "+86"
-    }
+watch(() => props.formData, (newValue) => {
+    Object.assign(formState, newValue);
+}, { deep: true })
 
-    return phoneHead[region]
-}
+watch(() => props.isCreate, (newValue) => {
+    createVal.value = newValue;
+},{ deep: true })
 
 defineExpose({
     showModal: () => {

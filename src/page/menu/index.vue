@@ -98,6 +98,9 @@ onMounted(async () => {
 
   //   加载快捷用语(固定首先加载登入用户所在公司的公共素材)
   await tempStore.setMaterialListData('wabaId=449711484896804');
+
+  //   加载客户列表
+  await customerStore.setContactList();
 })
 
 

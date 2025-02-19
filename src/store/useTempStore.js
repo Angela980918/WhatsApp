@@ -126,9 +126,6 @@ export const useTempStore = defineStore('template', {
             await cosApi.libraryFiles(source).then(result => {
                 if(result !== undefined) {
                     let { documents, images, videos } = result;
-                    // this.imageList = images.map((item, index) => ({ ...item, key: index + 1 }));
-                    // this.docList = documents.map((item, index) => ({ ...item, key: index + 1 }));
-                    // this.videoList = videos.map((item, index) => ({ ...item, key: index + 1 }));
                     this.imageList = images;
                     this.docList = documents;
                     this.videoList = videos;

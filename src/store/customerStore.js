@@ -1,5 +1,6 @@
 // stores/userStore.js
 import {defineStore} from 'pinia';
+import * as ycloudApi from "@/api/ycloud/index.js";
 
 export const useCustomerStore = defineStore('customerStore', {
     state: () => ({
@@ -9,35 +10,14 @@ export const useCustomerStore = defineStore('customerStore', {
         // 當前溝通用戶的信息
         currentCustomerInfo:{},
         // 已分配客户的模拟数据
-        assignedCustomers: [
-            // {id: 1, name: 'John Doe', time: '2024-12-03T12:36:00Z', message: 'Hello, how are you?', badgeCount: 5},
-            // {
-            //     id: 2,
-            //     name: 'Jane Smith',
-            //     time: '2024-12-03T14:00:00Z',
-            //     message: 'Can you help with the report?',
-            //     badgeCount: 2
-            // }
-        ],
+        assignedCustomers: [],
         // 未分配客户的模拟数据
-        unassignedCustomers: [
-            // {
-            //     id: 20,
-            //     name: 'Bob Brown',
-            //     time: '2024-12-03T10:00:00Z',
-            //     message: 'Have you reviewed the new project proposal?',
-            //     badgeCount: 1
-            // },
-            // {
-            //     id: 21,
-            //     name: 'Charlie Davis',
-            //     time: '2024-12-03T13:20:00Z',
-            //     message: 'Let me know your thoughts on the new design.',
-            //     badgeCount: 4
-            // },
-        ],
-        ws: null,
+        unassignedCustomers: [],
         searchWord: '', // 搜索詞
+        // 聯繫人信息
+        contactList: [],
+        page: 1,
+        total: 0
     }),
     actions: {
         setCurrentUser(id) {
@@ -48,8 +28,6 @@ export const useCustomerStore = defineStore('customerStore', {
                 ...customer,
                 isActive: index === 0, // 默认第一个客户 isActive 为 true
             }));
-            // console.log("this.assignedCustomers", this.assignedCustomers);
-
         },
         setUnassignedCustomers(customers) {
             this.unassignedCustomers = customers.map((customer, index) => ({
@@ -57,49 +35,53 @@ export const useCustomerStore = defineStore('customerStore', {
                 isActive: index === 0, // 默认第一个客户 isActive 为 true
             }));
         },
-        //     建立连接
-        async createConnect() {
-            this.ws = await new WebSocket('ws://ws.jackycode.cn:4000', );
-            // 设置 WebSocket 连接打开事件
-            this.ws.onopen = () => {
-                console.log("已建立連接")
-            };
-
-            // 设置 WebSocket 连接消息事件
-            this.ws.onmessage = (event) => {
-                // console.log("event",event)
-                // console.log('[CLIENT] Received message:', event.data);
-            };
-
-            // 设置 WebSocket 连接关闭事件
-            this.ws.onclose = () => {
-                // console.log('[CLIENT] Connection closed');
-            };
-
-            // 设置 WebSocket 错误事件
-            this.ws.onerror = (err) => {
-                // console.error('[CLIENT] Error:', err);
-            };
-        },
-        sendMessage(message) {
-            this.ws.send('message', message);
-        },
         setCurrentUserInfo(user) {
-            // console.log("usr",user)
             this.currentCustomerInfo = user;
         },
         setSearchWord(word) {
             this.searchWord = word;
-        }
+        },
+        async setContactList() {
+            let response = await ycloudApi.contactApi.getContactList(this.page);
+            if(response !== undefined) {
+                this.total = response.total;
+                response.items.map(item => {
+                    item.key = item.id;
+                });
+            }
+
+            this.contactList = response.items;
+        },
+        async changeContactList(page) {
+            this.page = page;
+            let response = await ycloudApi.contactApi.getContactList(page, 10);
+            if(response !== undefined) {
+                response.items.map(item => {
+                    this.total = response.total;
+                    item.key = item.id;
+                });
+            }
+            this.contactList = response.items;
+        },
+        contactOperate(isCreate,value) {
+            if(isCreate) {
+                value.key = value.id;
+                this.contactList.unshift(value);
+            }else {
+                const index = this.contactList.findIndex(item => item.id === value.id);
+                if (index !== -1) {
+                    this.contactList[index] = value;  // 直接更新数组中的元素
+                }
+            }
+        },
+
     },
 
     getters: {
         getAssignedCustomers: (state) => state.assignedCustomers,
-        // getUnassignedCustomers: (state) => state.unassignedCustomers,
         getAllUnReadNum: (state) => {
             const allCustomers = [...state.assignedCustomers];
             return allCustomers.reduce((count, item) => count + (item.badgeCount || 0), 0);
         },
-
     },
 });

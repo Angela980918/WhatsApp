@@ -223,7 +223,7 @@ const chatStore = useChatStore();
 const selectItemRef = ref(null);
 const options = ref([
     { value: '449711484896804', label: 'DataS素材库' },
-    { value: 'user-67890', label: '个人素材库' },
+    { value: '67890', label: '个人素材库' },
 ]);
 const value1 = ref(options.value[0].value);
 
@@ -250,7 +250,7 @@ const selectOpen = () => {
 // 切換公共\個人素材庫
 const changeOptions = (value) => {
     let source = "";
-    if(!value1.value.startsWith('user-')) {
+    if(!value1.value.length > 6) {
         source = "wabaId=" + value1.value;
     }else {
         source = "userId=" + value1.value;

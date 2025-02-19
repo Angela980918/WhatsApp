@@ -8,7 +8,7 @@ import {ycloudInstance} from "@/api/http.js";
  * @param optionPrams 其他過濾參數
  * @returns {Promise<axios.AxiosResponse<any>>}
  */
-export const getContactList = (page = 1, limit = 10, includeTotal = false, optionPrams = {}) => {
+export const getContactList = (page = 1, limit = 10, includeTotal = true, optionPrams = {}) => {
     const requireData = {
         page, limit, includeTotal
     }
@@ -17,9 +17,12 @@ export const getContactList = (page = 1, limit = 10, includeTotal = false, optio
     const data = {
         ...requireData, ...optionData
     }
+    const queryString = new URLSearchParams(data).toString();
+
+    const url = `/contact/contacts?${queryString}`;
 
     return ycloudInstance({
-        url: '/contact/contacts', method: 'get', data
+        url: url, method: 'get'
     })
 }
 
@@ -66,11 +69,10 @@ export const retrieveContact = id => {
  * @param ownerEmail 所屬郵箱
  * @returns {Promise<axios.AxiosResponse<any>>}
  */
-export const updateContact = (id, nickname, phoneNumber, countryCode, email, tags, ownerEmail) => {
+export const updateContact = (data) => {
+    const {id} = data;
     return ycloudInstance({
-        url: `/contact/contacts/${id}`, method: 'patch', data: {
-            nickname, phoneNumber, countryCode, email, tags, ownerEmail
-        }
+        url: `/contact/contacts/${id}`, method: 'patch', data: data
     })
 }
 

@@ -1,7 +1,7 @@
 <template>
   <div class="rightTab">
     <div class="headerCard">
-      <a-avatar style="margin-right: 12px" size="large" src="https://randomuser.me/api/portraits/women/7.jpg"/>
+        <a-avatar size="large" :style="{ backgroundColor: currentCustomerInfo.color }">{{ getAvatarText(currentCustomerInfo.name) }}</a-avatar>
       <div class="sampleInfo">
         <span>關於 {{ currentCustomerInfo.name }}</span>
         <span>創建時間：2024/12/06</span>
@@ -37,7 +37,7 @@
   </div>
 </template>
 
-<script setup>
+<script lang="ts" setup>
 import ChatBoxRightStatus from "@/components/chatBox/right/chatBox-right-status.vue";
 import ChatBoxRightPerson from "@/components/chatBox/right/chatBox-right-person.vue";
 import ChatBoxRightFile from "@/components/chatBox/right/chatBox-right-file.vue";
@@ -59,6 +59,12 @@ const currentCustomerInfo = computed(() => {
       ? chatStore.currentCustomerInfo
       : customerStore.assignedCustomers[0] || {};
 });
+const getAvatarText = (name: string) => {
+    if (name === undefined) return
+    // 使用正则表达式过滤掉数字，只取字母或汉字
+    const filteredName = name.replace(/[0-9]/g, '');  // 移除数字
+    return filteredName.charAt(0).toUpperCase();  // 获取第一个非数字字母或汉字
+};
 
 </script>
 

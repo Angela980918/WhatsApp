@@ -5,7 +5,7 @@
             <div style="display: flex; justify-content: space-between">
 <!--                公共素材库 OR 个人素材库-->
                 <a-select
-                    v-model:value="value1"
+                    v-model:value="selectValue"
                     :size="size"
                     style="width: 200px"
                     :options="options"
@@ -59,52 +59,48 @@
 </template>
 
 <script lang="ts" setup>
-import {ref, onBeforeMount, watch, nextTick, computed} from "vue";
-import {List, Card, message} from 'ant-design-vue';
+import {ref, watch, nextTick, computed} from "vue";
+import {List, Card} from 'ant-design-vue';
 import FileList from "@/components/contact/FileList.vue";
 import {cosApi} from "@/api/whatsapp/index.js";
 import { SelectProps, MenuProps } from 'ant-design-vue';
-import {
-    DownOutlined
-} from '@ant-design/icons-vue';
+import { DownOutlined } from '@ant-design/icons-vue';
 import {useTempStore} from "@/store/useTempStore.js";
 const { Item: ListItem } = List;
 const { Meta: CardMeta } = Card;
-const activeKey = ref('1');
 
 const tempStore = useTempStore();
 
+// 素材庫選擇
 const size = ref<SelectProps['size']>('middle');
-
-// 素材庫類型
 const options = ref([
     { value: '449711484896804', label: 'DataS素材库' },
-    { value: 'user-67890', label: '个人素材库' },
+    { value: '67890', label: '个人素材库' },
 ]);
-const value1 = ref(options.value[0].value);
+const selectValue = ref(options.value[0].value);
 
+//  素材 tab 頁面
+const activeKey = ref('1');
 const imgRef = ref(null);
 const docRef = ref(null);
 const videoRef = ref(null);
+let imageList  = computed(() => tempStore.imageList);
+let docList = computed(() => tempStore.docList)
+let videoList = computed(() => tempStore.videoList);
 
 // 上傳
 const fileInput = ref<HTMLInputElement | null>(null);
 const fileType = ref("");
 const type = ref("");
 
-// 素材列表
-let imageList  = computed(() => tempStore.imageList);
-let docList = computed(() => tempStore.docList)
-let videoList = computed(() => tempStore.videoList);
-console.log("imageList",imageList.value)
-console.log("docList",docList.value)
-console.log("videoList",videoList.value)
-
 // 选择
-const isSelecting = ref(false); // 是否进入选择模式
+const isSelecting = ref(false);
+
 const toggleSelectMode = () => {
     isSelecting.value = !isSelecting.value;
 };
+
+// 刪除
 const removeItem = async () => {
     let list = [];
     let selectList = [];
@@ -115,12 +111,6 @@ const removeItem = async () => {
             list.map((item) => {
                 selectList.push(item.id)
             })
-            data = {
-                userId: value1.value,
-                userType: value1.value.startsWith('user-') ? 'user' : 'waba',
-                materialIds: selectList
-            }
-            let { result, code, message } = await cosApi.deleteMaterial(data)
             tempStore.imageList = imageList.value.filter(item =>
                 !list.some(removedItem => removedItem.title === item.file_name)
             );
@@ -140,16 +130,13 @@ const removeItem = async () => {
     }
 }
 
-onBeforeMount(async () => {
-    // await checkCos();
-})
-
 // 私人和公共素材切换
-watch(() => value1.value, (newValue) => {
+watch(() => selectValue.value, (newValue) => {
     checkCos();
     isSelecting.value = false;
 })
 
+// 上傳按鈕
 const handleMenuClick: MenuProps["onClick"] = (e) => {
     switch (e.key) {
         case "1":
@@ -177,8 +164,7 @@ const uploadFile = async (event: Event) => {
     const files = target.files;
     let fileContent = files[0];
 
-    let result = await cosApi.uploadMaterial(fileContent, type.value, value1.value)
-    console.log("resultresult",result)
+    let result = await cosApi.uploadMaterial(fileContent, type.value, selectValue.value)
 
     await checkCos();
 };
@@ -186,10 +172,10 @@ const uploadFile = async (event: Event) => {
 // 检索素材库
 async function checkCos() {
     let source = "";
-    if(!value1.value.startsWith('user-')) {
-        source = "wabaId=" + value1.value;
+    if(!selectValue.value.length > 6) {
+        source = "wabaId=" + selectValue.value;
     }else {
-        source = "userId=" + value1.value;
+        source = "userId=" + selectValue.value;
     }
     tempStore.setMaterialListData(source);
 
@@ -198,14 +184,13 @@ async function checkCos() {
 </script>
 
 <style scoped>
-/* 适当调整图片尺寸，确保展示美观 */
 .ant-list-grid .ant-col {
     display: flex;
     justify-content: center;
     align-items: center;
 }
 
-/* 图片样式 */
+
 img {
     width: 100%;
     height: auto;

@@ -1,7 +1,10 @@
 <template>
     <div class="Container">
+<!--        快捷回复预览 OR 创建-->
         <QuickMsg :showQuickList="false" ref="quickRef" :fileArray="fileArray" :fileContent="fileContent" :msgName="msgName"/>
+
         <a-button class="editable-add-btn" style="margin-bottom: 8px" @click="addQuickMsg">Add</a-button>
+
         <a-table bordered :data-source="data" :columns="columns">
             <template #bodyCell="{ column, text, record }">
                 <template v-if="column.dataIndex === 'operation'">
@@ -16,11 +19,15 @@ import {onMounted, ref} from 'vue';
 import {useTempStore} from "@/store/useTempStore";
 import QuickMsg from "@/components/contact/QuickMsg.vue";
 
-const templateStore = useTempStore();
+// 弹窗信息&控制
 const quickRef = ref(null);
 const fileArray = ref([]);
-const msgName = ref(null);
 const fileContent = ref(null);
+const msgName = ref(null);
+
+const templateStore = useTempStore();
+
+// table
 interface DataItem {
     _id: string;
     title: string;
@@ -51,9 +58,8 @@ const columns = [
     },
 ];
 const data = ref<DataItem[]>([]);
-// const dataSource = computed(() => {
-//     templateStore.quickMessage.length === 0 ? [] : templateStore.quickMessage
-// });
+
+// 预览 & 新增 方法
 const checkMsg = (data) => {
     fileArray.value = data.attachments
     fileContent.value = data.content

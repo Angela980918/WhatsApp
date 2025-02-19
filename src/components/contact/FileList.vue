@@ -7,7 +7,7 @@
                 :loading="loading"
         >
             <template #renderItem="{ item }">
-                <a-list-item style="display: flex;flex-direction: column">
+                <a-list-item style="display: flex;flex-direction: column" :key="item.id">
                     <!-- 复选框 -->
                     <a-checkbox v-if="isSelect" v-model:checked="item.selected"/>
 
@@ -34,7 +34,7 @@
 </template>
 
 <script setup>
-import {ref, computed, watch} from "vue";
+import {ref, computed, watch, reactive} from "vue";
 import {FileOutlined} from "@ant-design/icons-vue";
 
 const props = defineProps({
@@ -52,53 +52,41 @@ const props = defineProps({
     }
 })
 
-const data = computed(() => handleFileList(props.fileList));
+const data = reactive({
+    list: [],
+});
+
 const isSelect = ref(false);
-const selectedItems = ref({});
 
 const handleFileList = (list) => {
-    let newList = [];
-    list.map((data, index) => {
-        newList.push({
-            id: data.id,
-            title: data.file_name,
-            imageSrc: `https://cos.jackycode.cn/` + data.file_path,
-            selected: false
-        })
-    })
-    return newList;
+    data.list = list.map(item => reactive({
+        id: item.id,
+        title: item.file_name,
+        imageSrc: `https://cos.jackycode.cn/${item.file_path}`,
+        selected: false,
+    }));
 }
 
 watch(() => props.fileList, (newValue) => {
-    data.value = handleFileList(newValue);
-    console.log("data.value",data.value)
-})
+    handleFileList(newValue);
+}, { immediate: true })
 
 watch(() => props.selectAble, (newValue) => {
     isSelect.value = newValue;
-
-    if (!newValue) {
-        let list = data.value;
-        list.map(item => item.selected = false);
-        data.value = list;
-
-    }
-
 }, {deep: true})
 
 
 // 勾选 / 取消勾选
 const getRemoveItem = () => {
-    let result = data.value.filter(item => item.selected);
-    // console.log("result", result)
-    return data.value.filter(item => item.selected);
+    let result = data.list.filter(item => item.selected);
+    return data.list.filter(item => item.selected);
 };
 
 // 分页配置
 const paginationConfig = ref({
     current: 1,
     pageSize: 50,  // 每页显示50张图片 (10列 * 5行)
-    total: data.value.length,
+    total: data.list.length,
     showSizeChanger: false,
     showQuickJumper: true,
     onChange: (page) => {
@@ -108,9 +96,11 @@ const paginationConfig = ref({
 
 // 计算当前分页数据
 const paginatedData = computed(() => {
-    const start = (paginationConfig.value.current - 1) * paginationConfig.value.pageSize;
-    const end = start + paginationConfig.value.pageSize;
-    return data.value.slice(start, end);
+    const { current, pageSize } = paginationConfig.value;
+    const start = (current - 1) * pageSize;
+    const end = start + pageSize;
+
+    return data.list.slice(start, end);
 });
 
 const loading = ref(false);
