@@ -1,7 +1,7 @@
 <template>
     <div>
         <a-modal v-model:open="open" :title="props.msgName !== '' ? props.msgName : '快捷回復'"
-                 style="justify-items: center" @ok="handleOk">
+                 style="justify-items: center" @ok="handleOk" :width="1000">
             <div class="flex-container">
                 <!--                显示可选快捷信息列表-->
                 <a-table v-show="showQuickList" class="ant-table-striped" :columns="columns" :pagination="pagination"
@@ -36,10 +36,10 @@
                         <span style="font-size: 18px">賬號</span>
                         <div style="padding: 12px 0; margin-top: 10px; max-width: 400px">
                             <a-select
-                                v-model:value="value1"
-                                style="width: 200px"
-                                :options="options"
-                                @change="changeOptions"
+                                    v-model:value="value1"
+                                    style="width: 200px"
+                                    :options="options"
+                                    @change="changeOptions"
                             ></a-select>
                         </div>
                     </div>
@@ -84,7 +84,7 @@
                 </div>
 
                 <!--                预览消息效果-->
-                <div class="phoneBox"> <!-- 确保居中 -->
+                <div class="phoneBox">
                     <div class="phone">
                         <div class="phoneTop"/>
                         <div class="phoneCenter" style="max-height: 500px; overflow-y: auto;">
@@ -211,19 +211,85 @@ import {Editor, Toolbar} from '@wangeditor/editor-for-vue'
 import SelectItem from "@/components/contact/SelectItem.vue";
 import {cosApi} from "@/api/whatsapp/index.js";
 
-const fileList = ref<UploadProps['fileList']>([]);
-
-const open = ref(false);
-const selectedRow = ref<number | null>(1);
-const confirmRef = ref(null);
 const templateStore = useTempStore();
 const chatStore = useChatStore();
+const open = ref(false);
+
+// 确认栏
+const confirmRef = ref(null);
+const selectName = ref(null);
+const sendQuickMsg = async () => {
+    const fromNumber = "+8613672967202";
+    const toNumber = currentPhone.value;
+    const files = selectFileArr.value;
+    const messageContent = selectContent.value;
+
+    const sendMessage = async (data) => {
+        const result = await ycloudApi.messageApi.sendMessage(data);
+        let message = {
+            direction: "outbound",
+            _id: result.id,
+            status: result.status,
+            type: result.type,
+            deliverTime: result.createTime,
+            content: {}
+        };
+
+        if (data.type === 'text') {
+            message.content.body = result.text.body;
+        } else {
+            message.content.link = result[result.type].link;
+            const url = message.content.link;
+            // message.content.filename = fileExtension;
+            message.fileExtension = url.split('.').pop();
+            message.content.caption = result[result.type].caption;
+        }
+
+        chatStore.addMessage(message);
+    };
+
+    if (files.length > 1) {
+        for (const item of files) {
+            await sendMessage({
+                from: fromNumber,
+                to: toNumber,
+                type: item.file_type === 'file' ? 'document' : item.file_type,
+                link: `https://cos.jackycode.cn/${item.file_path}`,
+                message: ""
+            });
+        }
+    } else if (files.length === 1) {
+        await sendMessage({
+            from: fromNumber,
+            to: toNumber,
+            type: files[0].file_type === 'file' ? 'document' : files[0].file_type,
+            link: `https://cos.jackycode.cn/${files[0].file_path}`,
+            message: messageContent
+        });
+    }
+
+    if (messageContent && files.length !== 1) {
+        await sendMessage({
+            from: fromNumber,
+            to: toNumber,
+            type: 'text',
+            message: messageContent
+        });
+    }
+
+
+}
+
+//
+const selectedRow = ref<number | null>(1);
+const fileList = ref<UploadProps['fileList']>([]);
+
 
 // 選擇上傳庫
 const selectItemRef = ref(null);
 const options = ref([
-    { value: '449711484896804', label: 'DataS素材库' },
-    { value: '67890', label: '个人素材库' },
+    {value: '449711484896804', label: 'DataS素材库'},
+    {value: '67890', label: '个人素材库'},
 ]);
 const value1 = ref(options.value[0].value);
 
@@ -250,9 +316,9 @@ const selectOpen = () => {
 // 切換公共\個人素材庫
 const changeOptions = (value) => {
     let source = "";
-    if(!value1.value.length > 6) {
+    if (!value1.value.length > 6) {
         source = "wabaId=" + value1.value;
-    }else {
+    } else {
         source = "userId=" + value1.value;
     }
     templateStore.setMaterialListData(source);
@@ -301,7 +367,7 @@ const htmlChange = (value) => {
 const selectFileArr = ref([]);
 const selectContent = ref(null);
 const selectRecord = ref(null);
-const selectName = ref(null);
+
 let headerTxt = ref('');
 
 // 分页配置
@@ -327,6 +393,7 @@ const columns = [
 ];
 const quickList = computed(() => templateStore.getQuickMsg);
 const currentPhone = computed(() => chatStore.currentPhone);
+
 // 点击列
 const handleRowClick = (record: any) => {
     return {
@@ -337,9 +404,6 @@ const handleRowClick = (record: any) => {
     };
 };
 
-// const headerTxtChange = (inputValue) => {
-//     headerTxt.value = inputValue.value
-// }
 const setRowClassName = (record: any) => {
     return record._id === selectedRow.value ? 'table-striped' : '';
 };
@@ -427,68 +491,7 @@ const confirm = (record) => {
     selectName.value = title;
     confirmRef.value.showModal();
 }
-const sendQuickMsg = async () => {
 
-    const fromNumber = "+8613672967202";
-    const toNumber = currentPhone.value;
-    const files = selectFileArr.value;
-    const messageContent = selectContent.value;
-
-    const sendMessage = async (data) => {
-        const result = await ycloudApi.messageApi.sendMessage(data);
-        let message = {
-            direction: "outbound",
-            _id: result.id,
-            status: result.status,
-            type: result.type,
-            deliverTime: result.createTime,
-            content: {}
-        };
-
-        if (data.type === 'text') {
-            message.content.body = result.text.body;
-        } else {
-            message.content.link = result[result.type].link;
-            const url = message.content.link;
-            // message.content.filename = fileExtension;
-            message.fileExtension = url.split('.').pop();
-            message.content.caption = result[result.type].caption;
-        }
-
-        chatStore.addMessage(message);
-    };
-
-    if (files.length > 1) {
-        for (const item of files) {
-            await sendMessage({
-                from: fromNumber,
-                to: toNumber,
-                type: item.file_type === 'file' ? 'document' : item.file_type,
-                link: `https://cos.jackycode.cn/${item.file_path}`,
-                message: ""
-            });
-        }
-    } else if (files.length === 1) {
-        await sendMessage({
-            from: fromNumber,
-            to: toNumber,
-            type: files[0].file_type === 'file' ? 'document' : files[0].file_type,
-            link: `https://cos.jackycode.cn/${files[0].file_path}`,
-            message: messageContent
-        });
-    }
-
-    if (messageContent && files.length !== 1) {
-        await sendMessage({
-            from: fromNumber,
-            to: toNumber,
-            type: 'text',
-            message: messageContent
-        });
-    }
-
-
-}
 
 // 上傳檢查
 const beforeUpload = async (file) => {
@@ -504,7 +507,7 @@ const beforeUpload = async (file) => {
         type = 'document'
     }
 
-    let {code,message,result} = await cosApi.uploadTempFile(file, type, '67890');
+    let {code, message, result} = await cosApi.uploadTempFile(file, type, '67890');
 
     let newFile = {
         uid: result?._id || '1',

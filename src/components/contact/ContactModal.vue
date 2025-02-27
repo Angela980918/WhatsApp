@@ -91,8 +91,10 @@ const onSubmit = () => {
         .then(() => {
             if(createVal.value) {
                 emits('createContact', toRaw(formState));
+                resetForm();
             }else {
                 emits('updateContact', toRaw(formState));
+                resetForm();
             }
         })
         .catch(error => {

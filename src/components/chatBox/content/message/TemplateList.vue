@@ -1,3 +1,4 @@
+
 <template>
     <div>
         <a-modal :footer="false" v-model:open="open" title="選擇模板" @ok="handleSubmit" :width="1000">
@@ -77,10 +78,10 @@
 </template>
 
 <script lang="ts" setup>
-import {ref, computed, reactive, onMounted} from "vue";
+import {ref, computed, onMounted} from "vue";
 import * as ycloudApi from "@/api/ycloud/index.js";
-import {useChatStore} from "@/store/chatStore";
 import {useTempStore} from "@/store/useTempStore";
+import {useChatStore} from "@/store/chatStore.js";
 import {FileImageOutlined, FilePdfOutlined, VideoCameraOutlined} from "@ant-design/icons-vue";
 import {handleTemplateMsg} from '@/tools/modules/common'
 import Confirm from "@/components/chatBox/content/message/Confirm.vue";

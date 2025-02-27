@@ -45,10 +45,11 @@ export const useTempStore = defineStore('template', {
         }, resetCreateTempData() {
             this.createTempData = [];
         },
-        async loadQuickMsg(){
+        async loadQuickMsg(){ //加载快捷短语
             let result  = await cosApi.loadQuickList();
-            console.log("resultresult", result)
+            // console.log("resultresult", result)
 
+            // 增加测试资料
             result.push({
                 _id: '2d6f6ad8-db20-40a1-a595-2f97d85b2f7g',
                 title: '纯文本消息',
@@ -122,7 +123,7 @@ export const useTempStore = defineStore('template', {
             this.quickMessage = result;
             // }
         },
-        async setMaterialListData(source) {
+        async setMaterialListData(source) { // 素材列表
             await cosApi.libraryFiles(source).then(result => {
                 if(result !== undefined) {
                     let { documents, images, videos } = result;

@@ -58,6 +58,7 @@ const data = reactive({
 
 const isSelect = ref(false);
 
+// 处理文件列表
 const handleFileList = (list) => {
     data.list = list.map(item => reactive({
         id: item.id,

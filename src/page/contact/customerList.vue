@@ -28,6 +28,7 @@
         </template>
       </span>
         </div>
+        <div style="height: 680px">
         <a-table
                 :row-selection="{ selectedRowKeys: state.selectedRowKeys, onChange: onSelectChange, getCheckboxProps: (record) => ({
       id: `checkbox-${record.key}`,
@@ -70,6 +71,7 @@
                 </template>
             </template>
         </a-table>
+        </div>
     </div>
 </template>
 <script lang="ts" setup>
@@ -93,9 +95,9 @@ const pagination = computed( () => {
         // showSizeChanger: true, // 显示每页条数切换器
         // pageSizeOptions: ['5', '10', '20', '50'], // 每页条数选项
         onChange: (page) => {
-            // showDelete.value = false;
-            // isDelete.value = false;
-            // state.selectedRowKeys = [];
+            showDelete.value = false;
+            isDelete.value = false;
+            state.selectedRowKeys = [];
             // 页码或每页条数变化时触发
             pagination.value.current = page;
             // pagination.value.pageSize = pageSize;
@@ -104,20 +106,7 @@ const pagination = computed( () => {
         },
     }
 });
-// interface DataItem {
-//     key: number;
-//     id: string;
-//     nickname: string;
-//     ownerEmail: string;
-//     tags: string[];
-//     countryCode: string;
-//     countryName: string;
-//     email: string;
-//     phoneNumber: string;
-//     lastMessageToPhoneNumber: string;
-//     createTime: string;
-//     lastSeen: string;
-// }
+
 const columns = [
     {
         key: 1,
@@ -213,7 +202,9 @@ const startCreate = () => {
 const createContact = async (value) => {
     let result = await ycloudApi.contactApi.createContact(value);
     if (result !== undefined) {
-      customerStore.contactOperate(isCreate.value, result)
+      setTimeout(() => {
+          customerStore.contactOperate(isCreate.value, result)
+      }, 1000)
     }
     showContact.value.showModal();
 }
@@ -249,17 +240,9 @@ const deleteContact = () => {
         showDelete.value = false;
         isDelete.value = false;
         state.selectedRowKeys = [];
-        customerStore.setContactList();
+        // customerStore.setContactList();
     })
 }
-
-// const updateContactList = async () => {
-//     let response = await ycloudApi.contactApi.getContactList();
-//     response.items.map(item => {
-//         item.key = item.id;
-//         data.value.push(item);
-//     });
-// }
 
 // item點擊事件
 const checkInfo = (data) => {
@@ -287,5 +270,7 @@ onMounted(() => {
 .Container {
     padding: 20px;
 }
-
+:deep(.ant-table-content) {
+    height: 650px;
+}
 </style>
